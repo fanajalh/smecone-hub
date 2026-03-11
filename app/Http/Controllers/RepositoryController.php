@@ -343,132 +343,117 @@ class RepositoryController extends Controller
         return $count;
     }
 
-    // 🔥 FUNGSI BARU: GENERATOR CLI DOCU-PUSH OTOMATIS (WARNA-WARNI ALA LINUX/VSCODE) 🔥
+    /**
+     * 🔥 GENERATOR CLI DOCU-PUSH (VERSI SUPER AMAN DENGAN API TOKEN)
+     */
     public function downloadCli($id)
     {
         $repository = Repository::findOrFail($id);
         $user = auth()->user();
 
         if ($repository->user_id !== $user->id && !$repository->collaborators->contains($user->id)) {
-            abort(403, 'Waduh, mau ngintip ya? Akses ditolak!');
+            abort(403, 'Akses ditolak.');
         }
 
-        // ==========================================
-        // Definisi Kode Warna ANSI (Mirip Tema VS Code)
-        // ==========================================
-        $reset   = "\e[0m";   // Reset ke warna terminal bawaan
-        $bold    = "\e[1m";   // Teks tebal
-        $gray    = "\e[90m";  // Abu-abu gelap (untuk border/komentar)
-        $magenta = "\e[35m";  // Ungu/Magenta (untuk Judul)
-        $cyan    = "\e[36m";  // Biru Muda (untuk label/info)
-        $green   = "\e[32m";  // Hijau (untuk value/sukses)
-        $yellow  = "\e[33m";  // Kuning (untuk warning)
-        $red     = "\e[31m";  // Merah (untuk error)
-        $blue    = "\e[34m";  // Biru
+        // 🔥 PERBAIKAN: Buat Token API unik untuk user ini
+        // Hapus token CLI lama agar tidak menumpuk di database
+        $user->tokens()->where('name', 'Smecone-CLI-Token')->delete();
+        $token = $user->createToken('Smecone-CLI-Token')->plainTextToken;
 
         $content = "@echo off\n";
-        // chcp 65001 digunakan agar terminal CMD mendukung UTF-8 (bisa nampilin Emoji)
-        $content .= "chcp 65001 >nul\n"; 
-        $content .= "title SMECONE HUB - Push CLI [%~1]\n\n";
-        
-        // Header Tampilan CLI
-        $content .= "echo {$gray}========================================{$reset}\n";
-        $content .= "echo {$magenta}{$bold} 🚀 SMECONE HUB DOCU-PUSH CLI{$reset}\n";
-        $content .= "echo {$gray}========================================{$reset}\n\n";
-        
-        // Pengecekan argumen jika kosong
+        $content .= "title SMECONE HUB - Push CLI [" . strtoupper($repository->name) . "]\n";
+        $content .= "color 0C\n";
+        $content .= "echo ========================================\n";
+        $content .= "echo         SMECONE HUB DOCU-PUSH CLI\n";
+        $content .= "echo ========================================\n\n";
+
         $content .= "if \"%~1\"==\"\" (\n";
-        $content .= "    echo {$red}[!] ERROR: Nama file belum dimasukkan, bos!{$reset}\n";
-        $content .= "    echo {$yellow}[i] Cara pakai: docpush namadokumen.pdf{$reset}\n";
-        $content .= "    echo {$gray}========================================{$reset}\n";
+        $content .= "    echo [!] ERROR: Nama file belum dimasukkan!\n";
+        $content .= "    echo [!] Cara pakai: docpush namadokumen.pdf\n";
+        $content .= "    echo ========================================\n";
         $content .= "    pause\n";
         $content .= "    exit /b\n";
         $content .= ")\n\n";
-        
-        // --- DATA OTOMATIS DARI LARAVEL ---
-        $content .= ":: Konfigurasi Otomatis\n";
-        $content .= "set EMAIL=" . $user->email . "\n";
+
+        $content .= ":: --- KONFIGURASI KEAMANAN TINGKAT TINGGI ---\n";
+        $content .= "set TOKEN=" . $token . "\n";
         $content .= "set REPO_ID=" . $repository->id . "\n";
-        $content .= "set SERVER_URL=" . url('/api/docs/push') . "\n\n";
-        
-        // Tampilan Proses Eksekusi (Syntax Highlighting Ala VS Code)
-        $content .= "echo {$cyan}[*] Menyiapkan pengiriman...{$reset}\n";
-        $content .= "echo {$cyan}[*] File       : {$green}%~1{$reset}\n";
-        $content .= "echo {$cyan}[*] Repositori : {$yellow}" . strtoupper($repository->name) . "{$reset}\n";
-        $content .= "echo {$cyan}[*] User       : {$blue}" . $user->name . "{$reset}\n";
-        $content .= "echo {$cyan}[*] Menghubungkan ke Server Smecone Hub...{$reset}\n";
+        $content .= "set SERVER_URL=" . url('/api/docs/push') . "\n";
+        $content .= ":: -------------------------------------------\n\n";
+
+        $content .= "echo [*] Menyiapkan pengiriman file: %~1\n";
+        $content .= "echo [*] Ke Repository : " . strtoupper($repository->name) . "\n";
+        $content .= "echo [*] User Aktif    : " . $user->name . "\n";
+        $content .= "echo [*] Menghubungkan ke Server via Jalur Aman...\n";
         $content .= "echo.\n\n";
-        
-        // Eksekusi CURL
-        $content .= "echo {$gray}--- Server Response ---{$reset}\n";
-        $content .= "curl -s -X POST ^\n";
-        $content .= "     -F \"email=%EMAIL%\" ^\n";
+
+        // 🔥 PERBAIKAN: Menggunakan Header Authorization, bukan melempar email mentah
+        $content .= "curl -X POST ^\n";
+        $content .= "     -H \"Authorization: Bearer %TOKEN%\" ^\n";
+        $content .= "     -H \"Accept: application/json\" ^\n";
         $content .= "     -F \"repo_id=%REPO_ID%\" ^\n";
         $content .= "     -F \"file=@%~1\" ^\n";
         $content .= "     %SERVER_URL%\n\n";
-        
-        // Footer CLI
+
         $content .= "echo.\n";
-        $content .= "echo {$gray}-----------------------{$reset}\n";
-        $content .= "echo {$green}{$bold}[v] Proses Selesai! Silahkan cek di dashboard web.{$reset}\n";
-        $content .= "echo {$gray}========================================{$reset}\n";
+        $content .= "echo ========================================\n";
+        $content .= "echo [*] Proses Selesai! Cek file di dashboard web.\n";
+        $content .= "echo ========================================\n";
         $content .= "pause\n";
 
-        // Generate File .bat
-        $fileName = 'docpush-' . strtolower(str_replace(' ', '-', $repository->name)) . '.bat';
+        $filename = "docpush-" . strtolower(str_replace(' ', '-', $repository->name)) . ".bat";
 
         return response($content)
-            ->withHeaders([
-                'Content-Type' => 'application/x-bat',
-                'Content-Disposition' => 'attachment; filename="' . $fileName . '"',
-            ]);
+            ->header('Content-Type', 'application/x-bat')
+            ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
     }
 
-    // 🔥 FUNGSI BARU: Endpoint untuk menerima file dari CLI 🔥
+    /**
+     * 🔥 API RECEIVER (Validasi menggunakan Token Sanctum)
+     */
     public function pushFromCli(Request $request)
     {
-        // 1. Validasi Input
-        $request->validate([
-            'email' => 'required|email',
-            'repo_id' => 'required|exists:repositories,id',
-            'file' => 'required|file|max:51200' // Maksimal 50MB
-        ]);
-
-        // 2. Ambil User dan Repositori
-        $user = User::where('email', $request->email)->first();
-        if (!$user) {
-            return response()->json(['error' => 'User dengan email tersebut tidak ditemukan.'], 404);
+        // 1. Ekstrak Token dari Header Script CMD
+        $token = $request->bearerToken();
+        if (!$token) {
+            return response()->json(['status' => 'error', 'message' => 'Token API tidak ditemukan. Akses ditolak!'], 401);
         }
 
-        $repository = Repository::findOrFail($request->repo_id);
+        // 2. Cek validitas Token di Database
+        $accessToken = \Laravel\Sanctum\PersonalAccessToken::findToken($token);
+        if (!$accessToken) {
+            return response()->json(['status' => 'error', 'message' => 'Token API tidak valid atau sudah usang!'], 401);
+        }
 
-        // 3. Pastikan user tersebut berhak upload ke repo ini (Owner / Collaborator)
+        // 3. Ambil data User sang pemilik token & Repo yang dituju
+        $user = $accessToken->tokenable;
+        $repository = Repository::find($request->repo_id);
+
+        if (!$repository) {
+            return response()->json(['status' => 'error', 'message' => 'Repository tujuan tidak ditemukan.'], 404);
+        }
+
+        // 4. Pastikan User tersebut punya akses ke Repo ini
         if ($repository->user_id !== $user->id && !$repository->collaborators->contains($user->id)) {
-            return response()->json(['error' => 'Akses ditolak! Kamu bukan pemilik atau kolaborator repositori ini.'], 403);
+            return response()->json(['status' => 'error', 'message' => 'Kamu bukan anggota dari repository ini!'], 403);
         }
 
-        // 4. Proses Simpan File
-        $file = $request->file('file');
-        $originalName = $file->getClientOriginalName();
-        $path = $file->storeAs('repositories/' . $repository->id, uniqid() . '_' . $originalName, 'public');
+        // 5. Proses Upload
+        if ($request->hasFile('file')) {
+            $file = $request->file('file');
+            $originalName = $file->getClientOriginalName();
+            $path = $file->storeAs('repositories/' . $repository->id, uniqid().'_'.$originalName, 'public');
 
-        // 5. Simpan ke Database
-        $bytes = $file->getSize();
-        $fileSize = ($bytes >= 1048576) ? number_format($bytes / 1048576, 2) . ' MB' : number_format($bytes / 1024, 2) . ' KB';
-        
-        RepositoryFile::create([
-            'repository_id' => $repository->id,
-            'file_name' => $originalName,
-            'file_path' => $path,
-            'file_size' => $fileSize
-        ]);
+            \App\Models\RepositoryFile::create([
+                'repository_id' => $repository->id,
+                'file_name' => $originalName,
+                'file_path' => $path,
+                'file_size' => number_format($file->getSize() / 1024, 2) . ' KB'
+            ]);
 
-        $repository->touch(); // Update last_modified pada tabel repository
+            return response()->json(['status' => 'success', 'message' => 'File berhasil mengangkasa ke Smecone Hub!']);
+        }
 
-        // 6. Return response sukses ke terminal cmd
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Mantap! File ' . $originalName . ' berhasil dikirim ke SMECONE HUB.'
-        ], 200);
+        return response()->json(['status' => 'error', 'message' => 'Tidak ada file yang dikirim.'], 400);
     }
 }

@@ -69,7 +69,7 @@
         <div class="flex items-center gap-3 text-right">
             <div>
                 <p class="text-[11px] md:text-xs text-gray-500 font-bold mb-0.5 md:mb-1">Level Akun</p>
-                <span class="text-sm md:text-lg font-extrabold text-red-600">{{ $level }}</span>
+                <span class="text-sm md:text-lg font-extrabold text-red-600">{{ $level ?? 'Rookie' }}</span>
             </div>
             <div class="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-tr from-yellow-400 to-orange-500 rounded-full flex items-center justify-center text-white shadow-md">
                 <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
@@ -156,15 +156,35 @@
         
         <div class="flex gap-4 overflow-x-auto hide-scrollbar pb-6 snap-x px-1 md:grid md:grid-cols-4 lg:grid-cols-5 md:overflow-visible md:pb-2">
             @forelse($recentMarketplace as $item)
-            <a href="/marketplace" class="min-w-[140px] md:min-w-0 bg-white rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.04)] border border-gray-100 flex flex-col overflow-hidden shrink-0 snap-start hover-scale transition-all">
+            <a href="/marketplace/{{ $item->id }}" class="min-w-[140px] md:min-w-0 bg-white rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.04)] border border-gray-100 flex flex-col overflow-hidden shrink-0 snap-start hover-scale transition-all tap-effect {{ $item->is_sold ? 'opacity-75 grayscale-[40%]' : '' }}">
                 <div class="h-32 md:h-40 bg-gray-100 relative">
+                    
+                    @if($item->is_sold)
+                    <div class="absolute inset-0 bg-white/40 backdrop-blur-[1px] z-20 flex items-center justify-center"></div>
+                    @endif
+
                     @if($item->image)
                         <img src="{{ asset('storage/' . $item->image) }}" class="w-full h-full object-cover">
                     @else
                         <div class="w-full h-full flex items-center justify-center text-gray-300 bg-gray-50 italic font-black text-xl uppercase">Smecone</div>
                     @endif
-                    <div class="absolute top-2 left-2">
-                        <span class="bg-orange-500 text-white text-[8px] md:text-[10px] font-extrabold px-1.5 py-0.5 md:px-2 md:py-1 rounded shadow-sm">BARU</span>
+                    
+                    <div class="absolute top-2 left-2 z-30 flex flex-col gap-1.5">
+                        @if($item->is_promoted)
+                            <span class="bg-gradient-to-r from-yellow-400 to-yellow-600 text-white text-[8px] md:text-[9px] font-black px-2 py-0.5 md:px-2 md:py-1 rounded shadow-sm border border-yellow-300 uppercase tracking-wider w-fit">
+                                ⭐ AD
+                            </span>
+                        @endif
+
+                        @if($item->is_sold)
+                            <span class="bg-gray-900 text-white text-[8px] md:text-[9px] font-black px-2 py-0.5 md:px-2 md:py-1 rounded shadow-sm uppercase tracking-wider w-fit">
+                                HABIS
+                            </span>
+                        @else
+                            <span class="bg-green-500 text-white text-[8px] md:text-[9px] font-black px-2 py-0.5 md:px-2 md:py-1 rounded shadow-sm uppercase tracking-wider w-fit">
+                                BARU
+                            </span>
+                        @endif
                     </div>
                 </div>
                 <div class="p-3 md:p-4 flex-1 flex flex-col justify-between">
@@ -172,9 +192,15 @@
                         <h3 class="text-[13px] md:text-sm font-bold text-gray-800 leading-snug line-clamp-2 mb-1">{{ $item->item_name }}</h3>
                         <p class="text-sm md:text-base font-black text-red-600 mb-2">Rp {{ number_format($item->price, 0, ',', '.') }}</p>
                     </div>
-                    <div class="flex items-center gap-1.5 pt-2 border-t border-gray-100 mt-auto">
-                        <div class="w-4 h-4 md:w-5 md:h-5 bg-gray-200 rounded-full flex items-center justify-center text-[7px] md:text-[9px] font-bold text-gray-600 uppercase">{{ substr($item->user->name, 0, 1) }}</div>
-                        <p class="text-[10px] md:text-xs font-medium text-gray-500 truncate">{{ $item->user->name }}</p>
+                    <div class="flex items-center justify-between pt-2 border-t border-gray-100 mt-auto">
+                        <div class="flex items-center gap-1.5 truncate max-w-[70%]">
+                            <div class="w-4 h-4 md:w-5 md:h-5 bg-gray-200 rounded-full flex items-center justify-center text-[7px] md:text-[9px] font-bold text-gray-600 uppercase shrink-0">{{ substr($item->user->name, 0, 1) }}</div>
+                            <p class="text-[10px] md:text-xs font-medium text-gray-500 truncate">{{ explode(' ', $item->user->name)[0] }}</p>
+                        </div>
+                        <div class="flex items-center gap-0.5 shrink-0 text-gray-400">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                            <span class="text-[9px] font-bold">{{ $item->views_count ?? 0 }}</span>
+                        </div>
                     </div>
                 </div>
             </a>

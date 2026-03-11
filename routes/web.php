@@ -11,24 +11,22 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\GitHttpController;
 
-// 🔥 FIX 1: Pintu Gerbang Utama yang Cerdas
+// Pintu Gerbang Utama
 Route::get('/', function () {
     if (auth()->check()) {
-        // Kalau sudah login, cek dia admin atau bukan
         if (auth()->user()->is_admin) {
             return redirect('/admin/dashboard');
         }
         return redirect('/dashboard');
     }
-    // Kalau belum login, lempar ke login
     return redirect('/login');
 });
 
-// --- AUTHENTICATION ---
-Route::get('/login', [AuthController::class, 'login'])->name('login');
-Route::post('/login', [AuthController::class, 'authenticate']);
-Route::get('/register', [AuthController::class, 'register'])->name('register');
-Route::post('/register', [AuthController::class, 'store']);
+// --- AUTHENTICATION (🔥 INI YANG TADI BIKIN LOOPING) ---
+Route::get('/login', [AuthController::class, 'showLogin'])->name('login'); // HARUS showLogin
+Route::post('/login', [AuthController::class, 'login']);                   // HARUS login
+Route::get('/register', [AuthController::class, 'showRegister'])->name('register'); // HARUS showRegister
+Route::post('/register', [AuthController::class, 'register']);             // HARUS register
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // --- STUDENT / USER ROUTES ---
@@ -52,17 +50,25 @@ Route::middleware(['auth', 'App\Http\Middleware\IsStudent'])->group(function () 
     Route::post('/repository/{id}/sync-git', [RepositoryController::class, 'syncGit']);
     Route::get('/repository/{id}/download-cli', [RepositoryController::class, 'downloadCli']);
 
-    // --- MARKETPLACE ---
+// --- MARKETPLACE ---
     Route::get('/marketplace', [MarketplaceController::class, 'index']);
     Route::get('/marketplace/create', [MarketplaceController::class, 'create']);
+    Route::get('/marketplace/lapak-saya', [MarketplaceController::class, 'myLapak']);
+    Route::post('/marketplace/register-store', [MarketplaceController::class, 'registerStore']);
     Route::post('/marketplace/store', [MarketplaceController::class, 'store']);
+    
+    // 🔥 RUTE BARU: HALAMAN PROFIL TOKO PENJUAL
+    Route::get('/marketplace/toko/{id}', [MarketplaceController::class, 'toko']);
+    
     Route::get('/marketplace/{id}', [MarketplaceController::class, 'show']);
+    Route::delete('/marketplace/{id}/delete', [MarketplaceController::class, 'destroy']);
+    Route::post('/marketplace/{id}/toggle-sold', [MarketplaceController::class, 'toggleSold']);
 
     // --- LOST & FOUND ---
-    Route::get('/lost-found', [LostAndFoundController::class, 'index']);
-    Route::get('/lost-found/create', [LostAndFoundController::class, 'create']);
-    Route::post('/lost-found', [LostAndFoundController::class, 'store']);
-    Route::get('/lost-found/{id}', [LostAndFoundController::class, 'show']);
+    // Route::get('/lost-found', [LostAndFoundController::class, 'index']);
+    // Route::get('/lost-found/create', [LostAndFoundController::class, 'create']);
+    // Route::post('/lost-found', [LostAndFoundController::class, 'store']);
+    // Route::get('/lost-found/{id}', [LostAndFoundController::class, 'show']);
 
     // --- FORUM & CHAT (EKSPLORASI) ---
     Route::get('/forum', [ForumController::class, 'index']);
@@ -75,7 +81,6 @@ Route::middleware(['auth', 'App\Http\Middleware\IsStudent'])->group(function () 
     Route::get('/dashboard/channel', function () {
         return redirect('/dashboard');
     });
-    
     Route::get('/dashboard/channel/create', [ForumController::class, 'createChannel']);
     Route::post('/dashboard/channel', [ForumController::class, 'storeChannel']); 
     Route::get('/dashboard/channel/{id}', [ForumController::class, 'show']);

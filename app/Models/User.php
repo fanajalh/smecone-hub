@@ -19,13 +19,14 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'password',
         'nis',
         'google_id',
         'avatar',
-        'password',
+        'is_admin',
         'reputation_points',
-        'rating',
-        'is_admin', // <--- INI KUNCI UTAMANYA AGAR BISA JADI ADMIN
+        'store_name',        // 🔥 TAMBAHAN BARU
+        'whatsapp_number',   // 🔥 TAMBAHAN BARU
     ];
 
     /**

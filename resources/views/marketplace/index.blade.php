@@ -14,14 +14,25 @@
             <p class="text-[13px] md:text-sm text-gray-500 mt-1.5 font-medium">Pusat jajan dan jasa karya warga sekolah Smecone.</p>
         </div>
         
-        <a href="/marketplace/create" class="w-full md:w-auto bg-red-600 text-white px-6 py-3.5 rounded-[20px] shadow-[0_8px_20px_rgba(220,38,38,0.25)] hover:bg-red-700 hover:shadow-lg hover:-translate-y-0.5 transition-all active:scale-95 flex items-center justify-center gap-2 font-extrabold text-[14px] relative z-10 tap-effect animate-float">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
-            <span>Buka Lapak</span>
-        </a>
+        <div class="flex flex-col md:flex-row gap-3 w-full md:w-auto relative z-10">
+            <a href="/marketplace/lapak-saya" class="w-full md:w-auto bg-white border border-gray-200 text-gray-700 px-6 py-3.5 rounded-[20px] hover:bg-gray-50 hover:border-gray-300 transition-all active:scale-95 flex items-center justify-center gap-2 font-extrabold text-[14px] tap-effect shadow-sm">
+                🏪 Lapak Saya
+            </a>
+            <a href="/marketplace/create" class="w-full md:w-auto bg-red-600 text-white px-6 py-3.5 rounded-[20px] shadow-[0_8px_20px_rgba(220,38,38,0.25)] hover:bg-red-700 hover:shadow-lg hover:-translate-y-0.5 transition-all active:scale-95 flex items-center justify-center gap-2 font-extrabold text-[14px] tap-effect animate-float">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+                <span>Buka Lapak</span>
+            </a>
+        </div>
     </div>
 
+    @if(session('success'))
+        <div class="mb-6 bg-green-50 text-green-700 px-5 py-4 rounded-xl text-sm border border-green-200 font-bold flex items-center gap-3">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+            {{ session('success') }}
+        </div>
+    @endif
+
     <div class="mb-8 flex flex-col md:flex-row gap-4 relative z-10">
-        
         <form action="/marketplace" method="GET" class="w-full md:w-[340px] shrink-0 relative tap-effect">
             @if(request('category'))
                 <input type="hidden" name="category" value="{{ request('category') }}">
@@ -50,60 +61,73 @@
 
     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-5">
         @forelse($products as $product)
-        <a href="/marketplace/{{ $product->id }}" class="group bg-white rounded-[24px] border border-gray-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] overflow-hidden hover:shadow-[0_8px_30px_rgba(220,38,38,0.08)] hover:border-red-100 transition-all duration-300 flex flex-col hover:-translate-y-1 tap-effect">
+        <div class="relative group bg-white rounded-[24px] border border-gray-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] overflow-hidden hover:shadow-[0_8px_30px_rgba(220,38,38,0.08)] hover:border-red-100 transition-all duration-300 flex flex-col hover:-translate-y-1">
             
-            <div class="aspect-square relative overflow-hidden bg-gray-50">
-                @if($product->image)
-                    <img src="{{ asset('storage/' . $product->image) }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-in-out">
-                @else
-                    <div class="w-full h-full flex flex-col items-center justify-center text-gray-300 bg-gray-100/50">
-                        <svg class="w-10 h-10 opacity-30 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
-                        <span class="text-[9px] font-black uppercase tracking-widest opacity-40">No Foto</span>
+            <a href="/marketplace/{{ $product->id }}" class="flex flex-col h-full tap-effect {{ $product->is_sold ? 'opacity-75 grayscale-[40%]' : '' }}">
+                <div class="aspect-square relative overflow-hidden bg-gray-50">
+                    
+                    @if($product->is_sold)
+                    <div class="absolute inset-0 bg-white/40 backdrop-blur-[2px] z-20 flex items-center justify-center">
+                        <span class="bg-gray-900 text-white px-4 py-1.5 rounded-xl font-black text-[10px] md:text-xs tracking-widest uppercase transform -rotate-12 border-2 border-white shadow-xl">Habis</span>
                     </div>
-                @endif
-                
-                <div class="absolute top-2 left-2 md:top-3 md:left-3 z-10">
-                    <span class="px-2.5 py-1 rounded-lg bg-gray-900/60 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-wider border border-white/20 shadow-sm">
-                        {{ $product->category }}
-                    </span>
-                </div>
-                
-                @if($product->type == 'Pre-Order')
-                    <div class="absolute top-2 right-2 md:top-3 md:right-3 z-10">
-                        <span class="px-2.5 py-1 rounded-lg bg-orange-500/90 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-wider shadow-sm border border-orange-400/50 flex items-center gap-1">
-                            <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span> PO
-                        </span>
-                    </div>
-                @endif
-            </div>
+                    @endif
 
-            <div class="p-3 md:p-4 flex flex-col flex-1 bg-white">
-                <div class="text-red-600 font-black text-base md:text-[18px] mb-1 leading-none tracking-tight">
-                    Rp {{ number_format($product->price, 0, ',', '.') }}
-                </div>
-                
-                <h3 class="text-[13px] md:text-[14px] font-bold text-gray-800 line-clamp-2 mb-3 leading-snug group-hover:text-red-600 transition-colors">
-                    {{ $product->item_name }}
-                </h3>
-                
-                <div class="mt-auto pt-3 border-t border-gray-50 flex items-center justify-between">
-                    <div class="flex items-center gap-1.5 truncate max-w-[70%]">
-                        <div class="w-5 h-5 md:w-6 md:h-6 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center text-[9px] md:text-[10px] font-black text-gray-500 uppercase shrink-0">
-                            {{ substr($product->user->name, 0, 1) }}
+                    @if($product->image)
+                        <img src="{{ asset('storage/' . $product->image) }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-in-out">
+                    @else
+                        <div class="w-full h-full flex flex-col items-center justify-center text-gray-300 bg-gray-100/50">
+                            <svg class="w-10 h-10 opacity-30 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                            <span class="text-[9px] font-black uppercase tracking-widest opacity-40">No Foto</span>
                         </div>
-                        <span class="text-[10px] md:text-[11px] font-bold text-gray-500 truncate">
-                            {{ explode(' ', $product->user->name)[0] }}
+                    @endif
+                    
+                    <div class="absolute top-2 left-2 md:top-3 md:left-3 z-10 flex flex-col gap-1.5">
+                        @if($product->is_promoted)
+                            <span class="px-2.5 py-1 rounded-lg bg-gradient-to-r from-yellow-400 to-yellow-600 text-white text-[8px] md:text-[9px] font-black uppercase tracking-wider shadow-sm border border-yellow-300 flex items-center gap-1 w-fit">
+                                ⭐ AD
+                            </span>
+                        @endif
+                        <span class="px-2.5 py-1 rounded-lg bg-gray-900/60 backdrop-blur-md text-white text-[8px] md:text-[9px] font-black uppercase tracking-wider border border-white/20 shadow-sm w-fit">
+                            {{ $product->category }}
                         </span>
                     </div>
                     
-                    <div class="flex items-center gap-0.5 shrink-0 text-yellow-500">
-                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                        <span class="text-[10px] font-black text-gray-400">Baru</span>
+                    @if($product->type == 'Pre-Order')
+                        <div class="absolute top-2 right-2 md:top-3 md:right-3 z-10">
+                            <span class="px-2.5 py-1 rounded-lg bg-orange-500/90 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-wider shadow-sm border border-orange-400/50 flex items-center gap-1">
+                                <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span> PO
+                            </span>
+                        </div>
+                    @endif
+                </div>
+
+                <div class="p-3 md:p-4 flex flex-col flex-1 bg-white">
+                    <div class="text-red-600 font-black text-base md:text-[18px] mb-1 leading-none tracking-tight">
+                        Rp {{ number_format($product->price, 0, ',', '.') }}
+                    </div>
+                    
+                    <h3 class="text-[13px] md:text-[14px] font-bold text-gray-800 line-clamp-2 mb-3 leading-snug group-hover:text-red-600 transition-colors">
+                        {{ $product->item_name }}
+                    </h3>
+                    
+                    <div class="mt-auto pt-3 border-t border-gray-50 flex items-center justify-between">
+                        <div class="flex items-center gap-1.5 truncate max-w-[50%] md:max-w-[60%]">
+                            <div class="w-5 h-5 md:w-6 md:h-6 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center text-[9px] md:text-[10px] font-black text-gray-500 uppercase shrink-0">
+                                {{ substr($product->user->name, 0, 1) }}
+                            </div>
+                            <span class="text-[10px] md:text-[11px] font-bold text-gray-500 truncate">
+                                {{ explode(' ', $product->user->name)[0] }}
+                            </span>
+                        </div>
+                        
+                        <div class="flex items-center gap-1 shrink-0 text-gray-400 bg-gray-50 px-2 py-0.5 rounded-md">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                            <span class="text-[9px] font-bold">{{ $product->views_count }}</span>
+                        </div>
                     </div>
                 </div>
-            </div>
-            
-        </a>
+            </a>
+        </div>
         @empty
         <div class="col-span-full py-16 md:py-24 bg-white rounded-[32px] border border-gray-100 text-center flex flex-col items-center justify-center shadow-sm">
             <div class="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-5 relative group">
@@ -111,21 +135,19 @@
                 <div class="absolute top-2 right-2 text-xl opacity-30">🛒</div>
             </div>
             <h3 class="text-lg font-extrabold text-gray-900 mb-1">Yah, tokonya masih kosong</h3>
-            <p class="text-[13px] text-gray-500 max-w-sm mx-auto mb-6">Belum ada barang atau jasa yang dijual di kategori ini. Coba kata kunci atau kategori lain.</p>
+            <p class="text-[13px] text-gray-500 max-w-sm mx-auto mb-6">Belum ada barang atau jasa yang dijual. Coba kata kunci lain.</p>
             
-            @if(request('search') || request('category'))
-                <a href="/marketplace" class="inline-flex items-center gap-2 bg-red-50 text-red-600 px-6 py-3 rounded-xl font-extrabold text-[13px] hover:bg-red-100 hover:shadow-sm transition-all tap-effect active:scale-95">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-                    Lihat Semua Barang
-                </a>
-            @else
-                <a href="/marketplace/create" class="inline-flex items-center gap-2 bg-red-600 text-white px-6 py-3 rounded-xl font-extrabold text-[13px] hover:bg-red-700 hover:shadow-lg hover:shadow-red-500/30 transition-all tap-effect active:scale-95">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
-                    Jadilah Penjual Pertama!
-                </a>
-            @endif
+            <a href="/marketplace/create" class="inline-flex items-center gap-2 bg-red-600 text-white px-6 py-3 rounded-xl font-extrabold text-[13px] hover:bg-red-700 transition-all tap-effect active:scale-95">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+                Jadilah Penjual Pertama!
+            </a>
         </div>
         @endforelse
     </div>
+
+    <div class="mt-8 md:mt-10">
+        {{ $products->links() }}
+    </div>
+
 </div>
 @endsection

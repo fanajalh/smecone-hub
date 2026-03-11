@@ -14,6 +14,10 @@ class AuthController extends Controller
     // ================= LOGIN =================
     public function showLogin()
     {
+        // Cegah user yang udah login buka halaman login lagi (Biar gak muter-muter)
+        if (Auth::check()) {
+            return Auth::user()->is_admin ? redirect('/admin/dashboard') : redirect('/dashboard');
+        }
         return view('auth.login');
     }
 
@@ -28,12 +32,11 @@ class AuthController extends Controller
             $request->session()->regenerate();
 
             // PENGECEKAN GURU / ADMIN
-            // Jika yang login adalah guru kesiswaan, arahkan langsung ke Panel Admin
             if (Auth::user()->is_admin) {
-                return redirect()->intended('/admin');
+                return redirect()->intended('/admin/dashboard'); // 🔥 FIX: Arahkan ke dashboard admin yang benar
             }
 
-            // Jika siswa biasa, arahkan ke Dashboard
+            // Jika siswa biasa
             return redirect()->intended('/dashboard');
         }
 
@@ -45,6 +48,10 @@ class AuthController extends Controller
     // ================= REGISTER =================
     public function showRegister()
     {
+        // Cegah user yang udah login buka halaman register
+        if (Auth::check()) {
+            return Auth::user()->is_admin ? redirect('/admin/dashboard') : redirect('/dashboard');
+        }
         return view('auth.register');
     }
 
@@ -53,12 +60,11 @@ class AuthController extends Controller
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'nis' => ['required', 'string', 'unique:users'], // Bisa juga diisi NIP untuk guru
+            'nis' => ['required', 'string', 'unique:users'],
             'password' => ['required', 'min:8', 'confirmed'],
         ]);
 
         // LOGIKA EMAIL SAKTI GURU KESISWAAN
-        // Ubah email ini sesuai dengan email asli Bapak/Ibu guru Kesiswaan nantinya
         $emailGuru = 'kesiswaan@smecone.com';
         $isAdmin = ($request->email === $emailGuru) ? true : false;
 
@@ -67,14 +73,13 @@ class AuthController extends Controller
             'email' => $request->email,
             'nis' => $request->nis,
             'password' => Hash::make($request->password),
-            'is_admin' => $isAdmin, // Otomatis jadi admin jika emailnya cocok
+            'is_admin' => $isAdmin,
         ]);
 
         Auth::login($user);
 
-        // Arahkan sesuai peran setelah register
         if ($user->is_admin) {
-            return redirect('/admin');
+            return redirect('/admin/dashboard'); // 🔥 FIX
         }
 
         return redirect('/dashboard');
@@ -100,7 +105,6 @@ class AuthController extends Controller
         try {
             $googleUser = Socialite::driver('google')->user();
             
-            // Logika Email Sakti untuk Login via Google
             $emailGuru = 'kesiswaan@smecone.com';
             $isAdmin = ($googleUser->email === $emailGuru) ? true : false;
             
@@ -112,13 +116,13 @@ class AuthController extends Controller
                 $user->update([
                     'google_id' => $googleUser->id,
                     'avatar' => $googleUser->avatar,
-                    'is_admin' => $isAdmin, // Pastikan status admin tetap update
+                    'is_admin' => $isAdmin,
                 ]);
             } else {
                 $user = User::create([
                     'name' => $googleUser->name,
                     'email' => $googleUser->email,
-                    'nis' => rand(100000, 999999), // NIS Acak sementara untuk Google Login
+                    'nis' => rand(100000, 999999),
                     'google_id' => $googleUser->id,
                     'avatar' => $googleUser->avatar,
                     'password' => Hash::make(Str::random(24)),
@@ -128,9 +132,8 @@ class AuthController extends Controller
 
             Auth::login($user);
 
-            // Arahkan sesuai peran
             if ($user->is_admin) {
-                return redirect('/admin');
+                return redirect('/admin/dashboard'); // 🔥 FIX
             }
             return redirect('/dashboard');
 
