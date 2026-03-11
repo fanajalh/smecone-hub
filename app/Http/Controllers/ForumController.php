@@ -49,35 +49,99 @@ class ForumController extends Controller
             return redirect('/forum')->withErrors(['error' => 'Kamu harus bergabung ke channel ini terlebih dahulu.']);
         }
 
-        $chats = ForumReply::with('user')->where('forum_thread_id', $id)->oldest()->get();
+        // 🔥 FIX: Wajib load relasi repliedMessage.user agar UI Reply tidak error
+        $chats = ForumReply::with(['user', 'repliedMessage.user'])
+                    ->where('forum_thread_id', $id)
+                    ->oldest()
+                    ->get();
+                    
         return view('forum.show', compact('channel', 'chats'));
     }
 
-    // Mengirim Chat via AJAX
+    // ==========================================
+    // BAGIAN 2: LOGIKA CHAT (KIRIM, EDIT, HAPUS, REAKSI)
+    // ==========================================
+
     public function storeMessage(Request $request, $id)
     {
-        $request->validate(['content' => 'required|string']);
+        $request->validate([
+            'content' => 'required_without:poll_data|string|nullable',
+            'reply_to_id' => 'nullable|exists:forum_replies,id',
+            'poll_data' => 'nullable|array'
+        ]);
 
         $chat = ForumReply::create([
             'forum_thread_id' => $id,
             'user_id' => auth()->id(),
-            'content' => $request->content,
+            'content' => $request->content ?? '',
+            'reply_to_id' => $request->reply_to_id,
+            'poll_data' => $request->poll_data,
         ]);
 
-        if ($request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'chat' => $chat->load('user')
-            ]);
-        }
-        return back();
+        // Kembalikan data lengkap untuk dirender oleh JavaScript
+        return response()->json([
+            'success' => true, 
+            'chat' => $chat->load(['user', 'repliedMessage.user'])
+        ]);
     }
 
-    // Mengambil Pesan Baru via AJAX (Polling)
+    public function editMessage(Request $request, $id)
+    {
+        $chat = ForumReply::findOrFail($id);
+        
+        if ($chat->user_id !== auth()->id()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $chat->update([
+            'content' => $request->content,
+            'is_edited' => true
+        ]);
+
+        return response()->json(['success' => true]);
+    }
+    
+    public function deleteMessage($id)
+    {
+        $chat = ForumReply::findOrFail($id);
+        
+        // Hanya pemilik pesan atau admin yang boleh hapus
+        if ($chat->user_id !== auth()->id() && !auth()->user()->is_admin) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $chat->delete();
+        return response()->json(['success' => true]);
+    }
+
+    public function reactMessage(Request $request, $id)
+    {
+        $chat = ForumReply::findOrFail($id);
+        $emoji = $request->emoji;
+        $userId = auth()->id();
+
+        $reactions = $chat->reactions ?? [];
+        
+        // Logika Toggle: Kalau udah pencet emoji yang sama, hapus emojinya. Kalau belum, tambahkan.
+        if (isset($reactions[$emoji]) && in_array($userId, $reactions[$emoji])) {
+            $reactions[$emoji] = array_diff($reactions[$emoji], [$userId]);
+            if (empty($reactions[$emoji])) {
+                unset($reactions[$emoji]);
+            }
+        } else {
+            $reactions[$emoji][] = $userId;
+        }
+
+        $chat->update(['reactions' => $reactions]);
+        return response()->json(['success' => true, 'reactions' => $reactions]);
+    }
+
     public function fetchMessages(Request $request, $id)
     {
         $lastId = $request->query('last_id', 0);
-        $chats = ForumReply::with('user')
+        
+        // 🔥 FIX: Tambahkan load relasi agar JS Polling mendapat data yang utuh
+        $chats = ForumReply::with(['user', 'repliedMessage.user'])
                     ->where('forum_thread_id', $id)
                     ->where('id', '>', $lastId)
                     ->oldest()
@@ -87,12 +151,11 @@ class ForumController extends Controller
     }
 
     // ==========================================
-    // BAGIAN 2: MANAJEMEN CHANNEL DI DASHBOARD
+    // BAGIAN 3: MANAJEMEN CHANNEL DI DASHBOARD
     // ==========================================
 
     public function createChannel()
     {
-        // Pastikan file view-nya ada di: resources/views/dashboard/create-channel.blade.php
         return view('dashboard.create-channel');
     }
 
@@ -122,6 +185,7 @@ class ForumController extends Controller
     {
         $channel = ForumThread::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
         $allUsers = User::where('id', '!=', auth()->id())->get(); 
+        
         return view('dashboard.manage-channel', compact('channel', 'allUsers'));
     }
 
@@ -132,6 +196,7 @@ class ForumController extends Controller
             'title' => Str::slug($request->title),
             'content' => $request->content,
         ]);
+        
         return back()->with('success', 'Info channel berhasil diperbarui!');
     }
 
@@ -139,6 +204,7 @@ class ForumController extends Controller
     {
         $channel = ForumThread::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
         $channel->delete();
+        
         return redirect('/dashboard')->with('success', 'Channel berhasil dihapus.');
     }
 
@@ -148,6 +214,7 @@ class ForumController extends Controller
         if (!$channel->members->contains($request->user_id)) {
             $channel->members()->attach($request->user_id);
         }
+        
         return back()->with('success', 'Anggota berhasil ditambahkan!');
     }
 
@@ -155,6 +222,7 @@ class ForumController extends Controller
     {
         $channel = ForumThread::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
         $channel->members()->detach($userId);
+        
         return back()->with('success', 'Anggota berhasil dikeluarkan.');
     }
 }
