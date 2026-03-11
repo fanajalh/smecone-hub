@@ -3,28 +3,39 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use App\Models\MarketplaceItem;
 use App\Models\LostAndFound;
-use App\Models\ForumThread; // Tambahkan ini untuk memanggil model Channel
+use App\Models\Marketplace; 
+use App\Models\Repository;
+use App\Models\ForumThread;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        $user = Auth::user();
+        $user = auth()->user();
         
-        $level = 'Pemula';
-        if ($user->reputation_points > 50) $level = 'Aktif';
-        if ($user->reputation_points > 150) $level = 'Bintang Sekolah';
+        $points = $user->reputation_points ?? 0;
+        $level = ($points >= 100) ? 'Senior Hubber' : (($points >= 50) ? 'Active Student' : 'Newcomer');
 
-        // Ambil data untuk slider Halaman Utama
-        $recentMarketplace = MarketplaceItem::with('user')->latest()->take(5)->get();
-        $recentLostFounds = LostAndFound::with('user')->where('status', 'active')->latest()->take(5)->get();
+        $myLostItemsCount = LostAndFound::where('user_id', $user->id)->count();
+        $myRepositoriesCount = Repository::where('user_id', $user->id)
+                            ->orWhereHas('collaborators', function($q) use ($user) {
+                                $q->where('user_id', $user->id);
+                            })->count();
 
-        // AMBIL DATA CHANNEL MILIK USER INI SAJA (Sebagai Admin)
-        $myChannels = ForumThread::where('user_id', $user->id)->withCount('replies')->latest()->get();
+        // FIX: Pakai 'replies' sesuai yang ada di Model ForumThread lu
+        $myChannels = ForumThread::where('user_id', $user->id)
+                        ->withCount('replies') 
+                        ->take(5)
+                        ->get(); 
+        
+        $recentMarketplace = Marketplace::with('user')->latest()->take(6)->get();
+        $recentLostFounds = LostAndFound::with('user')->where('status', 'active')->latest()->take(6)->get();
+        $popularRepos = Repository::withCount('stars')->orderBy('stars_count', 'desc')->take(3)->get();
 
-        return view('dashboard.index', compact('user', 'level', 'recentMarketplace', 'recentLostFounds', 'myChannels'));
+        return view('dashboard.index', compact(
+            'user', 'level', 'myLostItemsCount', 'myRepositoriesCount', 
+            'myChannels', 'recentMarketplace', 'recentLostFounds', 'popularRepos'
+        ));
     }
 }

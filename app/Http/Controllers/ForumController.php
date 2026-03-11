@@ -18,7 +18,6 @@ class ForumController extends Controller
     {
         $search = $request->query('search');
         
-        // Ambil semua channel, hitung pesannya, dan cek apakah mengandung kata kunci pencarian
         $channels = ForumThread::with(['user', 'members'])
             ->withCount('replies')
             ->when($search, function($query, $search) {
@@ -35,7 +34,6 @@ class ForumController extends Controller
     {
         $channel = ForumThread::findOrFail($id);
         
-        // Masukkan user ke channel jika belum menjadi anggota
         if (!$channel->members->contains(auth()->id())) {
             $channel->members()->attach(auth()->id());
         }
@@ -47,7 +45,6 @@ class ForumController extends Controller
     {
         $channel = ForumThread::findOrFail($id);
         
-        // Pastikan hanya anggota yang bisa masuk ke ruang chat
         if (!$channel->members->contains(auth()->id())) {
             return redirect('/forum')->withErrors(['error' => 'Kamu harus bergabung ke channel ini terlebih dahulu.']);
         }
@@ -95,6 +92,7 @@ class ForumController extends Controller
 
     public function createChannel()
     {
+        // Pastikan file view-nya ada di: resources/views/dashboard/create-channel.blade.php
         return view('dashboard.create-channel');
     }
 

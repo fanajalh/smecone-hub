@@ -6,29 +6,29 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::create('marketplace_items', function (Blueprint $table) {
+        Schema::disableForeignKeyConstraints();
+        Schema::dropIfExists('marketplaces');
+        Schema::enableForeignKeyConstraints();
+
+        Schema::create('marketplaces', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->string('title');
+            $table->string('item_name');
             $table->text('description');
-            $table->decimal('price', 10, 2);
-            $table->enum('type', ['barang', 'jasa']);
+            $table->integer('price');
             $table->string('image')->nullable();
-            $table->string('whatsapp_number');
+            $table->enum('category', ['Makanan', 'Alat Tulis', 'Elektronik', 'Jasa', 'Lainnya']);
+            $table->enum('type', ['Ready Stock', 'Pre-Order'])->default('Ready Stock');
+            $table->string('location')->nullable(); // Misal: Kantin, Kelas X PPLG 1, dll.
+            $table->boolean('is_sold')->default(false);
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('marketplace_items');
+        Schema::dropIfExists('marketplaces');
     }
 };

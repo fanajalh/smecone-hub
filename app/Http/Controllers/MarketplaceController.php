@@ -2,65 +2,64 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\MarketplaceItem;
+use App\Models\Marketplace;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 
 class MarketplaceController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $items = MarketplaceItem::with('user')->latest()->get();
-        return view('marketplace.index', compact('items'));
+        $search = $request->query('search');
+        $category = $request->query('category');
+
+        $products = Marketplace::with('user')
+            ->when($search, function($query, $search) {
+                return $query->where('item_name', 'like', "%{$search}%");
+            })
+            ->when($category, function($query, $category) {
+                return $query->where('category', $category);
+            })
+            ->latest()
+            ->get();
+
+        return view('marketplace.index', compact('products', 'search', 'category'));
     }
 
-    public function create()
-    {
-        return view('marketplace.create');
-    }
+    public function create() { return view('marketplace.create'); }
 
     public function store(Request $request)
     {
         $request->validate([
-            'title' => 'required|string|max:255',
+            'item_name' => 'required|string|max:255',
             'price' => 'required|numeric',
-            'type' => 'required|in:barang,jasa',
-            'whatsapp_number' => 'required|string',
-            'description' => 'required|string',
-            'image' => 'nullable|image|max:2048',
+            'description' => 'required',
+            'category' => 'required',
+            'image' => 'nullable|image|max:2048'
         ]);
 
-        $imagePath = null;
+        $path = null;
         if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('marketplace', 'public');
+            $path = $request->file('image')->store('marketplaces', 'public');
         }
 
-        $item = MarketplaceItem::create([
+        Marketplace::create([
             'user_id' => auth()->id(),
-            'title' => $request->title,
+            'item_name' => $request->item_name,
             'price' => $request->price,
-            'type' => $request->type,
-            'whatsapp_number' => $request->whatsapp_number,
             'description' => $request->description,
-            'image' => $imagePath,
+            'category' => $request->category,
+            'type' => $request->type ?? 'Ready Stock',
+            'location' => $request->location,
+            'image' => $path,
         ]);
 
-        // Trigger Bot WA
-        try {
-            $pesanPromosi = "*PROMOSI SMECONE HUB*\n\n" . 
-                            "Ada " . $item->type . " baru dari " . auth()->user()->name . "!\n" .
-                            "*" . $item->title . "*\n" .
-                            "Harga: Rp" . number_format($item->price, 0, ',', '.') . "\n" .
-                            "Hubungi: wa.me/" . $item->whatsapp_number;
+        return redirect('/marketplace')->with('success', 'Produk berhasil dipasang!');
+    }
 
-            // Ganti URL ini dengan URL Webhook Bot WA milikmu
-            Http::post('http://localhost:3000/send-group', [
-                'message' => $pesanPromosi
-            ]);
-        } catch (\Exception $e) {
-            // Lanjutkan eksekusi meskipun Bot WA sedang offline
-        }
-
-        return redirect('/marketplace')->with('success', 'Dagangan berhasil diposting!');
+    public function show($id)
+    {
+        $product = Marketplace::with('user')->findOrFail($id);
+        return view('marketplace.show', compact('product'));
     }
 }

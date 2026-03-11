@@ -8,42 +8,27 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // 1. Tabel Repository (Karya & Tugas)
+        Schema::disableForeignKeyConstraints();
+        Schema::dropIfExists('repositories');
+        Schema::enableForeignKeyConstraints();
+
         Schema::create('repositories', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->string('title');
-            $table->text('description');
-            $table->string('file_link'); // Link ke GDrive / Github / file lokal
-            $table->enum('type', ['karya', 'tugas']);
-            $table->timestamps();
-        });
-
-        // 2. Tabel Forum Diskusi (Topik Utama)
-        Schema::create('forum_threads', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->string('title');
-            $table->text('content');
-            $table->boolean('is_solved')->default(false); // Penanda kalau sudah ada jawaban terbaik
-            $table->timestamps();
-        });
-
-        // 3. Tabel Balasan Forum
-        Schema::create('forum_replies', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('forum_thread_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->text('content');
-            $table->boolean('is_best_answer')->default(false); // Penanda jawaban terbaik -> memicu reward poin
+            $table->string('name');
+            $table->text('description')->nullable();
+            $table->enum('visibility', ['public', 'private'])->default('public');
+            
+            // FITUR BARU: Filter Jurusan & Link Pameran
+            $table->string('major')->nullable(); 
+            $table->string('demo_link')->nullable(); 
+            
             $table->timestamps();
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('forum_replies');
-        Schema::dropIfExists('forum_threads');
         Schema::dropIfExists('repositories');
     }
 };
