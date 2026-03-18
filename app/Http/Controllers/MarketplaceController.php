@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Marketplace;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Http;
 
 class MarketplaceController extends Controller
 {
@@ -27,6 +28,32 @@ class MarketplaceController extends Controller
             ->paginate(15)->withQueryString();
 
         return view('marketplace.index', compact('products', 'search', 'category'));
+    }
+
+    public function broadcastKeWa($itemId)
+    {
+        $item = \App\Models\Marketplace::find($itemId);
+            
+        // ID Grup yang tadi kamu copy dari terminal Node.js
+        $idGrupSmecone = '123456789098765432@g.us'; 
+        
+        // Susun pesan iklannya
+        $pesan = "*📢 IKLAN LAPAK SMECONE 📢*\n\n";
+        $pesan .= "Barang: *" . $item->title . "*\n";
+        $pesan .= "Harga: Rp " . number_format($item->price, 0, ',', '.') . "\n";
+        $pesan .= "Cek selengkapnya di web: " . url('/marketplace/' . $item->id);
+
+        // Tembak API Bot Node.js yang sedang menyala
+        $response = Http::post('http://localhost:3000/api/broadcast-iklan', [
+            'groupId' => $idGrupSmecone,
+            'pesan' => $pesan
+        ]);
+
+        if ($response->successful()) {
+            return back()->with('success', 'Iklan berhasil dikirim ke grup WhatsApp!');
+        }
+
+        return back()->with('error', 'Gagal mengirim iklan.');
     }
 
     /**

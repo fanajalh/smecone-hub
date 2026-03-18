@@ -76,6 +76,9 @@ Route::middleware(['auth', 'App\Http\Middleware\IsStudent'])->group(function () 
     Route::get('/forum/{id}', [ForumController::class, 'show']);
     Route::post('/forum/{id}/message', [ForumController::class, 'storeMessage']);
     Route::get('/forum/{id}/messages', [ForumController::class, 'fetchMessages']);
+    Route::put('/forum/message/{id}/edit', [ForumController::class, 'editMessage']);
+    Route::delete('/forum/message/{id}/delete', [ForumController::class, 'deleteMessage']);
+    Route::post('/forum/message/{id}/react', [ForumController::class, 'reactMessage']);
 
     // --- FORUM (MANAJEMEN DASHBOARD) ---
     Route::get('/dashboard/channel', function () {

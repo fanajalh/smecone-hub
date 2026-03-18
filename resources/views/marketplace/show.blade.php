@@ -73,7 +73,7 @@
                     </div>
                 </div>
             </div>
-            <a href="#" class="border border-red-500 text-red-500 px-4 py-1.5 rounded-full text-xs font-bold hover:bg-red-50 transition">
+            <a href="/marketplace/toko/{{ $product->user_id }}" class="border border-red-500 text-red-500 px-4 py-1.5 rounded-full text-xs font-bold hover:bg-red-50 transition active:scale-95">
                 Kunjungi Toko
             </a>
         </div>
