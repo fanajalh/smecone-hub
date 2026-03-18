@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Marketplace;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 
 class MarketplaceController extends Controller
 {
@@ -20,7 +22,6 @@ class MarketplaceController extends Controller
             ->when($category, function($query, $category) {
                 return $query->where('category', $category);
             })
-            // 🔥 Barang yang is_promoted (Iklan) bakal ditaruh paling atas!
             ->orderBy('is_promoted', 'desc') 
             ->orderBy('is_sold', 'asc') 
             ->latest()
@@ -29,9 +30,49 @@ class MarketplaceController extends Controller
         return view('marketplace.index', compact('products', 'search', 'category'));
     }
 
-    /**
-     * 🔥 FUNGSI BARU: Proses Pendaftaran Lapak
-     */
+    public function broadcastKeWa(Request $request, $itemId)
+    {
+        // 1. Validasi input dari modal
+        $request->validate([
+            'pesan' => 'required|string',
+            'custom_image' => 'nullable|image|max:2048' // Maksimal 2MB
+        ]);
+
+        $item = Marketplace::findOrFail($itemId);
+        $idGrupSmecone = '120363425273294200@g.us'; 
+        
+        // 2. Gunakan pesan yang diketik/diedit user dari Modal
+        $pesan = $request->pesan;
+
+        // 3. Cek apakah user mengunggah gambar custom
+        $imageUrl = null;
+        if ($request->hasFile('custom_image')) {
+            // Simpan gambar custom ke folder storage/app/public/broadcasts
+            $path = $request->file('custom_image')->store('broadcasts', 'public');
+            $imageUrl = asset('storage/' . $path);
+        } else {
+            // Jika tidak upload gambar custom, pakai gambar asli produk (jika ada)
+            $imageUrl = $item->image ? asset('storage/' . $item->image) : null;
+        }
+
+        try {
+            // Tembak API Bot
+            $response = Http::post('http://localhost:3000/api/broadcast-iklan', [
+                'groupId' => $idGrupSmecone,
+                'pesan' => $pesan,
+                'imageUrl' => $imageUrl
+            ]);
+
+            if ($response->successful()) {
+                return back()->with('success', 'Iklan custom berhasil dikirim ke grup WhatsApp!');
+            }
+
+            return back()->with('error', 'Gagal mengirim iklan.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Tidak bisa terhubung ke API Bot. Pastikan server Node.js menyala!');
+        }
+    }
+
     public function registerStore(Request $request)
     {
         $request->validate([
@@ -41,7 +82,6 @@ class MarketplaceController extends Controller
 
         $user = auth()->user();
         
-        // Simpan data lapak ke tabel user
         $user->update([
             'store_name' => $request->store_name,
             'whatsapp_number' => $request->whatsapp_number,
@@ -50,12 +90,10 @@ class MarketplaceController extends Controller
         return redirect('/marketplace/create')->with('success', 'Selamat! Lapak berhasil dibuka. Sekarang kamu bisa tambah produk.');
     }
 
-    // 🔥 FITUR BARU: Dashboard Pemantauan Lapak
     public function myLapak()
     {
         $products = Marketplace::where('user_id', auth()->id())->latest()->get();
         
-        // Statistik untuk dashboard
         $totalViews = $products->sum('views_count');
         $totalProducts = $products->count();
         $soldProducts = $products->where('is_sold', true)->count();
@@ -68,12 +106,10 @@ class MarketplaceController extends Controller
     { 
         $user = auth()->user();
 
-        // Kalau belum punya nama lapak, arahkan ke halaman Daftar Lapak
         if (empty($user->store_name)) {
             return view('marketplace.register-store');
         }
 
-        // Kalau sudah punya, lanjut ke form tambah barang
         return view('marketplace.create'); 
     }
 
@@ -113,15 +149,13 @@ class MarketplaceController extends Controller
     {
         $product = Marketplace::with('user')->findOrFail($id);
         
-        // Nambah view count kalau bukan pemilik yang liat
         if ($product->user_id !== auth()->id()) {
             $product->increment('views_count');
         }
 
-        // 🔥 AMBIL DATA REKOMENDASI LAINNYA (Maksimal 6 barang dari kategori yang sama)
         $recommendations = Marketplace::where('category', $product->category)
                             ->where('id', '!=', $id)
-                            ->where('is_sold', false) // Usahakan yang direkomendasikan belum habis
+                            ->where('is_sold', false)
                             ->latest()
                             ->take(6)
                             ->get();
@@ -129,19 +163,15 @@ class MarketplaceController extends Controller
         return view('marketplace.show', compact('product', 'recommendations'));
     }
 
-    // 🔥 FITUR BARU: Halaman Kunjungi Toko
     public function toko($id)
     {
-        // Cari data penjual berdasarkan ID User
         $seller = \App\Models\User::findOrFail($id);
         
-        // Ambil semua produk milik penjual ini
         $products = Marketplace::where('user_id', $id)
-                        ->orderBy('is_sold', 'asc') // Yang belum laku di atas
+                        ->orderBy('is_sold', 'asc')
                         ->latest()
                         ->paginate(15);
         
-        // Hitung statistik toko
         $totalProducts = Marketplace::where('user_id', $id)->count();
         $soldProducts = Marketplace::where('user_id', $id)->where('is_sold', true)->count();
         

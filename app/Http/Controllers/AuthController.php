@@ -33,13 +33,14 @@ class AuthController extends Controller
 
             // PENGECEKAN GURU / ADMIN
             if (Auth::user()->is_admin) {
-                return redirect()->intended('/admin/dashboard'); // 🔥 FIX: Arahkan ke dashboard admin yang benar
+                return redirect()->intended('/admin/dashboard'); 
             }
 
             // Jika siswa biasa
             return redirect()->intended('/dashboard');
         }
 
+        // Jika login gagal (Email/Password salah), lempar balik ke form login
         return back()->withErrors([
             'email' => 'Email atau password salah.',
         ])->onlyInput('email');
@@ -78,11 +79,7 @@ class AuthController extends Controller
 
         Auth::login($user);
 
-        if ($user->is_admin) {
-            return redirect('/admin/dashboard'); // 🔥 FIX
-        }
-
-        return redirect('/dashboard');
+        return $user->is_admin ? redirect('/admin/dashboard') : redirect('/dashboard');
     }
 
     // ================= LOGOUT =================
@@ -132,10 +129,7 @@ class AuthController extends Controller
 
             Auth::login($user);
 
-            if ($user->is_admin) {
-                return redirect('/admin/dashboard'); // 🔥 FIX
-            }
-            return redirect('/dashboard');
+            return $user->is_admin ? redirect('/admin/dashboard') : redirect('/dashboard');
 
         } catch (\Exception $e) {
             return redirect('/login')->withErrors(['email' => 'Gagal login dengan Google. Coba lagi.']);

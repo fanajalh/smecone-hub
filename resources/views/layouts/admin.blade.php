@@ -49,9 +49,5 @@
         @yield('content')
     </main>
 
-    <footer class="bg-white border-t border-gray-100 py-6 text-center text-xs font-bold text-gray-400 mt-auto relative z-20">
-        &copy; {{ date('Y') }} SMK Negeri 1 Purwokerto - Tim Kesiswaan
-    </footer>
-
 </body>
 </html>

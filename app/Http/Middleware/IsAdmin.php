@@ -4,23 +4,23 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
 class IsAdmin
 {
     public function handle(Request $request, Closure $next): Response
     {
-        // Kalau belum login, lempar ke login
-        if (!auth()->check()) {
-            return redirect('/login');
-        }
+        if (Auth::check()) {
+            // Jika yang login BUKAN admin (siswa), lempar paksa ke dashboard siswa
+            if (!Auth::user()->is_admin) {
+                return redirect('/dashboard');
+            }
 
-        // Kalau dia benar-benar ADMIN, izinkan lewat
-        if (auth()->user()->is_admin) {
+            // Jika benar admin, silakan masuk
             return $next($request);
         }
 
-        // 🔥 FIX 4: Kalau dia STUDENT nyasar ke sini, lempar ke dashboard student
-        return redirect('/dashboard');
+        return redirect('/login');
     }
 }
