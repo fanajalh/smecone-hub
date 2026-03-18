@@ -1,4 +1,4 @@
-const { Client, LocalAuth } = require('whatsapp-web.js');
+const { Client, LocalAuth, MessageMedia } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 const express = require('express');
 const cors = require('cors');
@@ -8,9 +8,9 @@ const app = express();
 app.use(cors());
 app.use(express.json()); // Agar bisa membaca data JSON dari Laravel
 
-// Inisialisasi Bot WA (Tanpa executablePath karena sudah pakai Chromium bawaan)
+// Inisialisasi Bot WA
 const client = new Client({
-    authStrategy: new LocalAuth(), // Menyimpan sesi login agar tidak perlu scan QR terus
+    authStrategy: new LocalAuth(), // Menyimpan sesi login
     puppeteer: {
         headless: true,
         args: ['--no-sandbox', '--disable-setuid-sandbox']
@@ -48,24 +48,15 @@ client.on('ready', async () => {
 // DAFTAR NOMOR ADMIN (Wajib format 628xxx@c.us)
 // ==========================================
 const ADMIN_NUMBERS = [
-    '6285728150223@c.us', // Ganti dengan nomor WA kamu! (Pakai 62, bukan 0)
-    // '6289876543210@c.us', // Buka komentar ini kalau mau nambah admin ke-2
+    '6285728150223@c.us', // Ganti dengan nomor WA kamu!
 ];
 
 client.on('message', async message => {
-    // Ambil nomor WA si pengirim pesan
     const senderNumber = message.author || message.from; 
     const text = message.body.toLowerCase();
-
-    // Cek apakah nomor pengirim ada di dalam daftar ADMIN_NUMBERS
     const isAdmin = ADMIN_NUMBERS.includes(senderNumber);
 
-    // ==========================================
-    // 🛡️ ZONA KHUSUS ADMIN 🛡️
-    // ==========================================
     if (isAdmin) {
-        
-        // 1. Menampilkan Menu
         if (text === '!menu') {
             const menuText = `*🛠️ MENU ADMIN SMECONE 🛠️*\n\n` +
                              `Halo Admin! Silakan balas dengan angka:\n\n` +
@@ -73,11 +64,8 @@ client.on('message', async message => {
                              `*2️⃣* Cek Status Bot\n` +
                              `*3️⃣* Test Tag Semua Member\n\n` +
                              `_(Pesan ini rahasia, hanya Admin yang bisa pakai)_`;
-            
             message.reply(menuText);
         }
-        
-        // 2. Eksekusi Pilihan 1 (Cek ID Grup)
         else if (text === '1') {
             const chat = await message.getChat();
             if (chat.isGroup) {
@@ -86,13 +74,9 @@ client.on('message', async message => {
                 message.reply('Perintah ini cuma bisa dipakai di dalam grup bos.');
             }
         }
-
-        // 3. Eksekusi Pilihan 2 (Cek Status)
         else if (text === '2') {
             message.reply('🤖 *Status:* NORMAL & AKTIF!\n🌐 *Server API:* Berjalan di Port 3000\n🚀 *Siap menerima iklan dari web!*');
         }
-
-        // 4. Eksekusi Pilihan 3 (Tag All - Contoh fitur advance)
         else if (text === '3') {
             const chat = await message.getChat();
             if (chat.isGroup) {
@@ -107,41 +91,45 @@ client.on('message', async message => {
                 message.reply('Cuma bisa tag all di grup bos.');
             }
         }
-    } 
-    // ==========================================
-    // 🛑 ZONA MEMBER BIASA 🛑
-    // ==========================================
-    else {
-        // Kalau member biasa iseng ngetik !menu atau angka 1,2,3
+    } else {
         if (text === '!menu' || text === '1' || text === '2' || text === '3') {
             message.reply('Maaf, kamu bukan Admin Smecone! 🛑 Jangan iseng ya!');
         }
     }
 });
 
-// 3. Membuat Endpoint API untuk dipanggil Laravel
-app.post('/api/broadcast-iklan', async (req, res) => {
-    const { groupId, pesan } = req.body;
+// 3. Endpoint API untuk Broadcast dari Laravel
+app.post('/api/broadcast-iklan', (req, res) => { // hapus kata 'async' di baris ini
+    const { groupId, pesan, imageUrl } = req.body;
 
     if (!groupId || !pesan) {
         return res.status(400).json({ success: false, message: 'Data groupId atau pesan kosong!' });
     }
 
-    try {
-        await client.sendMessage(groupId, pesan);
-        console.log(`\n📢 Berhasil mengirim iklan ke grup: ${groupId}`);
-        
-        res.json({ success: true, message: 'Iklan berhasil terkirim ke WhatsApp!' });
-    } catch (error) {
-        console.error('\n❌ Gagal mengirim pesan:', error);
-        res.status(500).json({ success: false, message: 'Gagal mengirim pesan via Bot' });
-    }
+    // 1. LANGSUNG balas ke Laravel agar web tidak loading lama / terkena Timeout
+    res.json({ success: true, message: 'Iklan sedang diproses dan dikirim oleh Bot!' });
+
+    // 2. Jalankan proses pengiriman WhatsApp di latar belakang (Background Process)
+    (async () => {
+        try {
+            if (imageUrl) {
+                // Download gambar dan kirim
+                const media = await MessageMedia.fromUrl(imageUrl);
+                await client.sendMessage(groupId, media, { caption: pesan });
+                console.log(`\n📢 Berhasil mengirim IKLAN + GAMBAR ke grup: ${groupId}`);
+            } else {
+                // Kirim teks saja
+                await client.sendMessage(groupId, pesan);
+                console.log(`\n📢 Berhasil mengirim IKLAN TEKS ke grup: ${groupId}`);
+            }
+        } catch (error) {
+            console.error('\n❌ Gagal mengirim pesan di background:', error);
+        }
+    })();
 });
 
-// Menjalankan Bot WA
 client.initialize();
 
-// Menjalankan Server API di port 3000
 const PORT = 3000;
 app.listen(PORT, () => {
     console.log(`🚀 API Server Bot berjalan di http://localhost:${PORT}`);

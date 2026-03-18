@@ -11,7 +11,15 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\GitHttpController;
 
-// Pintu Gerbang Utama
+// Hapus kode ini kalau sudah selesai ngetes tampilannya ya!
+Route::get('/404', function() { abort(404); });
+Route::get('/403', function() { abort(403); });
+Route::get('/419', function() { abort(419); });
+Route::get('/500', function() { abort(500); });
+
+// ==========================================
+// 🚪 Pintu Gerbang Utama
+// ==========================================
 Route::get('/', function () {
     if (auth()->check()) {
         if (auth()->user()->is_admin) {
@@ -22,17 +30,29 @@ Route::get('/', function () {
     return redirect('/login');
 });
 
-// --- AUTHENTICATION (🔥 INI YANG TADI BIKIN LOOPING) ---
-Route::get('/login', [AuthController::class, 'showLogin'])->name('login'); // HARUS showLogin
-Route::post('/login', [AuthController::class, 'login']);                   // HARUS login
-Route::get('/register', [AuthController::class, 'showRegister'])->name('register'); // HARUS showRegister
-Route::post('/register', [AuthController::class, 'register']);             // HARUS register
+// ==========================================
+// 🔑 AUTHENTICATION
+// ==========================================
+Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+Route::post('/login', [AuthController::class, 'login']);
+Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+Route::post('/register', [AuthController::class, 'register']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// --- STUDENT / USER ROUTES ---
+// ==========================================
+// 🎓 ZONA SISWA (Hanya bisa diakses Siswa)
+// ==========================================
 Route::middleware(['auth', 'App\Http\Middleware\IsStudent'])->group(function () {
     
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    Route::get('/prestasi', function () {
+        return view('prestasi.index');
+    });
+
+    Route::get('/event', function () {
+        return view('event.index');
+    });
 
     // --- REPOSITORY SYSTEM ---
     Route::get('/repository', [RepositoryController::class, 'index']);
@@ -50,27 +70,19 @@ Route::middleware(['auth', 'App\Http\Middleware\IsStudent'])->group(function () 
     Route::post('/repository/{id}/sync-git', [RepositoryController::class, 'syncGit']);
     Route::get('/repository/{id}/download-cli', [RepositoryController::class, 'downloadCli']);
 
-// --- MARKETPLACE ---
+    // --- MARKETPLACE ---
     Route::get('/marketplace', [MarketplaceController::class, 'index']);
     Route::get('/marketplace/create', [MarketplaceController::class, 'create']);
     Route::get('/marketplace/lapak-saya', [MarketplaceController::class, 'myLapak']);
     Route::post('/marketplace/register-store', [MarketplaceController::class, 'registerStore']);
     Route::post('/marketplace/store', [MarketplaceController::class, 'store']);
-    
-    // 🔥 RUTE BARU: HALAMAN PROFIL TOKO PENJUAL
+    Route::post('/marketplace/{id}/broadcast', [MarketplaceController::class, 'broadcastKeWa']);          
     Route::get('/marketplace/toko/{id}', [MarketplaceController::class, 'toko']);
-    
     Route::get('/marketplace/{id}', [MarketplaceController::class, 'show']);
     Route::delete('/marketplace/{id}/delete', [MarketplaceController::class, 'destroy']);
     Route::post('/marketplace/{id}/toggle-sold', [MarketplaceController::class, 'toggleSold']);
 
-    // --- LOST & FOUND ---
-    // Route::get('/lost-found', [LostAndFoundController::class, 'index']);
-    // Route::get('/lost-found/create', [LostAndFoundController::class, 'create']);
-    // Route::post('/lost-found', [LostAndFoundController::class, 'store']);
-    // Route::get('/lost-found/{id}', [LostAndFoundController::class, 'show']);
-
-    // --- FORUM & CHAT (EKSPLORASI) ---
+    // --- FORUM & CHAT ---
     Route::get('/forum', [ForumController::class, 'index']);
     Route::post('/forum/{id}/join', [ForumController::class, 'joinChannel']);
     Route::get('/forum/{id}', [ForumController::class, 'show']);
@@ -80,7 +92,7 @@ Route::middleware(['auth', 'App\Http\Middleware\IsStudent'])->group(function () 
     Route::delete('/forum/message/{id}/delete', [ForumController::class, 'deleteMessage']);
     Route::post('/forum/message/{id}/react', [ForumController::class, 'reactMessage']);
 
-    // --- FORUM (MANAJEMEN DASHBOARD) ---
+    // --- FORUM MANAJEMEN ---
     Route::get('/dashboard/channel', function () {
         return redirect('/dashboard');
     });
@@ -100,14 +112,17 @@ Route::middleware(['auth', 'App\Http\Middleware\IsStudent'])->group(function () 
     Route::post('/profile/update', [ProfileController::class, 'update']);
 });
 
-// --- ADMIN ROUTES ---
+// ==========================================
+// 🛡️ ZONA ADMIN (Hanya bisa diakses Admin)
+// ==========================================
 Route::middleware(['auth', 'App\Http\Middleware\IsAdmin'])->group(function () {
     Route::get('/admin/dashboard', [AdminController::class, 'index']);
+    // Tambahkan rute admin lainnya di sini nanti kalau butuh
 });
 
-// --- GIT SERVER & WEBHOOK ---
+// ==========================================
+// 🌐 API & WEBHOOK (Tanpa Middleware Auth)
+// ==========================================
 Route::any('/git/{path}', [GitHttpController::class, 'handle'])->where('path', '.*');
 Route::post('/git-hook/{id}/auto-sync', [RepositoryController::class, 'autoSyncGit']);
-
-// API Endpoint untuk CLI (Tanpa CSRF)
 Route::post('/api/docs/push', [RepositoryController::class, 'pushFromCli'])->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
