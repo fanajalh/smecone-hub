@@ -6,10 +6,7 @@ use App\Models\Marketplace;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Http;
-<<<<<<< HEAD
-=======
 use Illuminate\Support\Str;
->>>>>>> temp-update
 
 class MarketplaceController extends Controller
 {
@@ -33,37 +30,6 @@ class MarketplaceController extends Controller
         return view('marketplace.index', compact('products', 'search', 'category'));
     }
 
-<<<<<<< HEAD
-    public function broadcastKeWa($itemId)
-    {
-        $item = \App\Models\Marketplace::find($itemId);
-            
-        // ID Grup yang tadi kamu copy dari terminal Node.js
-        $idGrupSmecone = '123456789098765432@g.us'; 
-        
-        // Susun pesan iklannya
-        $pesan = "*📢 IKLAN LAPAK SMECONE 📢*\n\n";
-        $pesan .= "Barang: *" . $item->title . "*\n";
-        $pesan .= "Harga: Rp " . number_format($item->price, 0, ',', '.') . "\n";
-        $pesan .= "Cek selengkapnya di web: " . url('/marketplace/' . $item->id);
-
-        // Tembak API Bot Node.js yang sedang menyala
-        $response = Http::post('http://localhost:3000/api/broadcast-iklan', [
-            'groupId' => $idGrupSmecone,
-            'pesan' => $pesan
-        ]);
-
-        if ($response->successful()) {
-            return back()->with('success', 'Iklan berhasil dikirim ke grup WhatsApp!');
-        }
-
-        return back()->with('error', 'Gagal mengirim iklan.');
-    }
-
-    /**
-     * 🔥 FUNGSI BARU: Proses Pendaftaran Lapak
-     */
-=======
     public function broadcastKeWa(Request $request, $itemId)
     {
         // 1. Validasi input dari modal
@@ -107,7 +73,6 @@ class MarketplaceController extends Controller
         }
     }
 
->>>>>>> temp-update
     public function registerStore(Request $request)
     {
         $request->validate([
@@ -234,4 +199,17 @@ class MarketplaceController extends Controller
         $product->update(['is_sold' => !$product->is_sold]);
         return back()->with('success', 'Status barang diperbarui!');
     }
+
+    public function salesHistory()
+{
+    // Ambil transaksi yang barangnya milik si penjual yang sedang login
+    $sales = Transaction::with(['user', 'marketplaceItem'])
+        ->whereHas('marketplaceItem', function($query) {
+            $query->where('user_id', auth()->id());
+        })
+        ->latest()
+        ->get();
+
+    return view('marketplace.sales', compact('sales'));
+}
 }

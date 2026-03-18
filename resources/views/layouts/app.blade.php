@@ -65,7 +65,11 @@
                 <span class="text-[13px] font-extrabold text-red-700">{{ auth()->user()->reputation_points ?? 0 }} <span class="opacity-70">Pts</span></span>
             </div>
             <a href="/profile" class="w-9 h-9 rounded-full border-2 border-gray-100 overflow-hidden tap-effect">
-                <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&background=dc2626&color=fff&bold=true" class="w-full h-full object-cover">
+                @if(auth()->user()->avatar)
+                    <img src="{{ asset('storage/' . auth()->user()->avatar) }}" class="w-full h-full object-cover">
+                @else
+                    <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&background=dc2626&color=fff&bold=true" class="w-full h-full object-cover">
+                @endif
             </a>
             <form action="/logout" method="POST" class="inline">
                 @csrf
@@ -113,7 +117,11 @@
 
         <a href="/profile" class="flex flex-col items-center justify-center w-full py-1 group tap-effect">
             <div class="w-7 h-7 rounded-full border-2 {{ request()->is('profile*') ? 'border-red-500 scale-110' : 'border-gray-300 opacity-70' }} overflow-hidden transition-all">
-                <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&background=dc2626&color=fff&bold=true" class="w-full h-full object-cover">
+                @if(auth()->user()->avatar)
+                    <img src="{{ asset('storage/' . auth()->user()->avatar) }}" class="w-full h-full object-cover" alt="Profile">
+                @else
+                    <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&background=dc2626&color=fff&bold=true" class="w-full h-full object-cover" alt="Profile">
+                @endif
             </div>
             <span class="text-[10px] mt-1 font-bold {{ request()->is('profile*') ? 'text-red-600' : 'text-gray-500' }}">Profil</span>
         </a>

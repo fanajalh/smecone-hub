@@ -27,7 +27,11 @@
         <div class="flex justify-between items-center w-full md:w-auto">
             <div class="flex items-center gap-3 md:gap-4">
                 <div class="w-10 h-10 md:w-14 md:h-14 rounded-full bg-white/20 border-2 border-white/50 flex items-center justify-center overflow-hidden shadow-sm">
-                    <img src="https://ui-avatars.com/api/?name={{ urlencode($user->name) }}&background=random&color=fff" alt="Avatar" class="w-full h-full object-cover">
+                    @if($user->avatar)
+                        <img src="{{ asset('storage/' . $user->avatar) }}" alt="Avatar" class="w-full h-full object-cover">
+                    @else
+                        <img src="https://ui-avatars.com/api/?name={{ urlencode($user->name) }}&background=random&color=fff" alt="Avatar" class="w-full h-full object-cover">
+                    @endif
                 </div>
                 <div>
                     <p class="text-[11px] md:text-sm font-medium opacity-90 leading-tight">Selamat datang di Smecone,</p>
@@ -129,16 +133,23 @@
     </div>
 
     <div class="mt-8 flex gap-4 overflow-x-auto hide-scrollbar snap-x snap-mandatory px-1 pb-4 md:grid md:grid-cols-2 md:overflow-visible">
-        <div class="min-w-[85%] md:min-w-0 h-36 md:h-44 bg-gradient-to-br from-red-600 to-red-800 rounded-3xl snap-center shrink-0 p-5 md:p-8 flex flex-col justify-center text-white relative overflow-hidden shadow-[0_4px_15px_rgba(220,38,38,0.2)] hover-scale cursor-pointer">
+        
+        <a href="/prestasi" class="min-w-[85%] md:min-w-0 h-36 md:h-44 bg-gradient-to-br from-red-600 to-red-800 rounded-3xl snap-center shrink-0 p-5 md:p-8 flex flex-col justify-center text-white relative overflow-hidden shadow-[0_4px_15px_rgba(220,38,38,0.2)] hover-scale cursor-pointer block">
             <div class="absolute -right-4 -bottom-4 w-32 h-32 md:w-48 md:h-48 bg-white opacity-10 rounded-full blur-xl"></div>
-            <span class="bg-white/20 backdrop-blur-md border border-white/30 text-[10px] md:text-xs font-extrabold px-2.5 py-1 rounded-full w-fit mb-2 md:mb-3 uppercase tracking-wide">Info OSIS</span>
-            <h3 class="font-extrabold text-xl md:text-2xl leading-tight w-3/4">Pendaftaran Ekskul<br>Telah Dibuka!</h3>
-        </div>
-        <div class="min-w-[85%] md:min-w-0 h-36 md:h-44 bg-gradient-to-br from-blue-600 to-indigo-800 rounded-3xl snap-center shrink-0 p-5 md:p-8 flex flex-col justify-center text-white relative overflow-hidden shadow-[0_4px_15px_rgba(37,99,235,0.2)] hover-scale cursor-pointer">
+            <span class="bg-white/20 backdrop-blur-md border border-white/30 text-[10px] md:text-xs font-extrabold px-2.5 py-1 rounded-full w-fit mb-2 md:mb-3 uppercase tracking-wide">Prestasi Terbaru</span>
+            <h3 class="font-extrabold text-xl md:text-2xl leading-tight w-3/4 line-clamp-2">
+                {{ $latestPrestasi ? $latestPrestasi->judul : 'Belum ada prestasi tercatat' }}
+            </h3>
+        </a>
+
+        <a href="/event" class="min-w-[85%] md:min-w-0 h-36 md:h-44 bg-gradient-to-br from-blue-600 to-indigo-800 rounded-3xl snap-center shrink-0 p-5 md:p-8 flex flex-col justify-center text-white relative overflow-hidden shadow-[0_4px_15px_rgba(37,99,235,0.2)] hover-scale cursor-pointer block">
             <div class="absolute -right-4 -top-4 w-24 h-24 md:w-40 md:h-40 bg-white opacity-10 rounded-full blur-lg"></div>
-            <span class="bg-white/20 backdrop-blur-md border border-white/30 text-[10px] md:text-xs font-extrabold px-2.5 py-1 rounded-full w-fit mb-2 md:mb-3 uppercase tracking-wide">Kompetisi</span>
-            <h3 class="font-extrabold text-xl md:text-2xl leading-tight w-3/4">Lomba Koding<br>Berhadiah Menarik!</h3>
-        </div>
+            <span class="bg-white/20 backdrop-blur-md border border-white/30 text-[10px] md:text-xs font-extrabold px-2.5 py-1 rounded-full w-fit mb-2 md:mb-3 uppercase tracking-wide">Event Akan Datang</span>
+            <h3 class="font-extrabold text-xl md:text-2xl leading-tight w-3/4 line-clamp-2">
+                {{ $latestEvent ? $latestEvent->judul : 'Belum ada event terdekat' }}
+            </h3>
+        </a>
+
     </div>
 
     <div class="mt-6 md:mt-10">
@@ -239,44 +250,6 @@
                 @endforelse
             </div>
         </div>
-
-        <div class="mt-8 md:mt-0">
-            <div class="flex justify-between items-center mb-4 md:mb-6 px-1 md:px-0">
-                <h2 class="text-base md:text-lg font-extrabold text-gray-800 tracking-tight">Info Barang Hilang</h2>
-                <a href="/lost-found/create" class="text-[11px] md:text-xs font-extrabold text-white bg-red-500 px-3 py-1.5 md:px-4 md:py-2 rounded-full shadow-sm hover:bg-red-600 transition active-scale">
-                    Lapor
-                </a>
-            </div>
-            
-            <div class="flex gap-3 overflow-x-auto hide-scrollbar pb-4 snap-x px-1 md:px-0 md:flex-col md:overflow-visible">
-                @forelse($recentLostFounds as $item)
-                <div class="min-w-[260px] md:min-w-0 bg-white rounded-[20px] shadow-[0_2px_10px_rgba(0,0,0,0.04)] border border-gray-100 p-3 shrink-0 snap-start flex items-center gap-3 relative overflow-hidden hover-scale">
-                    <div class="absolute left-0 top-0 bottom-0 w-1 {{ $item->type == 'lost' ? 'bg-red-500' : 'bg-green-500' }}"></div>
-                    <div class="w-12 h-12 md:w-14 md:h-14 rounded-xl flex items-center justify-center font-black text-white shrink-0 shadow-inner {{ $item->type == 'lost' ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600' }}">
-                        <svg class="w-6 h-6 md:w-7 md:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            @if($item->type == 'lost')
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                            @else
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            @endif
-                        </svg>
-                    </div>
-                    <div class="min-w-0 flex-1 py-1">
-                        <span class="text-[9px] md:text-[10px] font-extrabold uppercase tracking-wider {{ $item->type == 'lost' ? 'text-red-500' : 'text-green-600' }}">
-                            {{ $item->type == 'lost' ? 'HILANG' : 'DITEMUKAN' }}
-                        </span>
-                        <h3 class="text-[13px] md:text-sm font-bold text-gray-800 truncate mt-0.5">{{ $item->item_name }}</h3>
-                        <p class="text-[10px] md:text-xs text-gray-500 mt-1 truncate">Oleh: <span class="font-medium">{{ $item->user->name }}</span></p>
-                    </div>
-                </div>
-                @empty
-                <div class="w-full bg-white p-6 rounded-2xl border border-gray-100 text-center shadow-sm">
-                    <p class="text-xs text-gray-400 font-medium">Aman! Tidak ada laporan barang hilang.</p>
-                </div>
-                @endforelse
-            </div>
-        </div>
-    </div>
 
     <div class="mt-8 md:mt-12 mb-10">
         <h2 class="text-base md:text-xl font-extrabold text-gray-800 tracking-tight mb-4 md:mb-6 px-1">Top Projects Smecone 🏆</h2>
