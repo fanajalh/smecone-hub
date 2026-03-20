@@ -73,6 +73,7 @@ Route::middleware(['auth', 'App\Http\Middleware\IsStudent'])->group(function () 
     Route::get('/marketplace/create', [MarketplaceController::class, 'create']);
     Route::get('/marketplace/lapak-saya', [MarketplaceController::class, 'myLapak'])->name('marketplace.lapak');
     Route::get('/marketplace/penjualan', [PaymentController::class, 'salesHistory'])->name('marketplace.sales');
+    Route::get('/marketplace/purchases', [App\Http\Controllers\PaymentController::class, 'purchaseHistory'])->name('marketplace.purchases');
     Route::post('/marketplace/register-store', [MarketplaceController::class, 'registerStore']);
     Route::post('/marketplace/store', [MarketplaceController::class, 'store']);
     Route::post('/marketplace/{id}/broadcast', [MarketplaceController::class, 'broadcastKeWa']);          
@@ -82,6 +83,12 @@ Route::middleware(['auth', 'App\Http\Middleware\IsStudent'])->group(function () 
     Route::post('/marketplace/{id}/toggle-sold', [MarketplaceController::class, 'toggleSold']);
     Route::get('/marketplace/payment/{id}', [PaymentController::class, 'paymentStatus'])->name('marketplace.payment.status');
     
+    // Rute untuk Update Profil Toko (Banner & PP)
+    Route::post('/marketplace/update-store-profile', [App\Http\Controllers\MarketplaceController::class, 'updateStoreProfile'])->name('marketplace.updateStoreProfile');
+
+    // Rute untuk Update WA Penjual di Lapak
+    Route::post('/marketplace/update-wa', [App\Http\Controllers\MarketplaceController::class, 'updateStoreWa'])->name('marketplace.updateWa');
+
     // PAYMENT SYSTEM
     Route::get('/marketplace/{id}/checkout', [PaymentController::class, 'checkoutConfirm'])->name('marketplace.checkout.confirm');
     Route::post('/marketplace/{id}/checkout/direct', [PaymentController::class, 'processDirectPayment'])->name('marketplace.checkout.direct');
@@ -133,7 +140,7 @@ Route::post('/api/docs/push', [RepositoryController::class, 'pushFromCli'])->wit
 Route::post('/api/xendit/callback', [PaymentController::class, 'handleWebhook'])->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
 Route::get('/tes-bayar/{id}', function($id) {
     // Tambahin ->with() biar data nama user & judul barang kebawa buat isi pesan WA
-    $transaction = \App\Models\Transaction::with(['user', 'marketplaceItem'])->find($id);
+    $transaction = \App\Models\Transaction::with(['user', 'marketplaceItem', 'marketplaceItem.user'])->find($id);
     
     if(!$transaction) return "Transaksi nggak ketemu bos!";
 
@@ -144,30 +151,48 @@ Route::get('/tes-bayar/{id}', function($id) {
     }
 
     // 2. TRIGGER WHATSAPP BOT LANGSUNG DARI SINI! 🚀
+    $botUrl = 'http://localhost:3000/send-message'; 
+    
+    // Notif ke Pembeli
     if ($transaction->whatsapp_number) {
         try {
-            // Sesuaikan URL ini kalau API Bot lokal kamu beda port-nya
-            $botUrl = 'http://localhost:3000/send-message'; 
-            
-            \Illuminate\Support\Facades\Http::post($botUrl, [
+            \Illuminate\Support\Facades\Http::timeout(5)->post($botUrl, [
                 'number' => $transaction->whatsapp_number,
-                'message' => "Halo kak {$transaction->user->name}! 🛒\n\nPembayaran untuk *{$transaction->marketplaceItem->title}* sebesar Rp ".number_format($transaction->amount, 0, ',', '.')." sudah *BERHASIL* kami terima.\n\nPenjual akan segera memproses pesanan kakak. Terima kasih! 🚀"
+                'message' => "Halo kak *{$transaction->user->name}*! 🛒\n\nPembayaran kakak untuk pesanan *{$transaction->marketplaceItem->title}* sebesar *Rp ".number_format($transaction->amount, 0, ',', '.')."* telah kami terima dan *BERHASIL*.\n\nPenjual akan segera memproses pesanan kakak. Mohon kesediaannya untuk menunggu ya. Terima kasih! 🚀\n\n_SMEconE Hub_"
             ]);
         } catch (\Exception $e) {
-            // Kalau bot lagi mati, abaikan aja biar web nggak error
+            // Abaikan error
+        }
+    }
+
+    // Notif ke Penjual
+    $sellerWa = $transaction->marketplaceItem->user->whatsapp_number ?? null;
+    if ($sellerWa) {
+        try {
+            $waPembeli = str_starts_with($transaction->whatsapp_number, '62') ? '+' . $transaction->whatsapp_number : $transaction->whatsapp_number;
+            $linkWaPembeli = 'https://wa.me/' . ltrim($transaction->whatsapp_number, '+');
+
+            \Illuminate\Support\Facades\Http::timeout(5)->post($botUrl, [
+                'number' => $sellerWa,
+                'message' => "🔔 *PESANAN BARU MASUK!* 🔔\n\nSelamat! Barang jualanmu *{$transaction->marketplaceItem->title}* telah LUNAS dibayar oleh *{$transaction->user->name}*.\n\n*Detail Pesanan:*\nNominal: Rp ".number_format($transaction->amount, 0, ',', '.')."\nNomor WA Pembeli: {$waPembeli}\n\nSilakan segera hubungi pembeli untuk proses penyerahan barang ya! 📦\n\nKlik untuk chat pembeli: {$linkWaPembeli}\n\n_SMEconE Hub_"
+            ]);
+        } catch (\Exception $e) {
+            // Abaikan error
         }
     }
 
     // 3. Tetap coba kirim sinyal ke Xendit (Opsional)
     try {
-        \Illuminate\Support\Facades\Http::withHeaders(['api-version' => '2022-07-31'])
-            ->withBasicAuth(env('XENDIT_SECRET_KEY'), '')
-            ->post("https://api.xendit.co/qr_codes/{$transaction->invoice_id}/payments/simulate", [
-                'amount' => (int) $transaction->amount
-            ]);
+        if ($transaction->invoice_id) {
+            \Illuminate\Support\Facades\Http::withHeaders(['api-version' => '2022-07-31'])
+                ->withBasicAuth(env('XENDIT_SECRET_KEY'), '')
+                ->post("https://api.xendit.co/qr_codes/{$transaction->invoice_id}/payments/simulate", [
+                    'amount' => (int) $transaction->amount
+                ]);
+        }
     } catch (\Exception $e) {
         // Abaikan kalau Xendit error
     }
 
-    return "🔥 SUKSES BERAT! Database udah LUNAS & Pesan WA udah dikirim. Balik ke Smecone Hub terus klik tombol 'Cek Status' sekarang!";
+    return "🔥 SUKSES BERAT! Database udah LUNAS & Pesan WA (Pembeli dan Penjual) udah dipicu ke bot. Coba cek terminal bot NodeJS-nya sekarang! Balik ke web dan refresh.";
 });

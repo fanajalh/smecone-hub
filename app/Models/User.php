@@ -26,6 +26,8 @@ class User extends Authenticatable
         'is_admin',
         'reputation_points',
         'store_name',        // 🔥 TAMBAHAN BARU
+        'store_photo',
+        'store_banner',
         'whatsapp_number',   // 🔥 TAMBAHAN BARU
     ];
 

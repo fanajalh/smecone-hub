@@ -4,22 +4,58 @@
 @section('content')
 <div class="max-w-7xl mx-auto pt-6 px-4 sm:px-6 lg:px-8 pb-32 md:pb-12 animate-page-in">
     
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-        <div>
-            <h1 class="text-2xl font-extrabold text-gray-900 tracking-tight">Lapak Saya 🏪</h1>
-            <p class="text-sm text-gray-500 font-medium mt-1">Pantau performa jualanmu di Smecone Mart.</p>
+    <!-- Store Header -->
+    <div class="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 mb-8 relative">
+        <!-- Banner -->
+        <div class="h-32 md:h-48 w-full bg-gray-200 relative">
+            @if(auth()->user()->store_banner)
+                <img src="{{ asset('storage/' . auth()->user()->store_banner) }}" class="w-full h-full object-cover">
+            @else
+                <div class="w-full h-full bg-gradient-to-r from-red-600 to-red-400"></div>
+            @endif
+            <button onclick="openProfileModal()" class="absolute top-4 right-4 bg-black/50 hover:bg-black/70 backdrop-blur-md text-white px-4 py-2 rounded-full text-xs font-bold flex items-center gap-2 transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                Edit Profil Toko
+            </button>
         </div>
-        <a href="/marketplace/create" class="bg-red-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-red-700 shadow-md hover:shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 sm:w-auto w-full">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
-            Tambah Produk
-        </a>
 
-        <a href="{{ route('marketplace.sales') }}" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-lg flex items-center transition shadow-md">
-        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-        </svg>
-        Riwayat Penjualan
-    </a>
+        <!-- Info & Actions -->
+        <div class="px-6 pb-6 pt-4 flex flex-col md:flex-row gap-4 items-start md:items-end justify-between relative">
+            <!-- Profile Photo -->
+            <div class="flex items-end gap-4 -mt-16 md:-mt-20 relative z-10 w-full md:w-auto">
+                <div class="w-24 h-24 md:w-32 md:h-32 rounded-full border-4 border-white shadow-lg shrink-0 overflow-hidden bg-gray-100 flex items-center justify-center text-gray-400 text-3xl font-black uppercase">
+                    @if(auth()->user()->store_photo)
+                        <img src="{{ asset('storage/' . auth()->user()->store_photo) }}" class="w-full h-full object-cover">
+                    @elseif(auth()->user()->avatar)
+                        <img src="{{ asset('storage/' . auth()->user()->avatar) }}" class="w-full h-full object-cover">
+                    @else
+                        {{ substr(auth()->user()->store_name, 0, 1) }}
+                    @endif
+                </div>
+                <div class="mb-2 md:mb-4">
+                    <h1 class="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight">{{ auth()->user()->store_name }}</h1>
+                    <div class="flex items-center gap-2 text-sm text-gray-500 font-medium mt-1">
+                        <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+                        Terverifikasi
+                    </div>
+                </div>
+            </div>
+
+            <!-- Header Actions -->
+            <div class="flex gap-2 w-full md:w-auto mt-2 md:mt-0">
+                <a href="/marketplace/toko/{{ auth()->id() }}" class="flex-1 md:flex-none justify-center bg-gray-100 hover:bg-gray-200 text-gray-800 px-5 py-2.5 rounded-xl font-bold text-sm transition-all active:scale-95 flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                    Lihat Lapak
+                </a>
+                <a href="{{ route('marketplace.sales') }}" class="w-10 md:w-11 justify-center bg-emerald-50 text-emerald-600 hover:bg-emerald-100 py-2.5 rounded-xl transition-all active:scale-95 flex items-center" title="Riwayat Penjualan">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                </a>
+                <a href="/marketplace/create" class="flex-1 md:flex-none justify-center bg-red-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-red-700 shadow-md transition-all active:scale-95 flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+                    Tambah Produk
+                </a>
+            </div>
+        </div>
     </div>
 
     <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-8">
@@ -40,6 +76,21 @@
             <div class="text-red-100 mb-1 text-xs md:text-sm font-bold uppercase tracking-wider relative z-10">Beli Iklan?</div>
             <div class="text-xs md:text-sm font-medium text-white relative z-10 mt-1">Tingkatkan <span class="font-bold text-yellow-300">Viewers</span> mu. (Segera Hadir)</div>
         </div>
+    </div>
+
+    <div class="bg-blue-50 rounded-[24px] border border-blue-100 shadow-sm p-4 md:p-6 mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div>
+            <h3 class="text-lg font-bold text-blue-900 flex items-center gap-2">
+                <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.181-2.592-5.771-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.277.042-.615.081-2.028-.452-1.714-.65-2.822-2.398-2.909-2.515-.087-.116-.694-.925-.694-1.765 0-.84.44-1.266.598-1.428.158-.162.347-.203.463-.203.115 0 .23.003.332.008.106.005.25-.043.391.297.144.347.491 1.2.535 1.288.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.274.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564c.174.087.289.13.332.202.043.073.043.42-.101.825z"/></svg>
+                WhatsApp Toko
+            </h3>
+            <p class="text-sm text-blue-700 mt-1">Nomor ini untuk menerima notif pesanan & dihubungi pembeli.</p>
+        </div>
+        <form action="{{ route('marketplace.updateWa') }}" method="POST" class="flex w-full md:w-auto gap-2">
+            @csrf
+            <input type="text" name="whatsapp_number" value="{{ auth()->user()->whatsapp_number }}" placeholder="Contoh: 628123456789" class="w-full md:w-64 px-4 py-2 rounded-lg border border-blue-200 outline-none focus:ring-2 focus:ring-blue-500 text-sm font-bold">
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition shadow-sm">Simpan</button>
+        </form>
     </div>
 
     <div class="bg-white rounded-[24px] border border-green-100 shadow-sm overflow-hidden mb-8 border-l-4 border-l-green-500">
@@ -230,6 +281,41 @@
     </div>
 </div>
 
+<!-- Modal Edit Profil Toko -->
+<div id="profileModal" class="fixed inset-0 z-50 hidden bg-gray-900 bg-opacity-60 flex items-center justify-center p-4 backdrop-blur-sm transition-opacity">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden transform transition-all relative">
+        <div class="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+            <h3 class="font-bold text-lg text-gray-900 flex items-center gap-2">
+                <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path></svg>
+                Upload Foto & Banner
+            </h3>
+            <button onclick="closeProfileModal()" class="text-gray-400 hover:text-red-500 transition font-bold text-xl">&times;</button>
+        </div>
+        <form action="{{ route('marketplace.updateStoreProfile') }}" method="POST" enctype="multipart/form-data" class="p-5 md:p-6">
+            @csrf
+            
+            <div class="mb-5">
+                <label class="block text-sm font-bold text-gray-700 mb-2">Foto Profil Toko</label>
+                <input type="file" name="store_photo" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 transition cursor-pointer border border-dashed border-gray-300 rounded-xl p-2">
+                <p class="text-[11px] text-gray-400 mt-2">Disarankan rasio 1:1, max 2MB. Jika dikosongkan akan menggunakan Avatar default.</p>
+            </div>
+            
+            <div class="mb-2">
+                <label class="block text-sm font-bold text-gray-700 mb-2">Banner Toko <span class="text-red-500 text-xs">(Rekomendasi Lanskap)</span></label>
+                <input type="file" name="store_banner" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 transition cursor-pointer border border-dashed border-gray-300 rounded-xl p-2">
+                <p class="text-[11px] text-gray-400 mt-2">Gambar sampul akan muncul di lapak kamu. Max 4MB.</p>
+            </div>
+            
+            <div class="flex justify-end gap-3 mt-6 pt-5 border-t border-gray-100">
+                <button type="button" onclick="closeProfileModal()" class="px-5 py-2.5 text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200 text-sm font-bold transition w-full md:w-auto">Batal</button>
+                <button type="submit" class="px-5 py-2.5 text-white bg-gray-900 rounded-xl hover:bg-black text-sm font-bold flex items-center justify-center shadow-md transition w-full md:w-auto active:scale-95">
+                    Simpan Perubahan
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
@@ -244,6 +330,15 @@
 
     function closeBroadcastModal() {
         document.getElementById('broadcastModal').classList.add('hidden');
+    }
+
+    // Modal Edit Profile
+    function openProfileModal() {
+        document.getElementById('profileModal').classList.remove('hidden');
+    }
+
+    function closeProfileModal() {
+        document.getElementById('profileModal').classList.add('hidden');
     }
 
     // 2. Script Konfirmasi Delete dengan SweetAlert2

@@ -89,20 +89,28 @@ class PaymentController extends Controller
                 return back()->with('error', 'Gagal QRIS: ' . $pesanError . ' | Detail: ' . $detail);
             }
         } 
-        // JIKA USER PILIH DANA ATAU GOPAY
-        else { 
-            $channelCode = 'ID_' . $method;
-
-            $response = Http::withBasicAuth($secretKey, '')
-                ->post('https://api.xendit.co/ewallets/charges', [
+        // JIKA USER PILIH E-WALLET (DANA & GOPAY DIGABUNG PAKAI API V2 TERBARU)
+        elseif (in_array($method, ['DANA', 'GOPAY'])) {
+            $response = Http::withHeaders([
+                'api-version' => '2022-07-31',
+                // Otomatis mengirim URL Ngrok kamu yang sedang aktif ke Xendit
+                'x-callback-url' => env('XENDIT_WEBHOOK_URL', url('/api/xendit/callback'))
+            ])->withBasicAuth($secretKey, '')
+                ->post('https://api.xendit.co/payment_requests', [
                     'reference_id' => 'TRX-' . $transaction->id,
                     'currency' => 'IDR',
                     'amount' => (int) $item->price,
-                    'checkout_method' => 'ONE_TIME_PAYMENT',
-                    'channel_code' => $channelCode,
-                    'channel_properties' => [
-                        'success_redirect_url' => route('marketplace.index'), 
-                        'failure_redirect_url' => route('marketplace.index'),
+                    'payment_method' => [
+                        'type' => 'EWALLET',
+                        'reusability' => 'ONE_TIME_USE',
+                        'ewallet' => [
+                            'channel_code' => $method, // Otomatis jadi 'DANA' atau 'GOPAY'
+                            'channel_properties' => [
+                                'success_return_url' => route('marketplace.payment.status', $transaction->id),
+                                'failure_return_url' => route('marketplace.index'),
+                                'cancel_return_url'  => route('marketplace.index'), // Wajib ada untuk GoPay & DANA v2
+                            ]
+                        ]
                     ]
                 ]);
 
@@ -113,7 +121,7 @@ class PaymentController extends Controller
                 $checkoutUrl = null;
                 if(isset($data['actions'])) {
                     foreach ($data['actions'] as $action) {
-                        if (in_array($action['action'], ['MOBILE_WEB_CHECKOUT_URL', 'DESKTOP_WEB_CHECKOUT_URL'])) {
+                        if (isset($action['url'])) {
                             $checkoutUrl = $action['url'];
                             break;
                         }
@@ -121,24 +129,45 @@ class PaymentController extends Controller
                 }
 
                 if ($checkoutUrl) {
-                    return redirect($checkoutUrl);
+                    $transaction->update(['invoice_url' => $checkoutUrl]);
+                    // Lempar ke halaman status E-Wallet kita
+                    return redirect()->route('marketplace.payment.status', $transaction->id);
                 }
             } else {
                 $errorData = $response->json();
                 $pesanError = $errorData['message'] ?? 'Unknown Error';
                 $detail = isset($errorData['errors']) ? json_encode($errorData['errors']) : '';
-                return back()->with('error', 'Gagal E-Wallet: ' . $pesanError . ' | Detail: ' . $detail);
+                return back()->with('error', 'Gagal E-Wallet ('.$method.'): ' . $pesanError . ' | Detail: ' . $detail);
             }
         }
 
         return back()->with('error', 'Terjadi kesalahan sistem.');
     }
 
-    // 3. FUNGSI UNTUK MENAMPILKAN HALAMAN STATUS QRIS AUTO-REFRESH
+    // 3. FUNGSI UNTUK MENAMPILKAN HALAMAN STATUS AUTO-REFRESH
     public function paymentStatus($id)
     {
         $transaction = Transaction::findOrFail($id);
         $item = $transaction->marketplaceItem;
+        
+        // Cek jika ini E-Wallet (biasanya invoice_url diawali http dari URL checkout Xendit)
+        if ($transaction->invoice_url && str_starts_with($transaction->invoice_url, 'http')) {
+             $paymentMethod = 'E-Wallet';
+             // Deteksi channel code dari Xendit Payment Requests API v2 (Karena DANA & GOPAY digabung ke v2)
+             if (str_starts_with($transaction->invoice_id, 'pr-')) {
+                 $secretKey = env('XENDIT_SECRET_KEY');
+                 $response = \Illuminate\Support\Facades\Http::withHeaders(['api-version' => '2022-07-31'])
+                     ->withBasicAuth($secretKey, '')
+                     ->get('https://api.xendit.co/payment_requests/' . $transaction->invoice_id);
+                     
+                 if ($response->successful()) {
+                     $prData = $response->json();
+                     $paymentMethod = strtoupper($prData['payment_method']['ewallet']['channel_code'] ?? 'E-Wallet');
+                 }
+             }
+
+             return view('marketplace.ewallet_payment', compact('item', 'transaction', 'paymentMethod'));
+        }
         
         return view('marketplace.qris_payment', compact('item', 'transaction'));
     }
@@ -161,10 +190,19 @@ class PaymentController extends Controller
         $isPaid = false;
         $transaction = null;
         
-        // Cek e-Wallet
+        // Cek e-Wallet (Legacy API - jaga-jaga kalau masih ada transaksi nyangkut)
         if (isset($payload['data']['id']) && isset($payload['event']) && str_contains($payload['event'], 'ewallet')) {
             $transaction = Transaction::with(['user', 'marketplaceItem'])->where('invoice_id', $payload['data']['id'])->first();
             if ($transaction && $payload['data']['status'] === 'SUCCEEDED') {
+                $isPaid = true;
+            }
+        }
+        // Cek Payment Request v2 (DANA & GOPAY yang baru)
+        elseif (isset($payload['event']) && $payload['event'] === 'payment.succeeded' && isset($payload['data']['reference_id'])) {
+            $transaction = Transaction::with(['user', 'marketplaceItem'])
+                ->where('id', str_replace('TRX-', '', $payload['data']['reference_id']))
+                ->first();
+            if ($transaction) {
                 $isPaid = true;
             }
         }
@@ -182,23 +220,50 @@ class PaymentController extends Controller
             $transaction->marketplaceItem->update(['is_sold' => true]);
 
             // ==========================================
-            // TRIGGER WHATSAPP BOT AUTO-REPLY
+            // TRIGGER WHATSAPP BOT (KE PEMBELI & PENJUAL)
             // ==========================================
+            $botUrl = 'http://localhost:3000/send-message'; 
+            
+            // 1. Notif ke Pembeli
             if ($transaction->whatsapp_number) {
                 try {
-                    // Sesuaikan URL ini dengan endpoint API WA Bot lokal/online milikmu
-                    $botUrl = 'http://localhost:3000/send-message'; 
-                    
-                    Http::post($botUrl, [
+                    Http::timeout(5)->post($botUrl, [
                         'number' => $transaction->whatsapp_number,
-                        'message' => "Halo kak {$transaction->user->name}! 🛒\n\nPembayaran untuk *{$transaction->marketplaceItem->title}* sebesar Rp ".number_format($transaction->amount, 0, ',', '.')." sudah *BERHASIL* kami terima.\n\nPenjual akan segera memproses pesanan kakak. Terima kasih! 🚀"
+                        'message' => "Halo kak *{$transaction->user->name}*! 🛒\n\nPembayaran kakak untuk pesanan *{$transaction->marketplaceItem->title}* sebesar *Rp ".number_format($transaction->amount, 0, ',', '.')."* telah kami terima dan *BERHASIL*.\n\nPenjual akan segera memproses pesanan kakak. Mohon kesediaannya untuk menunggu ya. Terima kasih! 🚀\n\n_SMEconE Hub_"
                     ]);
                 } catch (\Exception $e) {
-                    // Biarkan kosong agar error bot tidak mengganggu proses lunas Xendit
+                    // Abaikan error agar tidak mengganggu proses lunas Xendit
+                }
+            }
+
+            // 2. Notif ke Penjual
+            $sellerWa = $transaction->marketplaceItem->user->whatsapp_number;
+            if ($sellerWa) {
+                try {
+                    $waPembeli = str_starts_with($transaction->whatsapp_number, '62') ? '+' . $transaction->whatsapp_number : $transaction->whatsapp_number;
+                    $linkWaPembeli = 'https://wa.me/' . ltrim($transaction->whatsapp_number, '+');
+
+                    Http::timeout(5)->post($botUrl, [
+                        'number' => $sellerWa,
+                        'message' => "🔔 *PESANAN BARU MASUK!* 🔔\n\nSelamat! Barang jualanmu *{$transaction->marketplaceItem->title}* telah LUNAS dibayar oleh *{$transaction->user->name}*.\n\n*Detail Pesanan:*\nNominal: Rp ".number_format($transaction->amount, 0, ',', '.')."\nNomor WA Pembeli: {$waPembeli}\n\nSilakan segera hubungi pembeli untuk proses penyerahan barang ya! 📦\n\nKlik untuk chat pembeli: {$linkWaPembeli}\n\n_SMEconE Hub_"
+                    ]);
+                } catch (\Exception $e) {
+                    // Abaikan error agar tidak mengganggu proses lunas Xendit
                 }
             }
         }
 
         return response()->json(['status' => 'ok']);
+    }
+
+    // FUNGSI UNTUK HALAMAN RIWAYAT PEMBELIAN (USER)
+    public function purchaseHistory()
+    {
+        $purchases = Transaction::with(['marketplaceItem.user'])
+            ->where('user_id', Auth::id())
+            ->latest()
+            ->get();
+
+        return view('marketplace.purchase_history', compact('purchases'));
     }
 }

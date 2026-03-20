@@ -212,4 +212,47 @@ class MarketplaceController extends Controller
 
     return view('marketplace.sales', compact('sales'));
 }
+
+    public function updateStoreWa(Request $request)
+    {
+        $request->validate(['whatsapp_number' => 'required']);
+        
+        $waNumber = preg_replace('/[^0-9]/', '', $request->whatsapp_number);
+        if (str_starts_with($waNumber, '0')) {
+            $waNumber = '62' . substr($waNumber, 1);
+        } elseif (!str_starts_with($waNumber, '62')) {
+            $waNumber = '62' . $waNumber;
+        }
+
+        auth()->user()->update(['whatsapp_number' => $waNumber]);
+        return back()->with('success', 'Nomor WA Toko berhasil diperbarui!');
+    }
+
+    public function updateStoreProfile(Request $request)
+    {
+        $request->validate([
+            'store_photo' => 'nullable|image|max:2048',
+            'store_banner' => 'nullable|image|max:4096'
+        ]);
+
+        $user = auth()->user();
+
+        if ($request->hasFile('store_photo')) {
+            if ($user->store_photo && Storage::disk('public')->exists($user->store_photo)) {
+                Storage::disk('public')->delete($user->store_photo);
+            }
+            $user->store_photo = $request->file('store_photo')->store('store_profiles', 'public');
+        }
+
+        if ($request->hasFile('store_banner')) {
+            if ($user->store_banner && Storage::disk('public')->exists($user->store_banner)) {
+                Storage::disk('public')->delete($user->store_banner);
+            }
+            $user->store_banner = $request->file('store_banner')->store('store_banners', 'public');
+        }
+
+        $user->save();
+
+        return back()->with('success', 'Profil toko berhasil diperbarui!');
+    }
 }

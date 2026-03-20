@@ -99,7 +99,7 @@ client.on('message', async message => {
 });
 
 // 3. Endpoint API untuk Broadcast dari Laravel
-app.post('/api/broadcast-iklan', (req, res) => { // hapus kata 'async' di baris ini
+app.post('/api/broadcast-iklan', (req, res) => { 
     const { groupId, pesan, imageUrl } = req.body;
 
     if (!groupId || !pesan) {
@@ -126,6 +126,36 @@ app.post('/api/broadcast-iklan', (req, res) => { // hapus kata 'async' di baris 
             console.error('\n❌ Gagal mengirim pesan di background:', error);
         }
     })();
+});
+
+// ==============================================================
+// 4. Endpoint API untuk Kirim Notif Personal (Ke Pembeli / Penjual)
+// ==============================================================
+app.post('/send-message', async (req, res) => {
+    console.log('\n📥 [INCOMING WEBHOOK] Menerima request di /send-message');
+    console.log('📦 Data Payload dari Laravel:', req.body);
+
+    const { number, message } = req.body;
+
+    if (!number || !message) {
+        console.log('⚠️ Peringatan: Data nomor atau pesan kosong!');
+        return res.status(400).json({ success: false, message: 'Data nomor atau pesan kosong!' });
+    }
+
+    // Nomor dari Laravel udah diformat "62...", tinggal tambahin "@c.us" khas WA
+    let formattedNumber = number;
+    if (!formattedNumber.includes('@c.us')) {
+        formattedNumber = `${formattedNumber}@c.us`;
+    }
+
+    try {
+        await client.sendMessage(formattedNumber, message);
+        console.log(`\n✅ [NOTIFIKASI] Berhasil mengirim pesan otomatis ke WA: ${formattedNumber}`);
+        res.json({ success: true, message: 'Pesan berhasil dikirim!' });
+    } catch (error) {
+        console.error(`\n❌ [NOTIFIKASI GAGAL] Tidak bisa mengirim ke ${formattedNumber}:`, error.message);
+        res.status(500).json({ success: false, message: 'Gagal mengirim pesan' });
+    }
 });
 
 client.initialize();

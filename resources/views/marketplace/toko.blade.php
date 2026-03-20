@@ -10,12 +10,23 @@
     </a>
 
     <div class="bg-white rounded-[24px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100 mb-6">
-        <div class="h-32 md:h-48 bg-gradient-to-r from-gray-800 to-gray-900 relative">
-            <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+        <div class="h-32 md:h-48 relative bg-gray-900">
+            @if($seller->store_banner)
+                <img src="{{ asset('storage/' . $seller->store_banner) }}" class="absolute inset-0 w-full h-full object-cover">
+            @else
+                <div class="absolute inset-0 bg-gradient-to-r from-gray-800 to-gray-900"></div>
+                <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+            @endif
             
             <div class="absolute bottom-0 left-0 w-full p-4 md:p-6 bg-gradient-to-t from-black/80 to-transparent flex items-end gap-4">
-                <div class="w-16 h-16 md:w-20 md:h-20 bg-white rounded-full flex items-center justify-center font-black text-2xl md:text-3xl text-red-600 shadow-lg border-4 border-white/20 uppercase">
-                    {{ substr($seller->store_name ?? $seller->name, 0, 1) }}
+                <div class="w-16 h-16 md:w-20 md:h-20 bg-white rounded-full flex items-center justify-center font-black text-2xl md:text-3xl text-gray-400 shadow-lg border-4 border-white/20 uppercase overflow-hidden shrink-0">
+                    @if($seller->store_photo)
+                        <img src="{{ asset('storage/' . $seller->store_photo) }}" class="w-full h-full object-cover">
+                    @elseif($seller->avatar)
+                        <img src="{{ asset('storage/' . $seller->avatar) }}" class="w-full h-full object-cover">
+                    @else
+                        <span class="text-red-600">{{ substr($seller->store_name ?? $seller->name, 0, 1) }}</span>
+                    @endif
                 </div>
                 <div class="text-white mb-1">
                     <h1 class="text-lg md:text-2xl font-extrabold tracking-tight">{{ $seller->store_name ?? $seller->name }}</h1>

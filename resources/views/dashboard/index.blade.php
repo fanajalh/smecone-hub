@@ -83,49 +83,56 @@
 
     <div class="grid grid-cols-4 lg:grid-cols-8 gap-y-6 md:gap-y-8 gap-x-2 md:gap-x-4 mt-8 md:mt-10 px-2 md:px-0">
         <a href="/marketplace" class="flex flex-col items-center gap-2 group active-scale md:hover:-translate-y-1 transition-transform">
-            <div class="w-14 h-14 md:w-16 md:h-16 rounded-[18px] md:rounded-[22px] bg-orange-100 flex items-center justify-center text-orange-600 shadow-sm group-hover:bg-orange-600 group-hover:text-white transition-colors">
+            <div class="w-14 h-14 md:w-16 md:h-16 rounded-[18px] md:rounded-[22px] bg-red-50 border border-red-100 flex items-center justify-center text-red-600 shadow-sm group-hover:bg-red-600 group-hover:text-white transition-colors">
                 <svg class="w-7 h-7 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
             </div>
             <span class="text-[11px] md:text-xs font-bold text-gray-700 text-center leading-tight">Jajan<br>& Jasa</span>
         </a>
 
         <a href="/forum" class="flex flex-col items-center gap-2 group active-scale md:hover:-translate-y-1 transition-transform">
-            <div class="w-14 h-14 md:w-16 md:h-16 rounded-[18px] md:rounded-[22px] bg-green-100 flex items-center justify-center text-green-600 shadow-sm group-hover:bg-green-600 group-hover:text-white transition-colors">
+            <div class="w-14 h-14 md:w-16 md:h-16 rounded-[18px] md:rounded-[22px] bg-red-50 border border-red-100 flex items-center justify-center text-red-600 shadow-sm group-hover:bg-red-600 group-hover:text-white transition-colors">
                 <svg class="w-7 h-7 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"></path></svg>
             </div>
             <span class="text-[11px] md:text-xs font-bold text-gray-700 text-center leading-tight">Forum<br>Diskusi</span>
         </a>
 
         <a href="/repository" class="flex flex-col items-center gap-2 group active-scale md:hover:-translate-y-1 transition-transform">
-            <div class="w-14 h-14 md:w-16 md:h-16 rounded-[18px] md:rounded-[22px] bg-purple-100 flex items-center justify-center text-purple-600 shadow-sm group-hover:bg-purple-600 group-hover:text-white transition-colors">
+            <div class="w-14 h-14 md:w-16 md:h-16 rounded-[18px] md:rounded-[22px] bg-red-50 border border-red-100 flex items-center justify-center text-red-600 shadow-sm group-hover:bg-red-600 group-hover:text-white transition-colors">
                 <svg class="w-7 h-7 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
             </div>
             <span class="text-[11px] md:text-xs font-bold text-gray-700 text-center leading-tight">Tugas<br>Akhir</span>
         </a>
         
         <a href="/prestasi" class="flex flex-col items-center gap-2 group active-scale md:hover:-translate-y-1 transition-transform">
-            <div class="w-14 h-14 md:w-16 md:h-16 rounded-[18px] md:rounded-[22px] bg-yellow-50 flex items-center justify-center text-yellow-600 border border-yellow-100 shadow-sm group-hover:bg-yellow-500 group-hover:text-white transition-colors">
+            <div class="w-14 h-14 md:w-16 md:h-16 rounded-[18px] md:rounded-[22px] bg-red-50 border border-red-100 flex items-center justify-center text-red-600 shadow-sm group-hover:bg-red-600 group-hover:text-white transition-colors">
                 <svg class="w-6 h-6 md:w-7 md:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg>
             </div>
             <span class="text-[11px] md:text-xs font-bold text-gray-700 text-center">Prestasi</span>
         </a>
 
         <a href="/marketplace?category=Makanan/Minuman" class="flex flex-col items-center gap-2 group active-scale md:hover:-translate-y-1 transition-transform">
-            <div class="w-14 h-14 md:w-16 md:h-16 rounded-[18px] md:rounded-[22px] bg-teal-50 flex items-center justify-center text-teal-600 border border-teal-100 shadow-sm group-hover:bg-teal-500 group-hover:text-white transition-colors">
+            <div class="w-14 h-14 md:w-16 md:h-16 rounded-[18px] md:rounded-[22px] bg-red-50 border border-red-100 flex items-center justify-center text-red-600 shadow-sm group-hover:bg-red-600 group-hover:text-white transition-colors">
                 <svg class="w-6 h-6 md:w-7 md:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
             </div>
             <span class="text-[11px] md:text-xs font-bold text-gray-700 text-center">Kantin</span>
         </a>
 
         <a href="/event" class="flex flex-col items-center gap-2 group active-scale md:hover:-translate-y-1 transition-transform">
-            <div class="w-14 h-14 md:w-16 md:h-16 rounded-[18px] md:rounded-[22px] bg-pink-50 flex items-center justify-center text-pink-600 border border-pink-100 shadow-sm group-hover:bg-pink-500 group-hover:text-white transition-colors">
+            <div class="w-14 h-14 md:w-16 md:h-16 rounded-[18px] md:rounded-[22px] bg-red-50 border border-red-100 flex items-center justify-center text-red-600 shadow-sm group-hover:bg-red-600 group-hover:text-white transition-colors">
                 <svg class="w-6 h-6 md:w-7 md:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
             </div>
             <span class="text-[11px] md:text-xs font-bold text-gray-700 text-center">Event</span>
         </a>
 
+        <a href="{{ route('marketplace.purchases') }}" class="flex flex-col items-center gap-2 group active-scale md:hover:-translate-y-1 transition-transform">
+            <div class="w-14 h-14 md:w-16 md:h-16 rounded-[18px] md:rounded-[22px] bg-red-50 border border-red-100 flex items-center justify-center text-red-600 shadow-sm group-hover:bg-red-600 group-hover:text-white transition-colors">
+                <svg class="w-6 h-6 md:w-7 md:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+            </div>
+            <span class="text-[11px] md:text-xs font-bold text-gray-700 text-center leading-tight">Riwayat<br>Beli</span>
+        </a>
+
         <button type="button" onclick="showComingSoon()" class="flex flex-col items-center gap-2 group active-scale md:hover:-translate-y-1 transition-transform outline-none">
-            <div class="w-14 h-14 md:w-16 md:h-16 rounded-[18px] md:rounded-[22px] bg-gray-100 flex items-center justify-center text-gray-600 shadow-sm group-hover:bg-gray-600 group-hover:text-white transition-colors">
+            <div class="w-14 h-14 md:w-16 md:h-16 rounded-[18px] md:rounded-[22px] bg-red-50 border border-red-100 flex items-center justify-center text-red-600 shadow-sm group-hover:bg-red-600 group-hover:text-white transition-colors">
                 <svg class="w-6 h-6 md:w-7 md:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
             </div>
             <span class="text-[11px] md:text-xs font-bold text-gray-700 text-center">Lainnya</span>

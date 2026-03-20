@@ -17,6 +17,7 @@ class Transaction extends Model
         'invoice_url',
         'amount',
         'status',
+        'whatsapp_number',
     ];
 
     /**
