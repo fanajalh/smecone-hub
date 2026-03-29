@@ -24,6 +24,7 @@ class User extends Authenticatable
         'google_id',
         'avatar',
         'is_admin',
+        'is_teacher',       // 🔥 TAMBAHAN BARU
         'reputation_points',
         'store_name',        // 🔥 TAMBAHAN BARU
         'store_photo',
@@ -52,6 +53,12 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_admin' => 'boolean',
+            'is_teacher' => 'boolean',
         ];
+    }
+
+    public function submissions(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Submission::class);
     }
 }

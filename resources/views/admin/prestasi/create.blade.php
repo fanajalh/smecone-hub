@@ -45,8 +45,9 @@
             </div>
 
             <div>
-                <label class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Upload Sertifikat / Dokumentasi (Opsional)</label>
-                <input type="file" name="gambar" accept="image/*" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-red-500 focus:bg-white transition outline-none file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-red-50 file:text-red-700 hover:file:bg-red-100 cursor-pointer">
+                <label class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Upload Sertifikat / Dokumentasi (Bisa lebih dari 1)</label>
+                <input type="file" name="gambar[]" accept="image/*" multiple class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-red-500 focus:bg-white transition outline-none file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-red-50 file:text-red-700 hover:file:bg-red-100 cursor-pointer">
+                <p class="text-[10px] text-gray-400 mt-1">* Pilih beberapa foto sekaligus dengan menekan tombol Ctrl/Shift</p>
             </div>
 
             <div>

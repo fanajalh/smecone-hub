@@ -18,6 +18,11 @@ class Event extends Model
         'gambar'
     ];
 
+    protected $casts = [
+        'gambar' => 'array',
+        'tanggal_event' => 'datetime'
+    ];
+
     // 👇 INI YANG TADI KURANG 👇
     public function likes() {
         return $this->morphMany(Like::class, 'likeable');

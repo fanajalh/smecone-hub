@@ -35,6 +35,10 @@ Route::get('/register', [AuthController::class, 'showRegister'])->name('register
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+// GOOGLE AUTH
+Route::get('/auth/google', [AuthController::class, 'redirectToGoogle'])->name('google.login');
+Route::get('/auth/google/callback', [AuthController::class, 'handleGoogleCallback'])->name('google.callback');
+
 // ZONA SISWA
 Route::middleware(['auth', 'App\Http\Middleware\IsStudent'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -102,6 +106,12 @@ Route::middleware(['auth', 'App\Http\Middleware\IsStudent'])->group(function () 
     Route::put('/forum/message/{id}/edit', [ForumController::class, 'editMessage']);
     Route::delete('/forum/message/{id}/delete', [ForumController::class, 'deleteMessage']);
     Route::post('/forum/message/{id}/react', [ForumController::class, 'reactMessage']);
+
+    // ASSIGNMENTS
+    Route::post('/forum/{forumThread}/assignment', [\App\Http\Controllers\AssignmentController::class, 'store'])->name('assignment.store');
+    Route::post('/assignment/{assignment}/submit', [\App\Http\Controllers\AssignmentController::class, 'submit'])->name('assignment.submit');
+    Route::post('/submission/{submission}/grade', [\App\Http\Controllers\AssignmentController::class, 'grade'])->name('submission.grade');
+    Route::post('/submission/{submission}/toggle-privacy', [\App\Http\Controllers\AssignmentController::class, 'togglePrivacy'])->name('submission.toggle-privacy');
 
     Route::get('/dashboard/channel', function () { return redirect('/dashboard'); });
     Route::get('/dashboard/channel/create', [ForumController::class, 'createChannel']);

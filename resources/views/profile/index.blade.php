@@ -1,145 +1,151 @@
 @extends('layouts.app')
+@section('title', '| Profil')
 
 @section('content')
-<style>
-    .tap-effect:active { transform: scale(0.95); transition: transform 0.1s ease; }
-</style>
+<div class="max-w-4xl mx-auto pt-6 px-4 sm:px-6 lg:px-8 pb-32 md:pb-12 animate-page-in">
+    
+    {{-- HEADER CARD --}}
+    <div class="bg-white rounded-[32px] p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 mb-8 flex flex-col md:flex-row md:justify-between items-center gap-6 relative overflow-hidden">
+        <div class="absolute -right-10 -top-10 w-40 h-40 bg-red-50 rounded-full blur-3xl opacity-60 pointer-events-none"></div>
+        <div class="absolute -left-10 -bottom-10 w-32 h-32 bg-blue-50 rounded-full blur-2xl opacity-60 pointer-events-none"></div>
 
-<div class="max-w-xl mx-auto px-4 sm:px-6 py-6 pb-32 md:pb-12">
-
-    {{-- Profile Header Card --}}
-    <div class="bg-gradient-to-br from-red-600 to-red-700 rounded-[28px] p-6 md:p-8 text-white text-center relative overflow-hidden shadow-[0_8px_30px_rgba(220,38,38,0.25)] mb-6">
-        <div class="absolute -right-10 -top-10 w-40 h-40 bg-white opacity-10 rounded-full blur-2xl"></div>
-        <div class="absolute -left-8 -bottom-8 w-32 h-32 bg-red-400 opacity-20 rounded-full blur-xl"></div>
-        
-        <div class="relative z-10">
-            <label for="avatar_upload" class="cursor-pointer group relative block w-20 h-20 md:w-24 md:h-24 mx-auto mb-3">
-                <div class="w-full h-full rounded-full bg-white/20 border-[3px] border-white/50 flex items-center justify-center text-3xl md:text-4xl font-black backdrop-blur-sm shadow-lg uppercase overflow-hidden relative">
-                    {{-- Tampilkan avatar jika ada, jika tidak inisial huruf --}}
-                    @if(auth()->user()->avatar)
-                        <img id="avatar_preview" src="{{ asset('storage/' . auth()->user()->avatar) }}" class="w-full h-full object-cover relative z-10">
-                    @else
-                        <img id="avatar_preview" src="" class="w-full h-full object-cover relative z-10 hidden">
-                        <span id="avatar_initial" class="relative z-0">{{ substr(auth()->user()->name, 0, 1) }}</span>
-                    @endif
-                </div>
-                {{-- Overlay Camera Icon --}}
-                <div class="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-20">
-                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                </div>
-            </label>
-            <h1 class="text-lg md:text-xl font-extrabold tracking-tight">{{ auth()->user()->name }}</h1>
-            <p class="text-[12px] md:text-sm text-white/70 font-medium mt-0.5">{{ auth()->user()->email }}</p>
-            <div class="inline-flex items-center gap-1.5 bg-white/15 backdrop-blur-md px-3 py-1 rounded-full mt-3 border border-white/20 relative z-30">
-                <svg class="w-3.5 h-3.5 text-yellow-300" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.441A3 3 0 018.53 2h2.94a3 3 0 012.263 1.441l1.166 1.602a1 1 0 00.793.407h1.808A3 3 0 0120 8.45v5.1a3 3 0 01-2.5 2.96h-1.808a1 1 0 00-.793.407l-1.166 1.602A3 3 0 0111.47 20H8.53a3 3 0 01-2.263-1.441l-1.166-1.602a1 1 0 00-.793-.407H2.5A3 3 0 010 13.55v-5.1a3 3 0 012.5-2.96h1.808a1 1 0 00.793-.407L6.267 3.441zm9.444 4.853a1 1 0 00-1.422-1.414L9 11.586 7.711 10.297a1 1 0 00-1.422 1.414l2 2a1 1 0 001.422 0l6-6z" clip-rule="evenodd"></path></svg>
-                <span class="text-[10px] md:text-[11px] font-bold text-white/90 uppercase tracking-wider">Smecone Member</span>
-            </div>
-            <p class="text-[10px] text-white/50 mt-2">Ketuk foto untuk mengubah</p>
+        <div class="text-center md:text-left relative z-10">
+            <div class="inline-flex items-center justify-center bg-red-50 text-red-600 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-3 md:hidden">Profil Saya</div>
+            <h1 class="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight">Pengaturan <span class="text-red-600">Profil</span></h1>
+            <p class="text-[13px] md:text-sm text-gray-500 mt-1.5 font-medium">Kelola informasi akun dan identitas digital kamu.</p>
         </div>
+        
+        <a href="/dashboard" class="bg-gray-100 text-gray-700 px-5 py-3 rounded-xl font-extrabold text-[13px] hover:bg-gray-200 transition-all active:scale-95 flex items-center gap-2 relative z-10 tap-effect">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+            <span>Kembali</span>
+        </a>
     </div>
 
-    {{-- Success Toast --}}
     @if(session('success'))
-        <div class="bg-green-50 text-green-700 px-4 py-3.5 rounded-2xl mb-5 text-[13px] font-bold border border-green-100 flex items-center gap-3 shadow-sm">
+        <div class="mb-6 bg-green-50 border border-green-100 text-green-700 px-5 py-4 rounded-[20px] text-[13px] font-bold shadow-sm flex items-center gap-3 animate-page-in">
             <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center shrink-0">
-                <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
             </div>
             {{ session('success') }}
         </div>
     @endif
 
-    <form action="{{ url('/profile/update') }}" method="POST" enctype="multipart/form-data" class="space-y-5">
+    <form action="{{ url('/profile/update') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
         @csrf
-        <input type="file" id="avatar_upload" name="avatar" class="hidden" accept="image/*" onchange="previewAvatar(event)">
+        
+        {{-- AVATAR SECTION --}}
+        <div class="bg-white rounded-[32px] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 text-center flex flex-col items-center">
+            <label for="avatar_upload" class="cursor-pointer group relative block w-24 h-24 md:w-32 md:h-32 mb-4">
+                <div class="w-full h-full rounded-[32px] bg-red-50 flex items-center justify-center text-4xl font-black text-red-500 shadow-inner border-4 border-white overflow-hidden relative group-hover:scale-105 transition-transform duration-500">
+                    @if(auth()->user()->avatar)
+                        <img id="avatar_preview" src="{{ asset('storage/' . auth()->user()->avatar) }}" class="w-full h-full object-cover">
+                    @else
+                        <img id="avatar_preview" src="" class="w-full h-full object-cover hidden">
+                        <span id="avatar_initial" class="relative z-0 uppercase">{{ substr(auth()->user()->name, 0, 1) }}</span>
+                    @endif
+                </div>
+                <div class="absolute inset-0 bg-black/40 rounded-[32px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-20">
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path></svg>
+                </div>
+            </label>
+            <input type="file" id="avatar_upload" name="avatar" class="hidden" accept="image/*" onchange="previewAvatar(event)">
 
-        {{-- Section: Profil Publik --}}
-        <div class="bg-white rounded-[24px] shadow-[0_2px_15px_rgba(0,0,0,0.04)] border border-gray-100 overflow-hidden">
-            <div class="px-5 pt-5 pb-3 border-b border-gray-50">
-                <h2 class="text-[15px] md:text-base font-extrabold text-gray-900 flex items-center gap-2">
-                    <div class="w-8 h-8 bg-red-50 rounded-full flex items-center justify-center">
-                        <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-                    </div>
-                    Profil Publik
-                </h2>
-                <p class="text-[11px] md:text-xs text-gray-500 mt-1 ml-10">Info yang terlihat oleh pengguna lain.</p>
-            </div>
+            <h2 class="text-xl font-extrabold text-gray-900 leading-tight">{{ auth()->user()->name }}</h2>
+            <p class="text-[13px] text-gray-500 font-medium mt-1">{{ auth()->user()->email }}</p>
             
-            <div class="p-5 space-y-4">
-                <div>
-                    <label for="name" class="block text-[12px] md:text-sm font-bold text-gray-700 mb-1.5">Nama Lengkap</label>
-                    <input type="text" name="name" id="name" value="{{ old('name', auth()->user()->name) }}" 
-                        class="block w-full rounded-2xl border border-gray-200 bg-gray-50 py-3 px-4 text-[14px] font-medium text-gray-900 focus:ring-2 focus:ring-red-500/30 focus:bg-white focus:border-red-500 placeholder:text-gray-400 transition-all" required>
-                    @error('name') <p class="mt-1 text-[11px] text-red-500 font-medium ml-1">{{ $message }}</p> @enderror
-                </div>
-
-                <div>
-                    <label for="email" class="block text-[12px] md:text-sm font-bold text-gray-700 mb-1.5">Alamat Email</label>
-                    <input type="email" name="email" id="email" value="{{ old('email', auth()->user()->email) }}" 
-                        class="block w-full rounded-2xl border border-gray-200 bg-gray-50 py-3 px-4 text-[14px] font-medium text-gray-900 focus:ring-2 focus:ring-red-500/30 focus:bg-white focus:border-red-500 placeholder:text-gray-400 transition-all" required>
-                    @error('email') <p class="mt-1 text-[11px] text-red-500 font-medium ml-1">{{ $message }}</p> @enderror
-                </div>
+            <div class="flex items-center gap-2 mt-4">
+                <span class="px-3 py-1 rounded-lg bg-red-50 text-red-600 text-[10px] font-black uppercase tracking-widest border border-red-100">
+                    {{ auth()->user()->is_admin ? 'Administrator' : 'Siswa' }}
+                </span>
+                <span class="px-3 py-1 rounded-lg bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-widest border border-blue-100">
+                    Smecone Member
+                </span>
             </div>
         </div>
 
-        {{-- Section: Keamanan --}}
-        <div class="bg-white rounded-[24px] shadow-[0_2px_15px_rgba(0,0,0,0.04)] border border-gray-100 overflow-hidden">
-            <div class="px-5 pt-5 pb-3 border-b border-gray-50">
-                <h2 class="text-[15px] md:text-base font-extrabold text-gray-900 flex items-center gap-2">
-                    <div class="w-8 h-8 bg-orange-50 rounded-full flex items-center justify-center">
-                        <svg class="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+        {{-- FORM FIELDS --}}
+        <div class="bg-white rounded-[32px] p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                    <label class="text-[13px] font-extrabold text-gray-700 ml-1">Nama Lengkap</label>
+                    <div class="relative tap-effect">
+                        <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none text-gray-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                        </div>
+                        <input type="text" name="name" value="{{ old('name', auth()->user()->name) }}" required
+                               class="w-full pl-12 pr-4 py-3.5 bg-gray-50/50 border border-gray-200 rounded-[20px] focus:outline-none focus:bg-white focus:ring-2 focus:ring-red-500/20 focus:border-red-500 text-[14px] font-bold text-gray-800 transition-all">
                     </div>
-                    Keamanan Akun
-                </h2>
-                <p class="text-[11px] md:text-xs text-gray-500 mt-1 ml-10">Biarkan kosong jika tidak ingin mengubah.</p>
-            </div>
-            
-            <div class="p-5 space-y-4">
-                <div>
-                    <label for="password" class="block text-[12px] md:text-sm font-bold text-gray-700 mb-1.5">Kata Sandi Baru</label>
-                    <input type="password" name="password" id="password" placeholder="••••••••"
-                        class="block w-full rounded-2xl border border-gray-200 bg-gray-50 py-3 px-4 text-[14px] font-medium text-gray-900 focus:ring-2 focus:ring-red-500/30 focus:bg-white focus:border-red-500 placeholder:text-gray-400 transition-all">
-                    @error('password') <p class="mt-1 text-[11px] text-red-500 font-medium ml-1">{{ $message }}</p> @enderror
+                    @error('name') <p class="text-[11px] text-red-500 font-bold ml-1">{{ $message }}</p> @enderror
                 </div>
 
-                <div>
-                    <label for="password_confirmation" class="block text-[12px] md:text-sm font-bold text-gray-700 mb-1.5">Konfirmasi Kata Sandi</label>
-                    <input type="password" name="password_confirmation" id="password_confirmation" placeholder="••••••••"
-                        class="block w-full rounded-2xl border border-gray-200 bg-gray-50 py-3 px-4 text-[14px] font-medium text-gray-900 focus:ring-2 focus:ring-red-500/30 focus:bg-white focus:border-red-500 placeholder:text-gray-400 transition-all">
+                <div class="space-y-2">
+                    <label class="text-[13px] font-extrabold text-gray-700 ml-1">Alamat Email</label>
+                    <div class="relative tap-effect">
+                        <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none text-gray-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                        </div>
+                        <input type="email" name="email" value="{{ old('email', auth()->user()->email) }}" required
+                               class="w-full pl-12 pr-4 py-3.5 bg-gray-50/50 border border-gray-200 rounded-[20px] focus:outline-none focus:bg-white focus:ring-2 focus:ring-red-500/20 focus:border-red-500 text-[14px] font-bold text-gray-800 transition-all">
+                    </div>
+                    @error('email') <p class="text-[11px] text-red-500 font-bold ml-1">{{ $message }}</p> @enderror
                 </div>
             </div>
-        </div>
 
-        {{-- Action Buttons --}}
-        <div class="flex gap-3 pt-2">
-            <button type="reset" class="flex-1 bg-white border border-gray-200 text-gray-700 font-extrabold py-3.5 rounded-2xl text-[14px] hover:bg-gray-50 transition tap-effect shadow-sm">
-                Batalkan
-            </button>
-            <button type="submit" class="flex-1 bg-red-600 text-white font-extrabold py-3.5 rounded-2xl text-[14px] shadow-[0_8px_20px_rgba(220,38,38,0.25)] hover:bg-red-700 hover:shadow-lg hover:-translate-y-0.5 transition-all tap-effect">
-                Simpan Perubahan
-            </button>
-        </div>
+            <div class="pt-4 border-t border-gray-50">
+                <h3 class="text-sm font-black text-gray-900 uppercase tracking-widest mb-6">Keamanan Akun</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="text-[13px] font-extrabold text-gray-700 ml-1">Password Baru</label>
+                        <div class="relative tap-effect">
+                            <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none text-gray-400">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                            </div>
+                            <input type="password" name="password" placeholder="Kosongkan jika tetap"
+                                   class="w-full pl-12 pr-4 py-3.5 bg-gray-50/50 border border-gray-200 rounded-[20px] focus:outline-none focus:bg-white focus:ring-2 focus:ring-red-500/20 focus:border-red-500 text-[14px] font-bold text-gray-800 transition-all placeholder:font-medium placeholder:text-gray-300">
+                        </div>
+                        @error('password') <p class="text-[11px] text-red-500 font-bold ml-1">{{ $message }}</p> @enderror
+                    </div>
 
+                    <div class="space-y-2">
+                        <label class="text-[13px] font-extrabold text-gray-700 ml-1">Konfirmasi Password</label>
+                        <div class="relative tap-effect">
+                            <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none text-gray-400">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                            </div>
+                            <input type="password" name="password_confirmation" placeholder="Masukan ulang password"
+                                   class="w-full pl-12 pr-4 py-3.5 bg-gray-50/50 border border-gray-200 rounded-[20px] focus:outline-none focus:bg-white focus:ring-2 focus:ring-red-500/20 focus:border-red-500 text-[14px] font-bold text-gray-800 transition-all placeholder:font-medium placeholder:text-gray-300">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-6 flex flex-col md:flex-row gap-4 items-center">
+                <button type="submit" class="w-full md:w-auto bg-red-600 text-white px-10 py-4 rounded-[20px] shadow-[0_8px_20px_rgba(220,38,38,0.25)] hover:bg-red-700 hover:shadow-lg hover:-translate-y-0.5 transition-all active:scale-95 font-black text-[14px] tap-effect flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                    Simpan Perubahan
+                </button>
+            </div>
+        </div>
     </form>
 
-    {{-- Logout Section --}}
-    <div class="mt-8 bg-white rounded-[24px] shadow-[0_2px_15px_rgba(0,0,0,0.04)] border border-gray-100 overflow-hidden">
-        <div class="p-5 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-red-50 rounded-full flex items-center justify-center">
-                    <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-                </div>
-                <div>
-                    <p class="text-[14px] font-extrabold text-gray-900">Keluar Akun</p>
-                    <p class="text-[11px] text-gray-500">Logout dari sesi saat ini.</p>
-                </div>
+    {{-- LOGOUT CARD --}}
+    <div class="mt-8 bg-white rounded-[32px] p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 flex items-center justify-between">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-red-50 rounded-2xl flex items-center justify-center text-red-600 border border-red-100">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
             </div>
-            <form action="/logout" method="POST">
-                @csrf
-                <button type="submit" class="bg-red-50 text-red-600 font-extrabold text-[13px] px-5 py-2.5 rounded-xl border border-red-100 hover:bg-red-100 transition tap-effect">
-                    Logout
-                </button>
-            </form>
+            <div>
+                <h3 class="text-[15px] font-extrabold text-gray-900">Keluar Sesi</h3>
+                <p class="text-[12px] text-gray-500 font-medium">Selesaikan sesi aktif kamu di perangkat ini.</p>
+            </div>
         </div>
+        <form action="/logout" method="POST">
+            @csrf
+            <button type="submit" class="bg-gray-900 text-white px-6 py-3 rounded-xl font-extrabold text-[13px] hover:bg-black transition-all active:scale-95 tap-effect">
+                Logout
+            </button>
+        </form>
     </div>
 
 </div>

@@ -24,6 +24,11 @@ class Prestasi extends Model
         'gambar'          // Path foto/thumbnail
     ];
 
+    protected $casts = [
+        'gambar' => 'array',
+        'tanggal' => 'date'
+    ];
+
     // Relasi ke Model User (Siswa yang meraih prestasi)
     public function user()
     {

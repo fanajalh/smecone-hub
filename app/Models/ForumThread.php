@@ -33,4 +33,9 @@ class ForumThread extends Model
     {
         return $this->belongsToMany(User::class, 'channel_user');
     }
+
+    public function assignments()
+    {
+        return $this->hasMany(Assignment::class);
+    }
 }

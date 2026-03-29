@@ -33,13 +33,18 @@ class AdminController extends Controller
             'nama_pemenang' => 'required|string|max:255',
             'kategori_juara' => 'required|string|max:255',
             'tanggal' => 'required|date',
+            'gambar.*' => 'nullable|image|max:2048', // Validate each image in array
         ]);
 
-        $data = $request->all();
+        $data = $request->except('gambar');
 
         // Jika ada upload gambar/sertifikat
         if ($request->hasFile('gambar')) {
-            $data['gambar'] = $request->file('gambar')->store('prestasi', 'public');
+            $images = [];
+            foreach ($request->file('gambar') as $file) {
+                $images[] = $file->store('prestasi', 'public');
+            }
+            $data['gambar'] = $images;
         }
 
         Prestasi::create($data);
@@ -66,13 +71,21 @@ class AdminController extends Controller
         $request->validate([
             'judul' => 'required|string|max:255',
             'tanggal_event' => 'required|date',
+            'kategori' => 'nullable|string|max:255',
+            'lokasi' => 'nullable|string|max:255',
+            'deskripsi' => 'nullable|string',
+            'gambar.*' => 'nullable|image|max:2048',
         ]);
 
-        $data = $request->all();
+        $data = $request->except('gambar');
 
         // Jika ada upload poster event
         if ($request->hasFile('gambar')) {
-            $data['gambar'] = $request->file('gambar')->store('event', 'public');
+            $images = [];
+            foreach ($request->file('gambar') as $file) {
+                $images[] = $file->store('event', 'public');
+            }
+            $data['gambar'] = $images;
         }
 
         Event::create($data);

@@ -43,19 +43,22 @@ class ForumController extends Controller
 
     public function show($id)
     {
-        $channel = ForumThread::findOrFail($id);
-        
+        $channel = ForumThread::with(['assignments.submissions.user'])->findOrFail($id);
+
         if (!$channel->members->contains(auth()->id())) {
             return redirect('/forum')->withErrors(['error' => 'Kamu harus bergabung ke channel ini terlebih dahulu.']);
         }
+
+        // Ambil repository milik user login untuk pilihan pengumpulan tugas
+        $myRepositories = \App\Models\Repository::where('user_id', auth()->id())->get();
 
         // 🔥 FIX: Wajib load relasi repliedMessage.user agar UI Reply tidak error
         $chats = ForumReply::with(['user', 'repliedMessage.user'])
                     ->where('forum_thread_id', $id)
                     ->oldest()
                     ->get();
-                    
-        return view('forum.show', compact('channel', 'chats'));
+
+        return view('forum.show', compact('channel', 'chats', 'myRepositories'));
     }
 
     // ==========================================

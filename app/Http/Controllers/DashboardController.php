@@ -16,6 +16,13 @@ class DashboardController extends Controller
     {
         $user = auth()->user();
         
+        // Dynamic Greeting
+        $hour = date('H');
+        $greeting = 'Selamat Malam';
+        if ($hour >= 5 && $hour <= 11) $greeting = 'Selamat Pagi';
+        else if ($hour >= 12 && $hour <= 15) $greeting = 'Selamat Siang';
+        else if ($hour >= 16 && $hour <= 18) $greeting = 'Selamat Sore';
+
         $points = $user->reputation_points ?? 0;
         $level = ($points >= 100) ? 'Senior Hubber' : (($points >= 50) ? 'Active Student' : 'Newcomer');
 
@@ -41,7 +48,7 @@ class DashboardController extends Controller
         return view('dashboard.index', compact(
             'user', 'level', 'myLostItemsCount', 'myRepositoriesCount', 
             'myChannels', 'recentMarketplace', 'recentLostFounds', 'popularRepos',
-            'latestEvent', 'latestPrestasi'
+            'latestEvent', 'latestPrestasi', 'greeting'
         ));
     }
 }
