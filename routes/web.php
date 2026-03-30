@@ -12,6 +12,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\GitHttpController;
 use App\Http\Controllers\InteractionController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\CartController;
 
 Route::get('/404', function() { abort(404); });
 Route::get('/403', function() { abort(403); });
@@ -71,6 +72,7 @@ Route::middleware(['auth', 'App\Http\Middleware\IsStudent'])->group(function () 
     Route::delete('/repository/{id}/collaborator/{userId}', [RepositoryController::class, 'removeCollaborator']);
     Route::post('/repository/{id}/sync-git', [RepositoryController::class, 'syncGit']);
     Route::get('/repository/{id}/download-cli', [RepositoryController::class, 'downloadCli']);
+    Route::delete('/repository/{id}', [RepositoryController::class, 'destroy']);
 
     // MARKETPLACE
     Route::get('/marketplace', [MarketplaceController::class, 'index'])->name('marketplace.index');
@@ -97,15 +99,26 @@ Route::middleware(['auth', 'App\Http\Middleware\IsStudent'])->group(function () 
     Route::get('/marketplace/{id}/checkout', [PaymentController::class, 'checkoutConfirm'])->name('marketplace.checkout.confirm');
     Route::post('/marketplace/{id}/checkout/direct', [PaymentController::class, 'processDirectPayment'])->name('marketplace.checkout.direct');
 
+    // CART
+    Route::get('/keranjang', [CartController::class, 'page'])->name('cart.page');
+    Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+    Route::get('/cart/count', [CartController::class, 'count'])->name('cart.count');
+    Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
+    Route::patch('/cart/{cart}/qty', [CartController::class, 'updateQty'])->name('cart.qty');
+    Route::delete('/cart/{cart}', [CartController::class, 'remove'])->name('cart.remove');
+    Route::delete('/cart', [CartController::class, 'clear'])->name('cart.clear');
+
     // FORUM
     Route::get('/forum', [ForumController::class, 'index']);
     Route::post('/forum/{id}/join', [ForumController::class, 'joinChannel']);
     Route::get('/forum/{id}', [ForumController::class, 'show']);
     Route::post('/forum/{id}/message', [ForumController::class, 'storeMessage']);
     Route::get('/forum/{id}/messages', [ForumController::class, 'fetchMessages']);
+    Route::get('/forum/{id}/search', [ForumController::class, 'searchMessages']);
     Route::put('/forum/message/{id}/edit', [ForumController::class, 'editMessage']);
     Route::delete('/forum/message/{id}/delete', [ForumController::class, 'deleteMessage']);
     Route::post('/forum/message/{id}/react', [ForumController::class, 'reactMessage']);
+    Route::post('/forum/message/{id}/vote', [ForumController::class, 'votePoll']);
 
     // ASSIGNMENTS
     Route::post('/forum/{forumThread}/assignment', [\App\Http\Controllers\AssignmentController::class, 'store'])->name('assignment.store');

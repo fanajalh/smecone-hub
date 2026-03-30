@@ -12,10 +12,12 @@ class ForumReply extends Model
         'user_id', 
         'content', 
         'is_best_answer',
-        'reply_to_id',   // Untuk menyimpan ID pesan yang dibalas
-        'is_edited',     // Penanda apakah pesan sudah diedit
-        'poll_data',     // Menyimpan pertanyaan & opsi polling
-        'reactions'      // Menyimpan data reaksi emoji
+        'reply_to_id',
+        'is_edited',
+        'poll_data',
+        'reactions',
+        'media_path',    // Path file media (gambar/video)
+        'media_type'     // Tipe media: image / video
     ];
 
     // 2. Beri tahu Laravel bahwa kolom poll dan reactions itu tipe datanya Array (karena di database disimpen sebagai JSON)

@@ -68,24 +68,59 @@ class ForumController extends Controller
     public function storeMessage(Request $request, $id)
     {
         $request->validate([
-            'content' => 'required_without:poll_data|string|nullable',
+            'content' => 'required_without_all:poll_data,media|string|nullable',
             'reply_to_id' => 'nullable|exists:forum_replies,id',
-            'poll_data' => 'nullable|array'
+            'poll_data' => 'nullable|array',
+            'media' => 'nullable|file|max:20480|mimes:jpg,jpeg,png,gif,webp,mp4,mov,webm',
         ]);
+
+        $mediaPath = null;
+        $mediaType = null;
+
+        if ($request->hasFile('media')) {
+            $file = $request->file('media');
+            $ext = strtolower($file->getClientOriginalExtension());
+            $mediaType = in_array($ext, ['mp4', 'mov', 'webm']) ? 'video' : 'image';
+            $mediaPath = $file->store('chat-media/' . $id, 'public');
+        }
 
         $chat = ForumReply::create([
             'forum_thread_id' => $id,
             'user_id' => auth()->id(),
-            'content' => $request->content ?? '',
+            'content' => $request->content,
             'reply_to_id' => $request->reply_to_id,
             'poll_data' => $request->poll_data,
+            'media_path' => $mediaPath,
+            'media_type' => $mediaType,
         ]);
 
-        // Kembalikan data lengkap untuk dirender oleh JavaScript
         return response()->json([
             'success' => true, 
             'chat' => $chat->load(['user', 'repliedMessage.user'])
         ]);
+    }
+
+    public function searchMessages(Request $request, $id)
+    {
+        $q = $request->query('q', '');
+        if (strlen($q) < 2) {
+            return response()->json([]);
+        }
+
+        $results = ForumReply::with('user')
+            ->where('forum_thread_id', $id)
+            ->where('content', 'like', "%{$q}%")
+            ->latest()
+            ->limit(20)
+            ->get()
+            ->map(fn($chat) => [
+                'id' => $chat->id,
+                'content' => $chat->content,
+                'user' => $chat->user->name,
+                'time' => $chat->created_at->format('d M H:i'),
+            ]);
+
+        return response()->json($results);
     }
 
     public function editMessage(Request $request, $id)
@@ -102,6 +137,48 @@ class ForumController extends Controller
         ]);
 
         return response()->json(['success' => true]);
+    }
+
+    public function votePoll(Request $request, $id)
+    {
+        $chat = ForumReply::findOrFail($id);
+        $optionToVote = $request->input('option');
+        $userId = auth()->id();
+
+        $pollData = $chat->poll_data;
+        if (!$pollData || !isset($pollData['options']) || !in_array($optionToVote, $pollData['options'])) {
+            return response()->json(['error' => 'Pilihan tidak valid'], 400);
+        }
+
+        // Initialize votes history if not exist
+        $votes = $pollData['votes'] ?? [];
+        
+        // Remove current user from all other options (so they only vote once per poll)
+        // Or if they click the same option, it toggles (unvotes)
+        $toggled = false;
+        foreach ($pollData['options'] as $opt) {
+            $optVotes = $votes[$opt] ?? [];
+            if (in_array($userId, $optVotes)) {
+                // Remove from this option
+                $votes[$opt] = array_values(array_diff($optVotes, [$userId]));
+                if ($opt === $optionToVote) {
+                    $toggled = true; // User un-voted
+                }
+            }
+        }
+
+        // If they didn't just un-vote the current option, add their vote to the new option
+        if (!$toggled) {
+            if (!isset($votes[$optionToVote])) {
+                $votes[$optionToVote] = [];
+            }
+            $votes[$optionToVote][] = $userId;
+        }
+
+        $pollData['votes'] = $votes;
+        $chat->update(['poll_data' => $pollData]);
+
+        return response()->json(['success' => true, 'poll_data' => $pollData]);
     }
     
     public function deleteMessage($id)

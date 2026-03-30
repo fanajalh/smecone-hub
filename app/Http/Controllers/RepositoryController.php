@@ -255,10 +255,29 @@ class RepositoryController extends Controller
 
     public function addCollaborator(Request $request, $id) {
         $repository = Repository::findOrFail($id);
-        if ($repository->user_id !== auth()->id()) abort(403); 
-        $request->validate(['user_id' => 'required|exists:users,id']);
-        $repository->collaborators()->attach($request->user_id);
-        return back()->with('success', 'Anggota tim berhasil ditambahkan!');
+        if ($repository->user_id !== auth()->id()) abort(403);
+
+        $request->validate(['username' => 'required|string|max:255']);
+
+        // Cari user berdasarkan nama atau email
+        $user = User::where('email', $request->username)
+                    ->orWhere('name', $request->username)
+                    ->first();
+
+        if (!$user) {
+            return back()->with('error', 'User dengan username/email "' . $request->username . '" tidak ditemukan.');
+        }
+
+        if ($user->id === auth()->id()) {
+            return back()->with('error', 'Kamu tidak bisa menambahkan dirimu sendiri.');
+        }
+
+        if ($repository->collaborators->contains($user->id)) {
+            return back()->with('error', $user->name . ' sudah menjadi anggota tim ini.');
+        }
+
+        $repository->collaborators()->attach($user->id);
+        return back()->with('success', $user->name . ' berhasil ditambahkan ke tim!');
     }
 
     public function removeCollaborator($id, $userId) {
@@ -455,5 +474,38 @@ class RepositoryController extends Controller
         }
 
         return response()->json(['status' => 'error', 'message' => 'Tidak ada file yang dikirim.'], 400);
+    }
+
+    /**
+     * 🔥 HAPUS REPOSITORY PERMANEN
+     */
+    public function destroy($id)
+    {
+        $repository = Repository::findOrFail($id);
+
+        // Hanya owner yang bisa menghapus repo
+        if ($repository->user_id !== auth()->id()) {
+            abort(403, 'Akses ditolak. Hanya pemilik yang dapat menghapus repositori ini.');
+        }
+
+        // 1. Hapus folder Git Bare dari storage server (jika ada)
+        if ($repository->git_path && \Illuminate\Support\Facades\File::exists($repository->git_path)) {
+            \Illuminate\Support\Facades\File::deleteDirectory($repository->git_path);
+        }
+
+        // 2. Hapus semua file extract-nya dari public storage
+        foreach($repository->files as $file) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($file->file_path);
+        }
+
+        // 3. Hapus Folder repository di dalam public/repositories/
+        if (\Illuminate\Support\Facades\Storage::disk('public')->exists('repositories/' . $repository->id)) {
+            \Illuminate\Support\Facades\Storage::disk('public')->deleteDirectory('repositories/' . $repository->id);
+        }
+
+        // 4. Hapus data Repository dari Database
+        $repository->delete();
+
+        return redirect('/repository')->with('success', 'Repositori beserta seluruh isinya berhasil dihapus permanen.');
     }
 }
