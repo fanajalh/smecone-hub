@@ -15,7 +15,7 @@
         transform: translateY(-100%);
         opacity: 0;
         pointer-events: none;
-    }
+    } 
 
     .brand-logo-anim {
         opacity: 0;
@@ -194,7 +194,7 @@
                         <input type="checkbox" name="remember" class="w-4 h-4 rounded border-gray-300 text-red-600 focus:ring-red-500 transition-all cursor-pointer">
                         <span class="ml-2 font-medium text-gray-600 group-hover:text-red-700 transition-colors">Ingat Saya</span>
                     </label>
-                    <a href="#" class="text-sm text-red-600 font-bold hover:text-red-800 transition-colors">Lupa Password?</a>
+                    <a href="/forgot-password" class="text-sm text-red-600 font-bold hover:text-red-800 transition-colors">Lupa Password?</a>
                 </div>
 
                 <button type="submit" class="w-full bg-red-500 text-white font-bold py-4 px-4 rounded-2xl hover:bg-red-600 hover:shadow-[0_8px_20px_rgba(239,68,68,0.3)] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all mt-4">

@@ -23,7 +23,7 @@
         .tap-effect:active { transform: scale(0.92); }
     </style>
 </head>
-<body class="bg-gray-50 flex items-center justify-center min-h-screen p-4 overflow-hidden relative font-sans selection:bg-pink-200">
+<body class="bg-gray-50 flex items-center justify-center min-h-screen p-4 overflow-hidden relative font-sans font-semibold selection:bg-pink-200">
     <div class="absolute top-1/4 left-1/3 w-72 h-72 bg-rose-300 rounded-full mix-blend-multiply filter blur-2xl opacity-50 animate-blob"></div>
     <div class="absolute bottom-1/4 right-1/3 w-72 h-72 bg-pink-300 rounded-full mix-blend-multiply filter blur-2xl opacity-50 animate-blob animation-delay-2000"></div>
 

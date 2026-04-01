@@ -7,9 +7,11 @@
     .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     /* Aman untuk layar iPhone (notch area) */
     .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+    /* Efek tekan tombol dari desain footer */
+    .tap-effect:active { transform: scale(0.96); transition: transform 0.1s; }
 </style>
 
-<div class="pb-24 md:pb-28 font-sans text-gray-800 selection:bg-red-100 selection:text-red-900 md:pt-6">
+<div class="pb-[140px] md:pb-[200px] font-sans text-gray-800 selection:bg-red-100 selection:text-red-900 md:pt-6">
     
     <div class="max-w-[480px] mx-auto bg-white relative md:rounded-3xl md:shadow-[0_4px_25px_rgba(0,0,0,0.03)] md:border md:border-gray-100 overflow-hidden">
         
@@ -156,73 +158,84 @@
         
     </div>
 </div>
-<div x-data="{ qty: 1, stock: {{ $product->stock ?? 99 }} }" class="fixed bottom-0 left-0 right-0 z-50 flex justify-center pointer-events-none pb-safe">
-    <div class="bg-white w-full max-w-[480px] border-t border-gray-100 shadow-[0_-4px_20px_rgba(0,0,0,0.04)] pointer-events-auto flex flex-col">
-        
-        {{-- Munculkan Selector QTY Jika bukan lapak sendiri dan barang belum habis --}}
-        @if(auth()->id() != $product->user_id && !$product->is_sold)
-        <div class="flex items-center justify-between px-4 py-3 border-b border-gray-50">
-            <span class="text-[13px] font-semibold text-gray-700">Jumlah Pembelian</span>
-            <div class="flex items-center border border-gray-200 rounded-lg overflow-hidden bg-white shadow-sm h-8">
-                <button type="button" @click="if(qty > 1) qty--" class="w-8 h-full flex items-center justify-center text-gray-500 hover:bg-gray-50 transition active:bg-gray-100">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 12H4"></path></svg>
-                </button>
-                <input type="number" x-model="qty" class="w-10 h-full text-center text-[13px] font-bold border-x border-gray-200 bg-gray-50 hide-scrollbar outline-none pointer-events-none" readonly>
-                <button type="button" @click="if(qty < stock) qty++" class="w-8 h-full flex items-center justify-center text-gray-500 hover:bg-gray-50 transition active:bg-gray-100">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"></path></svg>
-                </button>
-            </div>
-        </div>
-        @endif
 
-        <div class="h-[68px] flex items-center px-2">
-            @if(auth()->id() == $product->user_id)
-                <div class="flex-1 flex gap-2 p-2 w-full">
-                    <form action="/marketplace/{{ $product->id }}/toggle-sold" method="POST" class="flex-1">
-                        @csrf
-                        <button type="submit" class="w-full h-11 rounded-xl font-semibold text-[13px] transition active:scale-[0.98] {{ $product->is_sold ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-gray-900 text-white hover:bg-gray-800' }}">
-                            {{ $product->is_sold ? 'Tandai Tersedia' : 'Tandai Habis' }}
-                        </button>
-                    </form>
-                    <form action="/marketplace/{{ $product->id }}/delete" method="POST" class="flex-1" onsubmit="confirmSubmit(event, 'Tarik Dari Etalase?', 'Yakin ingin merekap dan menghapus lapak ini? Ini tidak bisa dikembalikan!', 'Ya, Tarik Keluar')">
-                        @csrf @method('DELETE')
-                        <button type="submit" class="w-full h-11 rounded-xl border border-red-100 font-semibold text-[13px] bg-white text-red-600 hover:bg-red-50 transition active:scale-[0.98]">
-                            Hapus Lapak
-                        </button>
-                    </form>
+{{-- ================= FLOATING BOTTOM BAR (DESAIN BARU) ================= --}}
+<div x-data="{ qty: 1, stock: {{ $product->stock ?? 99 }} }" class="fixed bottom-0 left-0 right-0 z-50 flex justify-center pointer-events-none pb-safe">
+    <div class="bg-white w-full max-w-[480px] rounded-t-[2.5rem] shadow-[0_-10px_40px_rgba(0,0,0,0.08)] border-t border-gray-50 pointer-events-auto flex flex-col px-6 py-5">
+        
+        {{-- ==== LOGIKA PEMBELI ==== --}}
+        @if(auth()->id() != $product->user_id)
+            
+            {{-- Bagian Atas: Harga & Selector QTY (Hanya tampil jika belum habis) --}}
+            <div class="flex items-end justify-between mb-4">
+                <div>
+                    <p class="text-[12px] font-semibold text-gray-400 mb-0.5">Total Harga</p>
+                    <div class="text-[20px] md:text-[22px] font-black text-[#E21F26] leading-none tracking-tight">
+                        <span class="text-[14px] font-bold mr-0.5 text-[#E21F26]">Rp</span><span x-text="Number({{ $product->price }} * qty).toLocaleString('id-ID')"></span>
+                    </div>
                 </div>
-            @else
+
+                @if(!$product->is_sold)
+                <div class="flex items-center bg-gray-50 border border-gray-100 rounded-[1rem] p-1 shadow-inner">
+                    <button type="button" @click="if(qty > 1) qty--" class="w-9 h-9 bg-white rounded-[0.8rem] shadow-sm text-gray-600 font-bold hover:text-[#E21F26] flex items-center justify-center transition tap-effect">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 12H4"></path></svg>
+                    </button>
+                    <input type="number" x-model="qty" class="w-10 text-center bg-transparent font-extrabold text-[15px] text-gray-800 hide-scrollbar outline-none pointer-events-none" readonly>
+                    <button type="button" @click="if(qty < stock) qty++" class="w-9 h-9 bg-white rounded-[0.8rem] shadow-sm text-gray-600 font-bold hover:text-[#E21F26] flex items-center justify-center transition tap-effect">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"></path></svg>
+                    </button>
+                </div>
+                @endif
+            </div>
+
+            {{-- Bagian Bawah: Aksi Tombol --}}
+            <div class="flex items-center gap-2.5 h-[52px]">
                 @php
                     $waNumber = $product->user->whatsapp_number ?? '';
                     if(str_starts_with($waNumber, '0')) $waNumber = '62' . substr($waNumber, 1);
                     $pesanDefault = urlencode("Halo kak, saya tertarik dengan *{$product->item_name}* di Smecone Mart. Masih ada?");
                 @endphp
 
-                <div class="flex items-center w-full h-full py-2 gap-2">
-                    {{-- Tombol WA --}}
-                    <a href="{{ $product->is_sold ? '#' : 'https://wa.me/'.$waNumber.'?text='.$pesanDefault }}" target="{{ $product->is_sold ? '_self' : '_blank' }}" 
-                        class="w-14 h-11 flex flex-col items-center justify-center rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-600 hover:bg-emerald-100 transition active:scale-95 {{ $product->is_sold ? 'opacity-50 cursor-not-allowed' : '' }}">
-                        <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.181-2.592-5.771-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.277.042-.615.081-2.028-.452-1.714-.65-2.822-2.398-2.909-2.515-.087-.116-.694-.925-.694-1.765 0-.84.44-1.266.598-1.428.158-.162.347-.203.463-.203.115 0 .23.003.332.008.106.005.25-.043.391.297.144.347.491 1.2.535 1.288.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.274.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564c.174.087.289.13.332.202.043.073.043.42-.101.825z"/></svg>
-                    </a>
+                {{-- Ikon WA --}}
+                <a href="{{ $product->is_sold ? '#' : 'https://wa.me/'.$waNumber.'?text='.$pesanDefault }}" target="{{ $product->is_sold ? '_self' : '_blank' }}" 
+                   class="w-[52px] h-[52px] flex items-center justify-center rounded-[1.2rem] bg-white border border-gray-200 text-gray-500 hover:text-green-500 hover:border-green-200 hover:bg-green-50 transition active:scale-95 shrink-0 shadow-sm {{ $product->is_sold ? 'opacity-50 cursor-not-allowed' : '' }}">
+                   <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.181-2.592-5.771-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.277.042-.615.081-2.028-.452-1.714-.65-2.822-2.398-2.909-2.515-.087-.116-.694-.925-.694-1.765 0-.84.44-1.266.598-1.428.158-.162.347-.203.463-.203.115 0 .23.003.332.008.106.005.25-.043.391.297.144.347.491 1.2.535 1.288.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.274.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564c.174.087.289.13.332.202.043.073.043.42-.101.825z"/></svg>
+                </a>
 
-                    {{-- Tombol Keranjang --}}
-                    <button type="button" @click="addToCart({{ $product->id }}, qty)" 
-                            class="w-14 h-11 flex flex-col items-center justify-center rounded-xl bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 transition active:scale-95 {{ $product->is_sold ? 'opacity-50 cursor-not-allowed' : '' }}" {{ $product->is_sold ? 'disabled' : '' }}>
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                {{-- Ikon Keranjang --}}
+                <button type="button" @click="addToCart({{ $product->id }}, qty)" 
+                        class="w-[52px] h-[52px] flex items-center justify-center rounded-[1.2rem] bg-white border border-gray-200 text-gray-500 hover:text-[#E21F26] hover:border-red-200 hover:bg-red-50 transition tap-effect shrink-0 shadow-sm {{ $product->is_sold ? 'opacity-50 cursor-not-allowed' : '' }}" {{ $product->is_sold ? 'disabled' : '' }}>
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                </button>
+
+                {{-- Form Beli Sekarang --}}
+                <form action="{{ route('marketplace.checkout.confirm', $product->id) }}" method="GET" class="flex-1 h-full">
+                    <input type="hidden" name="qty" :value="qty">
+                    <button type="submit" 
+                            class="w-full h-[52px] rounded-[1.2rem] font-bold text-[15px] flex items-center justify-center transition tap-effect {{ $product->is_sold ? 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-none' : 'bg-[#E21F26] text-white shadow-[0_8px_20px_rgba(226,31,38,0.25)] hover:bg-red-700 hover:-translate-y-0.5' }}" 
+                            {{ $product->is_sold ? 'disabled' : '' }}>
+                        {{ $product->is_sold ? 'Barang Habis' : 'Beli Sekarang' }}
                     </button>
+                </form>
+            </div>
 
-                    {{-- Form Beli Sekarang dengan param QTY --}}
-                    <form action="{{ route('marketplace.checkout.confirm', $product->id) }}" method="GET" class="flex-1 h-full pl-0.5">
-                        <input type="hidden" name="qty" :value="qty">
-                        <button type="submit" 
-                                class="w-full h-11 rounded-xl font-semibold text-[13px] flex items-center justify-center transition active:scale-[0.98] {{ $product->is_sold ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-red-600 hover:bg-red-700 text-white shadow-[0_4px_10px_rgba(220,38,38,0.2)]' }}" 
-                                {{ $product->is_sold ? 'disabled' : '' }}>
-                            {{ $product->is_sold ? 'Habis' : 'Beli Sekarang' }}
-                        </button>
-                    </form>
-                </div>
-            @endif
-        </div>
+        {{-- ==== LOGIKA PENJUAL ==== --}}
+        @else
+            <div class="flex gap-3 h-[52px]">
+                <form action="/marketplace/{{ $product->id }}/toggle-sold" method="POST" class="flex-1">
+                    @csrf
+                    <button type="submit" class="w-full h-full rounded-[1.2rem] font-bold text-[14px] transition tap-effect {{ $product->is_sold ? 'bg-gray-100 text-gray-800 border-2 border-gray-200 hover:bg-gray-200' : 'bg-gray-900 text-white shadow-[0_8px_20px_rgba(0,0,0,0.2)] hover:bg-black hover:-translate-y-0.5' }}">
+                        {{ $product->is_sold ? 'Tandai Tersedia' : 'Tandai Habis' }}
+                    </button>
+                </form>
+                <form action="/marketplace/{{ $product->id }}/delete" method="POST" class="flex-1" onsubmit="confirmSubmit(event, 'Tarik Dari Etalase?', 'Yakin ingin merekap dan menghapus lapak ini? Ini tidak bisa dikembalikan!', 'Ya, Tarik Keluar')">
+                    @csrf @method('DELETE')
+                    <button type="submit" class="w-full h-full rounded-[1.2rem] border-2 border-red-100 font-bold text-[14px] bg-red-50 text-red-600 hover:bg-red-100 transition tap-effect hover:-translate-y-0.5">
+                        Hapus Lapak
+                    </button>
+                </form>
+            </div>
+        @endif
     </div>
 </div>
 
