@@ -51,15 +51,20 @@ class CartController extends Controller
         ]);
     }
 
-    // ── POST /cart/add ─────────────────────────────────────────────────────────
     public function add(Request $request)
     {
-        $request->validate(['product_id' => 'required|exists:marketplaces,id']);
+        $request->validate([
+            'product_id' => 'required|exists:marketplaces,id',
+            'qty' => 'nullable|integer|min:1'
+        ]);
 
         $product = Marketplace::findOrFail($request->product_id);
+        
+        // Ambil stok produk, kalau kolom stok belum diisi default ke 999
+        $stock = $product->stock ?? 999;
 
-        if ($product->is_sold) {
-            return response()->json(['message' => 'Produk sudah habis terjual.'], 422);
+        if ($product->is_sold || $stock < 1) {
+            return response()->json(['message' => 'Produk sudah habis terjual / stok kosong.'], 422);
         }
 
         $cart = Cart::firstOrCreate(
@@ -67,7 +72,14 @@ class CartController extends Controller
             ['qty' => 0]
         );
 
-        $cart->increment('qty');
+        $qtyToAdd = $request->qty ?? 1;
+
+        if ($cart->qty + $qtyToAdd > $stock) {
+            return response()->json(['message' => 'Gagal, pembelian melebihi sisa stok ('.$stock.').'], 422);
+        }
+
+        $cart->qty += $qtyToAdd;
+        $cart->save();
 
         return response()->json([
             'message' => $product->item_name . ' ditambahkan ke keranjang!',
@@ -78,25 +90,17 @@ class CartController extends Controller
     // ── PATCH /cart/{id}/qty ───────────────────────────────────────────────────
     public function updateQty(Request $request, Cart $cart)
     {
-        // Pastikan cart milik user yang login
         if ($cart->user_id !== Auth::id()) abort(403);
+        $request->validate(['qty' => 'required|integer|min:1']);
 
-        $request->validate(['qty' => 'required|integer|min:1|max:99']);
+        // Validasi Stok
+        $stock = $cart->item->stock ?? 0;
+        if ($request->qty > $stock) {
+            return response()->json(['message' => 'Melebihi stok yang tersedia (' . $stock . ')'], 422);
+        }
+
         $cart->update(['qty' => $request->qty]);
-
         return response()->json(['message' => 'Qty diperbarui.']);
-    }
-
-    // ── DELETE /cart/{id} ──────────────────────────────────────────────────────
-    public function remove(Cart $cart)
-    {
-        if ($cart->user_id !== Auth::id()) abort(403);
-        $cart->delete();
-
-        return response()->json([
-            'message' => 'Item dihapus dari keranjang.',
-            'count'   => Cart::where('user_id', Auth::id())->sum('qty'),
-        ]);
     }
 
     // ── DELETE /cart/clear ─────────────────────────────────────────────────────

@@ -8,6 +8,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
@@ -49,5 +51,77 @@
         @yield('content')
     </main>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            @if(session('success'))
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Sukses! ✅',
+                    text: "{!! session('success') !!}",
+                    background: '#ffffff',
+                    color: '#111827',
+                    iconColor: '#dc2626',
+                    confirmButtonText: 'Oke Lanjut',
+                    buttonsStyling: false,
+                    customClass: {
+                        popup: 'rounded-[28px] shadow-[0_10px_40px_rgba(220,38,38,0.15)] border border-red-50 p-6',
+                        title: 'font-black text-2xl tracking-tight text-gray-900 mt-2',
+                        htmlContainer: 'text-sm font-medium text-gray-500 mt-2',
+                        confirmButton: 'bg-red-600 text-white font-bold px-8 py-3 rounded-xl w-full mt-6 shadow-md shadow-red-200 active:scale-95 transition-transform'
+                    },
+                    showClass: { popup: 'animate__animated animate__zoomIn animate__faster' },
+                    hideClass: { popup: 'animate__animated animate__zoomOut animate__faster' }
+                });
+            @endif
+
+            @if(session('error'))
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: "{!! session('error') !!}",
+                    background: '#ffffff',
+                    color: '#111827',
+                    iconColor: '#dc2626',
+                    confirmButtonText: 'Mengerti',
+                    buttonsStyling: false,
+                    customClass: {
+                        popup: 'rounded-[28px] shadow-2xl border border-gray-100 p-6',
+                        title: 'font-black text-2xl tracking-tight text-red-600 mt-2',
+                        htmlContainer: 'text-sm font-medium text-gray-500 mt-2',
+                        confirmButton: 'bg-gray-900 text-white font-bold px-8 py-3 rounded-xl w-full mt-6 active:scale-95 transition-transform'
+                    },
+                    showClass: { popup: 'animate__animated animate__rubberBand animate__faster' },
+                    hideClass: { popup: 'animate__animated animate__zoomOut animate__faster' }
+                });
+            @endif
+        });
+
+        window.confirmDelete = function(button) {
+            Swal.fire({
+                title: 'Apakah Anda yakin?',
+                text: "Anda tidak bisa mengembalikan data ini!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#f3f4f6',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal',
+                buttonsStyling: false,
+                customClass: {
+                    popup: 'rounded-[28px] shadow-2xl border border-gray-100 p-6',
+                    title: 'font-black text-2xl tracking-tight text-gray-900 mt-2',
+                    htmlContainer: 'text-sm font-medium text-gray-500 mt-2',
+                    confirmButton: 'bg-red-600 text-white font-bold px-6 py-3 rounded-xl shadow-md shadow-red-200 active:scale-95 transition-transform mx-2',
+                    cancelButton: 'bg-gray-100 text-gray-700 font-bold px-6 py-3 rounded-xl hover:bg-gray-200 active:scale-95 transition-transform mx-2'
+                },
+                showClass: { popup: 'animate__animated animate__zoomIn animate__faster' },
+                hideClass: { popup: 'animate__animated animate__zoomOut animate__faster' }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    button.closest('form').submit();
+                }
+            })
+        }
+    </script>
 </body>
 </html>

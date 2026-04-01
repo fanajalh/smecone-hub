@@ -57,7 +57,7 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 relative z-10">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5 relative z-10">
             <div>
                 <label class="block text-[11px] font-black uppercase tracking-widest text-gray-400 mb-2.5 ml-1">Kategori <span class="text-red-500">*</span></label>
                 <div class="relative">
@@ -66,7 +66,7 @@
                         <option value="Makanan">🍔 Makanan & Minuman</option>
                         <option value="Alat Tulis">✏️ Alat Tulis</option>
                         <option value="Elektronik">📱 Elektronik</option>
-                        <option value="Jasa">🎨 Jasa (Desain, Ketik, dll)</option>
+                        <option value="Jasa">🎨 Jasa (Desain, dll)</option>
                         <option value="Lainnya">📦 Lainnya</option>
                     </select>
                     <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
@@ -76,23 +76,30 @@
             </div>
             
             <div>
-                <label class="block text-[11px] font-black uppercase tracking-widest text-gray-400 mb-2.5 ml-1">Tipe Penjualan <span class="text-red-500">*</span></label>
-                
+                <label class="block text-[11px] font-black uppercase tracking-widest text-gray-400 mb-2.5 ml-1">Stok <span class="text-red-500">*</span></label>
+                <div class="relative flex items-center">
+                    <div class="absolute left-4 pointer-events-none font-black text-gray-400 text-[13px]">📦</div>
+                    <input type="number" name="stock" required min="1" placeholder="Contoh: 10" 
+                           class="w-full bg-gray-50 border border-gray-200 rounded-[20px] py-3.5 pl-11 pr-5 text-[14px] font-black text-gray-800 placeholder-gray-400 focus:bg-white focus:ring-4 focus:ring-red-500/10 focus:border-red-500 transition-all">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-[11px] font-black uppercase tracking-widest text-gray-400 mb-2.5 ml-1">Tipe <span class="text-red-500">*</span></label>
                 <div class="flex bg-gray-50 p-1.5 rounded-[20px] border border-gray-200 relative">
                     <label class="flex-1 text-center cursor-pointer relative z-10">
                         <input type="radio" name="type" value="Ready Stock" class="peer sr-only" checked>
                         <div class="py-2.5 rounded-[16px] text-[12px] font-extrabold text-gray-500 transition-all peer-checked:bg-white peer-checked:text-red-600 peer-checked:shadow-sm">
-                            Ready Stock
+                            Ready
                         </div>
                     </label>
                     <label class="flex-1 text-center cursor-pointer relative z-10">
                         <input type="radio" name="type" value="Pre-Order" class="peer sr-only">
                         <div class="py-2.5 rounded-[16px] text-[12px] font-extrabold text-gray-500 transition-all peer-checked:bg-orange-500 peer-checked:text-white peer-checked:shadow-[0_4px_10px_rgba(249,115,22,0.3)]">
-                            Pre-Order (PO)
+                            PO
                         </div>
                     </label>
                 </div>
-
             </div>
         </div>
 

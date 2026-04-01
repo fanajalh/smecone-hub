@@ -35,19 +35,22 @@
         {{-- Points & Stats (Glassmorphism) --}}
         <div class="flex items-center gap-3 md:gap-4">
             <div class="bg-white/10 backdrop-blur-md rounded-2xl px-5 py-3 text-white border border-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:bg-white/20 transition duration-300">
-                <p class="text-[10px] text-red-100 uppercase tracking-widest font-semibold mb-1">Poin Kamu</p>
-                <p class="text-xl font-black leading-none flex items-baseline gap-1">
-                    {{ number_format($user->reputation_points ?? 0) }} 
-                    <span class="text-xs font-medium text-red-200">PTS</span>
-                </p>
-            </div>
-            <div class="bg-white/10 backdrop-blur-md rounded-2xl px-5 py-3 text-white border border-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:bg-white/20 transition duration-300">
-                <p class="text-[10px] text-red-100 uppercase tracking-widest font-semibold mb-1">Level</p>
+                <p class="text-[10px] text-red-100 uppercase tracking-widest font-semibold mb-1">Peran Kamu</p>
                 <p class="text-sm font-black uppercase leading-tight mt-1 flex items-center gap-1">
-                    <svg class="w-4 h-4 text-yellow-300" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                    {{ $level ?? 'Newcomer' }}
+                    <svg class="w-4 h-4 text-yellow-300" fill="currentColor" viewBox="0 0 20 20"><path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"></path></svg>
+                    @if(auth()->user()->is_admin) Admin @elseif(auth()->user()->is_teacher) Guru @else Siswa @endif
                 </p>
             </div>
+            <button onclick="document.getElementById('logout-form').submit();" class="bg-white/10 backdrop-blur-md rounded-2xl px-4 py-3 text-white border border-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:bg-red-800 transition duration-300 text-left outline-none cursor-pointer">
+                <p class="text-[10px] text-red-100 uppercase tracking-widest font-semibold mb-1">Aksi Sistem</p>
+                <p class="text-sm font-black uppercase leading-tight mt-1 flex items-center gap-1">
+                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                    Keluar / Logout
+                </p>
+            </button>
+            <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">
+                 @csrf
+            </form>
         </div>
     </div>
 </div>
@@ -258,28 +261,64 @@
     function showAllShortcuts() {
         Swal.fire({
             html: `
-                <div class="text-left mb-6 mt-2">
-                    <h2 class="text-xl font-extrabold text-gray-900">Menu Lainnya</h2>
-                    <p class="text-xs font-medium text-gray-500 mt-1">Akses cepat ke fitur Smecone Hub</p>
+                <div class="text-left mb-4 mt-2 border-b border-gray-100 pb-3">
+                    <h2 class="text-xl font-extrabold text-gray-900 leading-tight">Navigasi Penuh</h2>
+                    <p class="text-xs font-semibold text-gray-500 mt-0.5">Semua fitur Smecone Hub & Riwayat Aktivitasmu</p>
                 </div>
-                <div class="grid grid-cols-3 gap-3 md:gap-4">
-                    <a href="/prestasi" class="group flex flex-col items-center gap-3 p-3 hover:bg-red-50 rounded-2xl transition-all border border-transparent hover:border-red-100">
-                        <div class="w-14 h-14 bg-gradient-to-br from-red-100 to-red-50 rounded-[1.2rem] flex items-center justify-center text-[#E21F26] group-hover:scale-110 transition-transform shadow-sm">
-                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg>
+                
+                <h3 class="text-left text-[11px] font-black tracking-widest text-[#E21F26] uppercase mb-3">Menu Utama</h3>
+                <div class="grid grid-cols-4 gap-2 mb-5">
+                    <a href="/prestasi" class="group flex flex-col items-center gap-2 p-2 hover:bg-red-50 rounded-2xl transition-all">
+                        <div class="w-12 h-12 bg-gradient-to-br from-red-100 to-red-50 rounded-xl flex items-center justify-center text-[#E21F26] group-hover:scale-110 transition-transform shadow-sm">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg>
                         </div>
-                        <span class="text-[12px] font-bold text-gray-700 group-hover:text-[#E21F26]">Prestasi</span>
+                        <span class="text-[10px] md:text-[11px] font-bold text-gray-700 text-center leading-tight">Prestasi</span>
                     </a>
-                    <a href="/lost-found" class="group flex flex-col items-center gap-3 p-3 hover:bg-yellow-50 rounded-2xl transition-all border border-transparent hover:border-yellow-100">
-                        <div class="w-14 h-14 bg-gradient-to-br from-yellow-100 to-yellow-50 rounded-[1.2rem] flex items-center justify-center text-yellow-600 group-hover:scale-110 transition-transform shadow-sm">
-                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    <a href="/event" class="group flex flex-col items-center gap-2 p-2 hover:bg-orange-50 rounded-2xl transition-all">
+                        <div class="w-12 h-12 bg-gradient-to-br from-orange-100 to-orange-50 rounded-xl flex items-center justify-center text-orange-600 group-hover:scale-110 transition-transform shadow-sm">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                         </div>
-                        <span class="text-[12px] font-bold text-gray-700 group-hover:text-yellow-600">Barang</span>
+                        <span class="text-[10px] md:text-[11px] font-bold text-gray-700 text-center leading-tight">Event</span>
                     </a>
-                    <a href="/profile" class="group flex flex-col items-center gap-3 p-3 hover:bg-blue-50 rounded-2xl transition-all border border-transparent hover:border-blue-100">
-                        <div class="w-14 h-14 bg-gradient-to-br from-blue-100 to-blue-50 rounded-[1.2rem] flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform shadow-sm">
-                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                    <a href="/profile" class="group flex flex-col items-center gap-2 p-2 hover:bg-blue-50 rounded-2xl transition-all">
+                        <div class="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-50 rounded-xl flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform shadow-sm">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
                         </div>
-                        <span class="text-[12px] font-bold text-gray-700 group-hover:text-blue-600">Profil</span>
+                        <span class="text-[10px] md:text-[11px] font-bold text-gray-700 text-center leading-tight">Profil</span>
+                    </a>
+                    <a href="/keranjang" class="group flex flex-col items-center gap-2 p-2 hover:bg-emerald-50 rounded-2xl transition-all">
+                        <div class="w-12 h-12 bg-gradient-to-br from-emerald-100 to-emerald-50 rounded-xl flex items-center justify-center text-emerald-600 group-hover:scale-110 transition-transform shadow-sm">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                        </div>
+                        <span class="text-[10px] md:text-[11px] font-bold text-gray-700 text-center leading-tight">Keranjang</span>
+                    </a>
+                </div>
+
+                <h3 class="text-left text-[11px] font-black tracking-widest text-[#E21F26] uppercase mb-3">Aktivitas & Riwayat</h3>
+                <div class="grid grid-cols-4 gap-2">
+                    <a href="/marketplace/purchases" class="group flex flex-col items-center gap-2 p-2 hover:bg-emerald-50 rounded-2xl transition-all text-center">
+                        <div class="w-12 h-12 bg-emerald-50 border border-emerald-100 rounded-xl flex items-center justify-center text-emerald-600 group-hover:scale-110 transition-transform">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                        <span class="text-[10px] md:text-[11px] font-bold text-gray-700 leading-tight group-hover:text-emerald-700">Terbeli</span>
+                    </a>
+                    <a href="/marketplace/penjualan" class="group flex flex-col items-center gap-2 p-2 hover:bg-red-50 rounded-2xl transition-all text-center">
+                        <div class="w-12 h-12 bg-red-50 border border-red-100 rounded-xl flex items-center justify-center text-red-600 group-hover:scale-110 transition-transform">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                        </div>
+                        <span class="text-[10px] md:text-[11px] font-bold text-gray-700 leading-tight group-hover:text-red-700">Terjual</span>
+                    </a>
+                    <a href="/marketplace/lapak-saya" class="group flex flex-col items-center gap-2 p-2 hover:bg-orange-50 rounded-2xl transition-all text-center">
+                        <div class="w-12 h-12 bg-orange-50 border border-orange-100 rounded-xl flex items-center justify-center text-orange-600 group-hover:scale-110 transition-transform">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                        </div>
+                        <span class="text-[10px] md:text-[11px] font-bold text-gray-700 leading-tight group-hover:text-orange-700">Lapakku</span>
+                    </a>
+                    <a href="/lost-found" class="group flex flex-col items-center gap-2 p-2 hover:bg-indigo-50 rounded-2xl transition-all text-center">
+                        <div class="w-12 h-12 bg-indigo-50 border border-indigo-100 rounded-xl flex items-center justify-center text-indigo-600 group-hover:scale-110 transition-transform">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        </div>
+                        <span class="text-[10px] md:text-[11px] font-bold text-gray-700 leading-tight group-hover:text-indigo-700">Barang</span>
                     </a>
                 </div>
             `,

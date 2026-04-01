@@ -64,6 +64,8 @@
                 <div class="flex items-center gap-3">
                     <span class="flex items-center gap-1"><svg class="w-3.5 h-3.5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg> Belum ada</span>
                     <span class="text-gray-300">•</span>
+                    <span class="flex items-center gap-1">Stok: {{ $product->stock ?? 999 }}</span>
+                    <span class="text-gray-300">•</span>
                     <span class="flex items-center gap-1">Terjual 0</span>
                 </div>
                 <div class="flex items-center gap-1">
@@ -154,11 +156,26 @@
         
     </div>
 </div>
+<div x-data="{ qty: 1, stock: {{ $product->stock ?? 99 }} }" class="fixed bottom-0 left-0 right-0 z-50 flex justify-center pointer-events-none pb-safe">
+    <div class="bg-white w-full max-w-[480px] border-t border-gray-100 shadow-[0_-4px_20px_rgba(0,0,0,0.04)] pointer-events-auto flex flex-col">
+        
+        {{-- Munculkan Selector QTY Jika bukan lapak sendiri dan barang belum habis --}}
+        @if(auth()->id() != $product->user_id && !$product->is_sold)
+        <div class="flex items-center justify-between px-4 py-3 border-b border-gray-50">
+            <span class="text-[13px] font-semibold text-gray-700">Jumlah Pembelian</span>
+            <div class="flex items-center border border-gray-200 rounded-lg overflow-hidden bg-white shadow-sm h-8">
+                <button type="button" @click="if(qty > 1) qty--" class="w-8 h-full flex items-center justify-center text-gray-500 hover:bg-gray-50 transition active:bg-gray-100">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 12H4"></path></svg>
+                </button>
+                <input type="number" x-model="qty" class="w-10 h-full text-center text-[13px] font-bold border-x border-gray-200 bg-gray-50 hide-scrollbar outline-none pointer-events-none" readonly>
+                <button type="button" @click="if(qty < stock) qty++" class="w-8 h-full flex items-center justify-center text-gray-500 hover:bg-gray-50 transition active:bg-gray-100">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"></path></svg>
+                </button>
+            </div>
+        </div>
+        @endif
 
-<div class="fixed bottom-0 left-0 right-0 z-50 flex justify-center pointer-events-none pb-safe">
-    <div class="bg-white w-full max-w-[480px] border-t border-gray-100 shadow-[0_-4px_20px_rgba(0,0,0,0.04)] pointer-events-auto">
         <div class="h-[68px] flex items-center px-2">
-            
             @if(auth()->id() == $product->user_id)
                 <div class="flex-1 flex gap-2 p-2 w-full">
                     <form action="/marketplace/{{ $product->id }}/toggle-sold" method="POST" class="flex-1">
@@ -167,7 +184,7 @@
                             {{ $product->is_sold ? 'Tandai Tersedia' : 'Tandai Habis' }}
                         </button>
                     </form>
-                    <form action="/marketplace/{{ $product->id }}/delete" method="POST" class="flex-1" onsubmit="return confirm('Yakin hapus lapak ini?')">
+                    <form action="/marketplace/{{ $product->id }}/delete" method="POST" class="flex-1" onsubmit="confirmSubmit(event, 'Tarik Dari Etalase?', 'Yakin ingin merekap dan menghapus lapak ini? Ini tidak bisa dikembalikan!', 'Ya, Tarik Keluar')">
                         @csrf @method('DELETE')
                         <button type="submit" class="w-full h-11 rounded-xl border border-red-100 font-semibold text-[13px] bg-white text-red-600 hover:bg-red-50 transition active:scale-[0.98]">
                             Hapus Lapak
@@ -182,17 +199,21 @@
                 @endphp
 
                 <div class="flex items-center w-full h-full py-2 gap-2">
+                    {{-- Tombol WA --}}
                     <a href="{{ $product->is_sold ? '#' : 'https://wa.me/'.$waNumber.'?text='.$pesanDefault }}" target="{{ $product->is_sold ? '_self' : '_blank' }}" 
                         class="w-14 h-11 flex flex-col items-center justify-center rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-600 hover:bg-emerald-100 transition active:scale-95 {{ $product->is_sold ? 'opacity-50 cursor-not-allowed' : '' }}">
                         <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.181-2.592-5.771-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.277.042-.615.081-2.028-.452-1.714-.65-2.822-2.398-2.909-2.515-.087-.116-.694-.925-.694-1.765 0-.84.44-1.266.598-1.428.158-.162.347-.203.463-.203.115 0 .23.003.332.008.106.005.25-.043.391.297.144.347.491 1.2.535 1.288.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.274.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564c.174.087.289.13.332.202.043.073.043.42-.101.825z"/></svg>
                     </a>
 
-                    <button onclick="alert('Fitur Keranjang sedang pengembangan! 🚀')" 
+                    {{-- Tombol Keranjang --}}
+                    <button type="button" @click="addToCart({{ $product->id }}, qty)" 
                             class="w-14 h-11 flex flex-col items-center justify-center rounded-xl bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 transition active:scale-95 {{ $product->is_sold ? 'opacity-50 cursor-not-allowed' : '' }}" {{ $product->is_sold ? 'disabled' : '' }}>
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
                     </button>
 
+                    {{-- Form Beli Sekarang dengan param QTY --}}
                     <form action="{{ route('marketplace.checkout.confirm', $product->id) }}" method="GET" class="flex-1 h-full pl-0.5">
+                        <input type="hidden" name="qty" :value="qty">
                         <button type="submit" 
                                 class="w-full h-11 rounded-xl font-semibold text-[13px] flex items-center justify-center transition active:scale-[0.98] {{ $product->is_sold ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-red-600 hover:bg-red-700 text-white shadow-[0_4px_10px_rgba(220,38,38,0.2)]' }}" 
                                 {{ $product->is_sold ? 'disabled' : '' }}>
@@ -204,4 +225,33 @@
         </div>
     </div>
 </div>
+
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
+<script>
+function addToCart(productId, qtyToAdd) {
+    fetch('/cart/add', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: JSON.stringify({ product_id: productId, qty: qtyToAdd })
+    })
+    .then(async response => {
+        const data = await response.json();
+        if (!response.ok) {
+            alert(data.message || 'Gagal menambahkan ke keranjang');
+            return;
+        }
+        if (confirm(data.message + '\n\nBuka halaman Keranjang sekarang?')) {
+            window.location.href = '/keranjang';
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Terjadi kesalahan sistem.');
+    });
+}
+</script>
 @endsection

@@ -14,6 +14,23 @@ use ZipArchive;
 
 class RepositoryController extends Controller
 {
+    private function canAccessPrivateRepo($repository)
+    {
+        if ($repository->user_id == auth()->id()) return true;
+        if ($repository->collaborators->contains(auth()->id())) return true;
+        if (auth()->user()->is_admin) return true;
+
+        if (auth()->user()->is_teacher) {
+            $isSubmittedToTeacher = \App\Models\Submission::where('repo_link', 'like', '%/repository/' . $repository->id . '%')
+                ->whereHas('assignment.forumThread', function ($q) {
+                    $q->where('user_id', auth()->id());
+                })->exists();
+            if ($isSubmittedToTeacher) return true;
+        }
+
+        return false;
+    }
+
     public function index(Request $request)
     {
         $major = $request->query('major');
@@ -97,7 +114,7 @@ class RepositoryController extends Controller
         $isOwner = $repository->user_id == auth()->id();
         $isCollaborator = $repository->collaborators->contains(auth()->id());
 
-        if ($repository->visibility == 'private' && !$isOwner && !$isCollaborator && !auth()->user()->is_admin) {
+        if ($repository->visibility == 'private' && !$this->canAccessPrivateRepo($repository)) {
             abort(403, 'Akses ditolak.');
         }
 
@@ -182,7 +199,7 @@ class RepositoryController extends Controller
     {
         $file = RepositoryFile::with('repository')->findOrFail($fileId);
         $repo = $file->repository;
-        if ($repo->visibility == 'private' && $repo->user_id !== auth()->id() && !$repo->collaborators->contains(auth()->id())) abort(403);
+        if ($repo->visibility == 'private' && !$this->canAccessPrivateRepo($repo)) abort(403);
         $repo->increment('downloads_count'); 
         return response()->download(storage_path('app/public/' . $file->file_path), basename($file->file_name));
     }
@@ -190,7 +207,7 @@ class RepositoryController extends Controller
     public function downloadZip(Request $request, $id)
     {
         $repository = Repository::with('files')->findOrFail($id);
-        if ($repository->visibility == 'private' && $repository->user_id !== auth()->id() && !$repository->collaborators->contains(auth()->id())) abort(403);
+        if ($repository->visibility == 'private' && !$this->canAccessPrivateRepo($repository)) abort(403);
         $fileIds = $request->input('file_ids', []); 
         $files = empty($fileIds) ? $repository->files : RepositoryFile::whereIn('id', $fileIds)->where('repository_id', $id)->get();
         if ($files->isEmpty()) return back()->with('error', 'Tidak ada file untuk didownload.');
@@ -226,7 +243,7 @@ class RepositoryController extends Controller
     {
         $file = RepositoryFile::with('repository')->findOrFail($fileId);
         $repo = $file->repository;
-        if ($repo->visibility == 'private' && $repo->user_id !== auth()->id() && !$repo->collaborators->contains(auth()->id())) {
+        if ($repo->visibility == 'private' && !$this->canAccessPrivateRepo($repo)) {
             return response()->json(['error' => 'Akses ditolak.'], 403);
         }
         $path = storage_path('app/public/' . $file->file_path);

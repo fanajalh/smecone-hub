@@ -6,6 +6,7 @@ use App\Models\Assignment;
 use App\Models\ForumThread;
 use App\Models\Submission;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class AssignmentController extends Controller
 {
@@ -85,5 +86,96 @@ class AssignmentController extends Controller
         ]);
 
         return back()->with('success', 'Privasi tugas diperbarui!');
+    }
+
+    // 5. exportChannelGrades: Rekap semua nilai tugas di 1 channel
+    public function exportChannelGrades(ForumThread $forumThread)
+    {
+        if (!auth()->user()->is_teacher || $forumThread->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $assignments = $forumThread->assignments()->orderBy('created_at', 'asc')->get();
+        // Hanya ambil member yang bukan guru / siswa
+        $members = $forumThread->members()->where('is_teacher', false)->get(); 
+
+        $filename = "rekap_nilai_channel_" . Str::slug($forumThread->title) . ".csv";
+
+        $headers = [
+            "Content-type"        => "text/csv",
+            "Content-Disposition" => "attachment; filename=$filename",
+            "Pragma"              => "no-cache",
+            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+            "Expires"             => "0"
+        ];
+
+        $columns = ['Nama Siswa', 'NIS', 'Email'];
+        foreach ($assignments as $task) {
+            $columns[] = $task->title;
+        }
+
+        $callback = function() use($members, $assignments, $columns) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, $columns);
+
+            foreach ($members as $member) {
+                $row = [$member->name, $member->nis ?? '-', $member->email];
+
+                foreach ($assignments as $task) {
+                    $submission = \App\Models\Submission::where('assignment_id', $task->id)
+                                    ->where('user_id', $member->id)->first();
+                    $grade = $submission ? ($submission->grade !== null ? $submission->grade : 'Belum Dinilai') : 'Belum Submit';
+                    $row[] = $grade;
+                }
+
+                fputcsv($file, $row);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    // 6. exportAssignmentGrades: Rekap nilai untuk 1 tugas spesifik
+    public function exportAssignmentGrades(Assignment $assignment)
+    {
+        $forumThread = $assignment->forumThread;
+        if (!auth()->user()->is_teacher || $forumThread->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $members = $forumThread->members()->where('is_teacher', false)->get(); 
+
+        $filename = "rekap_nilai_tugas_" . Str::slug($assignment->title) . ".csv";
+
+        $headers = [
+            "Content-type"        => "text/csv",
+            "Content-Disposition" => "attachment; filename=$filename",
+            "Pragma"              => "no-cache",
+            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+            "Expires"             => "0"
+        ];
+
+        $columns = ['Nama Siswa', 'NIS', 'Email', 'Nilai', 'Link Repositori'];
+
+        $callback = function() use($members, $assignment, $columns) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, $columns);
+
+            foreach ($members as $member) {
+                $submission = \App\Models\Submission::where('assignment_id', $assignment->id)
+                                ->where('user_id', $member->id)->first();
+                
+                $grade = $submission ? ($submission->grade !== null ? $submission->grade : 'Belum Dinilai') : 'Belum Submit';
+                $repoLink = $submission ? $submission->repo_link : '-';
+
+                fputcsv($file, [$member->name, $member->nis ?? '-', $member->email, $grade, $repoLink]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 }

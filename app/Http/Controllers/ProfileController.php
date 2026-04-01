@@ -23,7 +23,7 @@ class ProfileController extends Controller
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
             'whatsapp_number' => 'nullable|string|max:20',
             'store_name' => 'nullable|string|max:255',
-            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120', // Maks 5MB
         ]);
 
         $data = $request->except(['avatar']);

@@ -18,6 +18,8 @@ class Transaction extends Model
         'amount',
         'status',
         'whatsapp_number',
+        'qty',
+        'payment_method',
     ];
 
     /**

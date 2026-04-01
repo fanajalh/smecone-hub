@@ -21,9 +21,15 @@ class ForumController extends Controller
         $channels = ForumThread::with(['user', 'members'])
             ->withCount('replies')
             ->when($search, function($query, $search) {
-                return $query->where('title', 'like', "%{$search}%")
-                             ->orWhere('content', 'like', "%{$search}%");
+                return $query->where(function($q) use ($search) {
+                    $q->where('title', 'like', "%{$search}%")
+                      ->orWhere('content', 'like', "%{$search}%");
+                });
             })
+            // Tambahkan relasi join request user aktif
+            ->with(['joinRequests' => function($q) {
+                $q->where('user_id', auth()->id());
+            }])
             ->latest()
             ->get();
 
@@ -34,11 +40,38 @@ class ForumController extends Controller
     {
         $channel = ForumThread::findOrFail($id);
         
+        if ($channel->is_private && !auth()->user()->is_admin && $channel->user_id !== auth()->id()) {
+            // Minta Izin (Request Join)
+            $existingRequest = \App\Models\ChannelRequest::where('forum_thread_id', $id)
+                                ->where('user_id', auth()->id())->first();
+            
+            if (!$existingRequest) {
+                \App\Models\ChannelRequest::create([
+                    'forum_thread_id' => $channel->id,
+                    'user_id' => auth()->id(),
+                    'status' => 'pending'
+                ]);
+                return redirect('/forum')->with('success', 'Permintaan gabung terkirim! Menunggu persetujuan pembuat channel.');
+            }
+            return redirect('/forum')->withErrors(['error' => 'Permintaan kamu sudah dalam antrean.']);
+        }
+
         if (!$channel->members->contains(auth()->id())) {
             $channel->members()->attach(auth()->id());
         }
 
         return redirect("/forum/{$id}")->with('success', 'Berhasil bergabung ke channel!');
+    }
+
+    public function joinViaInvite($code)
+    {
+        $channel = ForumThread::where('invite_code', $code)->firstOrFail();
+        
+        if (!$channel->members->contains(auth()->id())) {
+            $channel->members()->attach(auth()->id());
+        }
+
+        return redirect("/forum/{$channel->id}")->with('success', 'Berhasil masuk melalui Link Invite!');
     }
 
     public function show($id)
@@ -248,11 +281,16 @@ class ForumController extends Controller
 
         $channelName = Str::slug($request->title); 
 
+        $isPrivate = $request->has('is_private');
+        $inviteCode = $isPrivate ? Str::random(10) : null;
+
         $thread = ForumThread::create([
             'user_id' => auth()->id(),
             'title' => $channelName,
             'content' => $request->content,
             'is_solved' => false,
+            'is_private' => $isPrivate,
+            'invite_code' => $inviteCode,
         ]);
 
         // Otomatis jadikan pembuat sebagai anggota
@@ -266,7 +304,32 @@ class ForumController extends Controller
         $channel = ForumThread::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
         $allUsers = User::where('id', '!=', auth()->id())->get(); 
         
-        return view('dashboard.manage-channel', compact('channel', 'allUsers'));
+        $pendingRequests = $channel->joinRequests()->with('user')->where('status', 'pending')->get();
+        
+        return view('dashboard.manage-channel', compact('channel', 'allUsers', 'pendingRequests'));
+    }
+
+    public function approveRequest($id, $requestId)
+    {
+        $channel = ForumThread::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
+        $req = \App\Models\ChannelRequest::where('id', $requestId)->where('forum_thread_id', $channel->id)->firstOrFail();
+        
+        $req->update(['status' => 'approved']);
+        if (!$channel->members->contains($req->user_id)) {
+            $channel->members()->attach($req->user_id);
+        }
+        
+        return back()->with('success', 'Persetujuan izin masuk berhasil!');
+    }
+
+    public function rejectRequest($id, $requestId)
+    {
+        $channel = ForumThread::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
+        $req = \App\Models\ChannelRequest::where('id', $requestId)->where('forum_thread_id', $channel->id)->firstOrFail();
+        
+        $req->update(['status' => 'rejected']);
+        
+        return back()->with('success', 'Permintaan masuk telah ditolak.');
     }
 
     public function updateChannel(Request $request, $id)

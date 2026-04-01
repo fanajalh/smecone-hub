@@ -34,6 +34,13 @@
                           class="w-full px-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:bg-white text-gray-800 font-medium resize-none transition"></textarea>
             </div>
 
+            <div class="flex items-center gap-3 p-4 bg-orange-50 border border-orange-200 rounded-xl mb-6">
+                <input type="checkbox" name="is_private" id="is_private" class="w-5 h-5 text-red-600 border-gray-300 rounded focus:ring-red-500">
+                <label for="is_private" class="text-sm font-bold text-gray-800 cursor-pointer">
+                    Buat sebagai Channel Privat <span class="block text-xs font-medium text-gray-500 mt-0.5">Hanya orang yang diizinkan atau memiliki link undangan khusus yang dapat bergabung.</span>
+                </label>
+            </div>
+
             <button type="submit" class="w-full bg-red-600 text-white font-bold py-4 rounded-xl hover:bg-red-700 active:scale-95 transition shadow-lg shadow-red-600/30">
                 Bentuk Channel Sekarang
             </button>

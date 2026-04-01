@@ -85,6 +85,8 @@ Route::middleware(['auth', 'App\Http\Middleware\IsStudent'])->group(function () 
     Route::post('/marketplace/{id}/broadcast', [MarketplaceController::class, 'broadcastKeWa']);          
     Route::get('/marketplace/toko/{id}', [MarketplaceController::class, 'toko']);
     Route::get('/marketplace/{id}', [MarketplaceController::class, 'show'])->name('marketplace.show');
+    Route::get('/marketplace/{id}/edit', [MarketplaceController::class, 'edit'])->name('marketplace.edit');
+    Route::put('/marketplace/{id}/update', [MarketplaceController::class, 'update'])->name('marketplace.update');
     Route::delete('/marketplace/{id}/delete', [MarketplaceController::class, 'destroy']);
     Route::post('/marketplace/{id}/toggle-sold', [MarketplaceController::class, 'toggleSold']);
     Route::get('/marketplace/payment/{id}', [PaymentController::class, 'paymentStatus'])->name('marketplace.payment.status');
@@ -96,8 +98,13 @@ Route::middleware(['auth', 'App\Http\Middleware\IsStudent'])->group(function () 
     Route::post('/marketplace/update-wa', [App\Http\Controllers\MarketplaceController::class, 'updateStoreWa'])->name('marketplace.updateWa');
 
     // PAYMENT SYSTEM
+    Route::post('/marketplace/withdraw', [App\Http\Controllers\MarketplaceController::class, 'requestWithdrawal'])->name('marketplace.withdraw');
     Route::get('/marketplace/{id}/checkout', [PaymentController::class, 'checkoutConfirm'])->name('marketplace.checkout.confirm');
     Route::post('/marketplace/{id}/checkout/direct', [PaymentController::class, 'processDirectPayment'])->name('marketplace.checkout.direct');
+    
+    // TRANSACTION CRUD
+    Route::put('/marketplace/transaction/{id}/status', [App\Http\Controllers\PaymentController::class, 'updateTransactionStatus'])->name('marketplace.transaction.status');
+    Route::delete('/marketplace/transaction/{id}', [App\Http\Controllers\PaymentController::class, 'destroyTransaction'])->name('marketplace.transaction.destroy');
 
     // CART
     Route::get('/keranjang', [CartController::class, 'page'])->name('cart.page');
@@ -111,6 +118,7 @@ Route::middleware(['auth', 'App\Http\Middleware\IsStudent'])->group(function () 
     // FORUM
     Route::get('/forum', [ForumController::class, 'index']);
     Route::post('/forum/{id}/join', [ForumController::class, 'joinChannel']);
+    Route::get('/forum/invite/{code}', [ForumController::class, 'joinViaInvite']);
     Route::get('/forum/{id}', [ForumController::class, 'show']);
     Route::post('/forum/{id}/message', [ForumController::class, 'storeMessage']);
     Route::get('/forum/{id}/messages', [ForumController::class, 'fetchMessages']);
@@ -123,6 +131,7 @@ Route::middleware(['auth', 'App\Http\Middleware\IsStudent'])->group(function () 
     // ASSIGNMENTS
     Route::post('/forum/{forumThread}/assignment', [\App\Http\Controllers\AssignmentController::class, 'store'])->name('assignment.store');
     Route::post('/assignment/{assignment}/submit', [\App\Http\Controllers\AssignmentController::class, 'submit'])->name('assignment.submit');
+    Route::get('/assignment/{assignment}/export', [\App\Http\Controllers\AssignmentController::class, 'exportAssignmentGrades'])->name('assignment.export');
     Route::post('/submission/{submission}/grade', [\App\Http\Controllers\AssignmentController::class, 'grade'])->name('submission.grade');
     Route::post('/submission/{submission}/toggle-privacy', [\App\Http\Controllers\AssignmentController::class, 'togglePrivacy'])->name('submission.toggle-privacy');
 
@@ -130,7 +139,10 @@ Route::middleware(['auth', 'App\Http\Middleware\IsStudent'])->group(function () 
     Route::get('/dashboard/channel/create', [ForumController::class, 'createChannel']);
     Route::post('/dashboard/channel', [ForumController::class, 'storeChannel']); 
     Route::get('/dashboard/channel/{id}', [ForumController::class, 'show']);
+    Route::get('/dashboard/channel/{forumThread}/export-grades', [AssignmentController::class, 'exportChannelGrades']);
     Route::get('/dashboard/channel/{id}/manage', [ForumController::class, 'manageChannel']);
+    Route::post('/dashboard/channel/{id}/request/{requestId}/approve', [ForumController::class, 'approveRequest']);
+    Route::post('/dashboard/channel/{id}/request/{requestId}/reject', [ForumController::class, 'rejectRequest']);
     Route::get('/dashboard/channel/{id}/members', [ForumController::class, 'manageChannel']);
     Route::put('/dashboard/channel/{id}', [ForumController::class, 'updateChannel']);
     Route::post('/dashboard/channel/{id}/update', [ForumController::class, 'updateChannel']);
@@ -146,11 +158,17 @@ Route::middleware(['auth', 'App\Http\Middleware\IsStudent'])->group(function () 
 // ZONA ADMIN
 Route::middleware(['auth', 'App\Http\Middleware\IsAdmin'])->group(function () {
     Route::get('/admin/dashboard', [AdminController::class, 'index']);
+    
     Route::get('/admin/prestasi/create', [AdminController::class, 'createPrestasi']);
     Route::post('/admin/prestasi', [AdminController::class, 'storePrestasi']);
+    Route::get('/admin/prestasi/{id}/edit', [AdminController::class, 'editPrestasi']);
+    Route::put('/admin/prestasi/{id}', [AdminController::class, 'updatePrestasi']);
     Route::delete('/admin/prestasi/{id}/delete', [AdminController::class, 'destroyPrestasi']);
+    
     Route::get('/admin/event/create', [AdminController::class, 'createEvent']);
     Route::post('/admin/event', [AdminController::class, 'storeEvent']);
+    Route::get('/admin/event/{id}/edit', [AdminController::class, 'editEvent']);
+    Route::put('/admin/event/{id}', [AdminController::class, 'updateEvent']);
     Route::delete('/admin/event/{id}/delete', [AdminController::class, 'destroyEvent']);
 });
 
@@ -169,8 +187,23 @@ Route::get('/tes-bayar/{id}', function($id) {
 
     // 1. LANGSUNG HACK DATABASE JADI LUNAS
     $transaction->update(['status' => 'PAID']);
+    
     if ($transaction->marketplaceItem) {
-        $transaction->marketplaceItem->update(['is_sold' => true]);
+        // Pengurangan stok
+        if ($transaction->marketplaceItem->stock - $transaction->qty <= 0) {
+            $transaction->marketplaceItem->update([
+                'is_sold' => true,
+                'stock' => 0
+            ]);
+        } else {
+            $transaction->marketplaceItem->decrement('stock', $transaction->qty);
+        }
+
+        // Penambahan saldo lapak penjual
+        $seller = $transaction->marketplaceItem->user;
+        if ($seller) {
+            $seller->increment('store_balance', $transaction->amount);
+        }
     }
 
     // 2. TRIGGER WHATSAPP BOT LANGSUNG DARI SINI! 🚀
@@ -181,7 +214,7 @@ Route::get('/tes-bayar/{id}', function($id) {
         try {
             \Illuminate\Support\Facades\Http::timeout(5)->post($botUrl, [
                 'number' => $transaction->whatsapp_number,
-                'message' => "Halo kak *{$transaction->user->name}*! 🛒\n\nPembayaran kakak untuk pesanan *{$transaction->marketplaceItem->title}* sebesar *Rp ".number_format($transaction->amount, 0, ',', '.')."* telah kami terima dan *BERHASIL*.\n\nPenjual akan segera memproses pesanan kakak. Mohon kesediaannya untuk menunggu ya. Terima kasih! 🚀\n\n_SMEconE Hub_"
+                'message' => "Halo kak *{$transaction->user->name}*! 🛒\n\nPembayaran kakak untuk pesanan *{$transaction->marketplaceItem->item_name}* sebesar *Rp ".number_format($transaction->amount, 0, ',', '.')."* telah kami terima dan *BERHASIL*.\n\nPenjual akan segera memproses pesanan kakak. Mohon kesediaannya untuk menunggu ya. Terima kasih! 🚀\n\n_SMEconE Hub_"
             ]);
         } catch (\Exception $e) {
             // Abaikan error
@@ -197,7 +230,7 @@ Route::get('/tes-bayar/{id}', function($id) {
 
             \Illuminate\Support\Facades\Http::timeout(5)->post($botUrl, [
                 'number' => $sellerWa,
-                'message' => "🔔 *PESANAN BARU MASUK!* 🔔\n\nSelamat! Barang jualanmu *{$transaction->marketplaceItem->title}* telah LUNAS dibayar oleh *{$transaction->user->name}*.\n\n*Detail Pesanan:*\nNominal: Rp ".number_format($transaction->amount, 0, ',', '.')."\nNomor WA Pembeli: {$waPembeli}\n\nSilakan segera hubungi pembeli untuk proses penyerahan barang ya! 📦\n\nKlik untuk chat pembeli: {$linkWaPembeli}\n\n_SMEconE Hub_"
+                'message' => "🔔 *PESANAN BARU MASUK!* 🔔\n\nSelamat! Barang jualanmu *{$transaction->marketplaceItem->item_name}* telah LUNAS dibayar oleh *{$transaction->user->name}*.\n\n*Detail Pesanan:*\nNominal: Rp ".number_format($transaction->amount, 0, ',', '.')."\nNomor WA Pembeli: {$waPembeli}\n\nSilakan segera hubungi pembeli untuk proses penyerahan barang ya! 📦\n\nKlik untuk chat pembeli: {$linkWaPembeli}\n\n_SMEconE Hub_"
             ]);
         } catch (\Exception $e) {
             // Abaikan error

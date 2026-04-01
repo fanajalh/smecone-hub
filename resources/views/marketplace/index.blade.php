@@ -141,25 +141,43 @@
                        class="w-full py-2.5 md:py-3 pl-10 md:pl-12 pr-4 bg-gray-100/80 border-transparent rounded-xl text-[13px] md:text-[14px] font-medium text-gray-900 placeholder-gray-500 focus:bg-white focus:border-red-400 focus:ring-2 focus:ring-red-100 transition-all">
             </form>
 
-            {{-- MOBILE: Kelola Lapak & Cart --}}
+            {{-- MOBILE: Kelola Lapak & Riwayat & Cart --}}
             <div class="flex items-center gap-1 md:hidden">
+                <a href="{{ route('marketplace.purchases') }}" class="flex flex-col items-center justify-center w-11 h-11 rounded-xl hover:bg-red-50 transition-colors group tap-effect" title="Riwayat Belanja">
+                    <svg class="w-6 h-6 text-gray-500 group-hover:text-[#E21F26] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span class="text-[8px] font-bold text-gray-500 group-hover:text-[#E21F26] leading-none mt-1">Belanja</span>
+                </a>
+                <a href="{{ route('marketplace.sales') }}" class="flex flex-col items-center justify-center w-11 h-11 rounded-xl hover:bg-red-50 transition-colors group tap-effect" title="Riwayat Penjualan">
+                    <svg class="w-6 h-6 text-gray-500 group-hover:text-[#E21F26] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    <span class="text-[8px] font-bold text-gray-500 group-hover:text-[#E21F26] leading-none mt-1">Jualan</span>
+                </a>
                 <a href="/marketplace/lapak-saya" class="flex flex-col items-center justify-center w-11 h-11 rounded-xl hover:bg-red-50 transition-colors group tap-effect">
                     <svg class="w-6 h-6 text-gray-500 group-hover:text-[#E21F26] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
-                    <span class="text-[8px] font-bold text-gray-500 group-hover:text-[#E21F26] leading-none mt-0.5">Lapak</span>
+                    <span class="text-[8px] font-bold text-gray-500 group-hover:text-[#E21F26] leading-none mt-1">Lapak</span>
                 </a>
                 <a href="/keranjang" class="relative flex flex-col items-center justify-center w-11 h-11 rounded-xl hover:bg-red-50 transition-colors group tap-effect">
                     <svg class="w-6 h-6 text-gray-500 group-hover:text-[#E21F26] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                    <span x-show="cartCount > 0" class="absolute -top-1.5 -right-0.5 bg-[#E21F26] text-white text-[9px] font-black min-w-[18px] h-[18px] rounded-full flex items-center justify-center border-[2px] border-white shadow-sm" x-text="cartCount > 99 ? '99+' : cartCount"></span>
-                    <span class="text-[8px] font-bold text-gray-500 group-hover:text-[#E21F26] leading-none mt-0.5">Cart</span>
+                    <span x-show="cartCount > 0" class="absolute -top-1.5 right-0.5 bg-[#E21F26] text-white text-[9px] font-black w-[18px] h-[18px] rounded-full flex items-center justify-center border-2 border-white shadow-sm" x-text="cartCount > 99 ? '99+' : cartCount"></span>
+                    <span class="text-[8px] font-bold text-gray-500 group-hover:text-[#E21F26] leading-none mt-1">Cart</span>
                 </a>
             </div>
 
-            {{-- DESKTOP: Cart button --}}
-            <a href="/keranjang" class="hidden md:flex items-center gap-2 bg-gray-50 hover:bg-red-50 border border-gray-100 hover:border-red-100 text-gray-700 hover:text-[#E21F26] px-5 py-2.5 rounded-xl font-extrabold text-sm transition-all relative shrink-0 tap-effect shadow-sm">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                Keranjang
-                <span x-show="cartCount > 0" class="bg-[#E21F26] text-white text-[10px] font-black px-2 py-0.5 rounded-full ml-1" x-text="cartCount"></span>
-            </a>
+            {{-- DESKTOP: Cart button and Menu --}}
+            <div class="hidden md:flex items-center gap-1 shrink-0">
+                <a href="{{ route('marketplace.purchases') }}" class="flex items-center gap-2 text-gray-600 hover:text-[#E21F26] bg-transparent hover:bg-red-50 px-4 py-2.5 rounded-xl transition-all tap-effect font-bold text-[13px] mr-1">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Riwayat Belanja
+                </a>
+                <a href="{{ route('marketplace.sales') }}" class="flex items-center gap-2 text-gray-600 hover:text-[#E21F26] bg-transparent hover:bg-red-50 px-4 py-2.5 rounded-xl transition-all tap-effect font-bold text-[13px] mr-1">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    Riwayat Jualan
+                </a>
+                <a href="/keranjang" class="flex items-center gap-2 bg-gray-50 hover:bg-red-50 border border-gray-100 hover:border-red-100 text-gray-700 hover:text-[#E21F26] px-5 py-2.5 rounded-xl font-extrabold text-sm transition-all relative shrink-0 tap-effect shadow-sm">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                    Keranjang
+                    <span x-show="cartCount > 0" class="bg-[#E21F26] text-white text-[10px] font-black px-2 py-0.5 rounded-full ml-1" x-text="cartCount"></span>
+                </a>
+            </div>
         </div>
 
         {{-- 2. SELLER ACTIONS --}}
@@ -464,7 +482,24 @@ document.addEventListener('alpine:init', () => {
 
         // Menghapus SEMUA isi keranjang
         async clearCart() {
-            if (!confirm('Yakin ingin mengosongkan keranjang belanja?')) return;
+            const result = await Swal.fire({
+                title: 'Kosongkan Keranjang?',
+                text: "Yakin ingin membuang semua barang di keranjang belanja Anda?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, Kosongkan!',
+                cancelButtonText: 'Batal',
+                buttonsStyling: false,
+                customClass: {
+                    popup: 'rounded-[28px] shadow-2xl border border-gray-100 p-6',
+                    title: 'font-black text-2xl tracking-tight text-gray-900 mt-2',
+                    htmlContainer: 'text-sm font-medium text-gray-500 mt-2',
+                    confirmButton: 'bg-red-600 text-white font-bold px-6 py-3 rounded-xl shadow-md shadow-red-200 active:scale-95 transition-transform mx-2',
+                    cancelButton: 'bg-gray-100 text-gray-700 font-bold px-6 py-3 rounded-xl hover:bg-gray-200 active:scale-95 transition-transform mx-2'
+                }
+            });
+            
+            if (!result.isConfirmed) return;
             
             try {
                 await fetch('/cart', {

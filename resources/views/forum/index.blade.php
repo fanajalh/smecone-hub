@@ -60,7 +60,12 @@
                 <div class="w-12 h-12 md:w-14 md:h-14 rounded-[18px] bg-red-50 text-red-500 flex items-center justify-center font-black text-2xl shrink-0 group-hover:bg-red-600 group-hover:text-white transition-colors duration-300 shadow-inner">#</div>
                 
                 <div class="flex-1 min-w-0">
-                    <h3 class="font-extrabold text-gray-800 text-[15px] md:text-lg truncate group-hover:text-red-600 transition-colors">{{ $channel->title }}</h3>
+                    <h3 class="font-extrabold text-gray-800 text-[15px] md:text-lg truncate group-hover:text-red-600 transition-colors flex items-center gap-2">
+                        @if($channel->is_private)
+                            <svg class="w-4 h-4 text-orange-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                        @endif
+                        {{ $channel->title }}
+                    </h3>
                     <p class="text-[12px] md:text-[13px] text-gray-500 mt-1 leading-snug line-clamp-2">{{ $channel->content }}</p>
                     
                     <div class="flex flex-wrap items-center gap-2 mt-3">
@@ -86,13 +91,27 @@
                         Masuk Obrolan
                     </a>
                 @else
-                    <form action="/forum/{{ $channel->id }}/join" method="POST" class="w-full md:w-auto">
-                        @csrf
-                        <button type="submit" class="w-full md:w-auto bg-red-600 text-white px-6 py-3 rounded-xl font-extrabold text-[13px] hover:bg-red-700 hover:shadow-lg hover:shadow-red-500/30 transition-all active:scale-95 flex items-center justify-center gap-2">
-                            <span>Gabung</span>
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    @php
+                        $pending = $channel->joinRequests ? $channel->joinRequests->where('status', 'pending')->first() : null;
+                    @endphp
+                    @if($pending)
+                        <button disabled class="w-full md:w-auto bg-yellow-100 text-yellow-700 px-6 py-3 rounded-xl font-extrabold text-[13px] border border-yellow-200 cursor-not-allowed text-center">
+                            Menunggu Persetujuan
                         </button>
-                    </form>
+                    @else
+                        <form action="/forum/{{ $channel->id }}/join" method="POST" class="w-full md:w-auto">
+                            @csrf
+                            <button type="submit" class="w-full md:w-auto {{ $channel->is_private && !auth()->user()->is_admin ? 'bg-orange-100 text-orange-700 hover:bg-orange-600 hover:text-white border-orange-200' : 'bg-red-600 text-white hover:bg-red-700 hover:shadow-red-500/30' }} px-6 py-3 rounded-xl font-extrabold text-[13px] hover:shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 border border-transparent">
+                                @if($channel->is_private && !auth()->user()->is_admin)
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                                    <span>Minta Izin Gabung</span>
+                                @else
+                                    <span>Gabung</span>
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                                @endif
+                            </button>
+                        </form>
+                    @endif
                 @endif
             </div>
 

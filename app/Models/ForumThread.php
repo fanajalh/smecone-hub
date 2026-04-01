@@ -13,7 +13,9 @@ class ForumThread extends Model
         'user_id',
         'title',
         'content',
-        'is_solved'
+        'is_solved',
+        'is_private',
+        'invite_code'
     ];
 
     // Relasi Pembuat Channel
@@ -37,5 +39,11 @@ class ForumThread extends Model
     public function assignments()
     {
         return $this->hasMany(Assignment::class);
+    }
+
+    // Relasi User yang melakukan Request Join
+    public function joinRequests()
+    {
+        return $this->hasMany(ChannelRequest::class);
     }
 }

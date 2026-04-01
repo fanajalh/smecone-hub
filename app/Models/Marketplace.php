@@ -9,7 +9,7 @@ class Marketplace extends Model
     protected $fillable = [
         'user_id', 'item_name', 'description', 'price', 
         'image', 'category', 'type', 'location', 'is_sold',
-        'views_count', 'is_promoted' // 🔥 FITUR BARU
+        'views_count', 'is_promoted', 'stock' // 🔥 DITAMBAHKAN: stock
     ];
 
     public function user() {

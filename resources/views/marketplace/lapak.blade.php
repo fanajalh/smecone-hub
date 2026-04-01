@@ -67,10 +67,15 @@
                 <div class="text-gray-400 text-[11px] md:text-[12px] font-medium mb-1">Terjual 🔴</div>
                 <div class="text-xl md:text-2xl font-bold text-gray-900">{{ $soldProducts }}</div>
             </div>
-            <div class="bg-gradient-to-br from-red-600 to-red-500 p-4 md:p-5 rounded-2xl shadow-sm relative overflow-hidden flex flex-col justify-center">
-                <div class="absolute -right-2 -bottom-2 opacity-10 text-5xl md:text-6xl">🔥</div>
-                <div class="text-red-100 text-[11px] md:text-[12px] font-medium mb-0.5 md:mb-1 relative z-10">Beli Iklan?</div>
-                <div class="text-[12px] md:text-[13px] font-normal text-white relative z-10 leading-tight">Tingkatkan <span class="font-semibold text-yellow-300">Viewers</span> mu. (Segera)</div>
+            <div class="bg-gradient-to-br from-emerald-500 to-green-600 p-4 md:p-5 rounded-2xl shadow-sm relative overflow-hidden flex flex-col justify-center">
+                <div class="absolute -right-2 -bottom-2 opacity-10 text-5xl md:text-6xl">💰</div>
+                <div class="flex justify-between items-start z-10 w-full relative">
+                    <div>
+                        <div class="text-green-100 text-[11px] md:text-[12px] font-medium mb-0.5 md:mb-1">Saldo Lapak</div>
+                        <div class="text-xl md:text-2xl font-bold text-white leading-tight">Rp {{ number_format(auth()->user()->store_balance, 0, ',', '.') }}</div>
+                    </div>
+                    <button type="button" onclick="{{ auth()->user()->store_balance >= 10000 ? "document.getElementById('wdModal').classList.remove('hidden');" : "alert('Minimal penarikan adalah Rp 10.000');" }}" class="bg-white/20 hover:bg-white/30 text-white text-[10px] md:text-xs font-bold px-2 py-1 md:py-1.5 rounded-lg backdrop-blur-sm transition active:scale-95 shrink-0 mt-1">Tarik</button>
+                </div>
             </div>
         </div>
 
@@ -133,6 +138,9 @@
                             </div>
                             
                             <div class="flex gap-1.5">
+                                <a href="/marketplace/{{ $product->id }}/edit" class="w-7 h-7 flex items-center justify-center bg-amber-50 text-amber-600 rounded-lg active:scale-90 transition" title="Edit Produk">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                </a>
                                 <button type="button" data-id="{{ $product->id }}" data-pesan="{{ $defaultPesan }}" onclick="openBroadcastModal(this)" class="w-7 h-7 flex items-center justify-center bg-green-50 text-green-600 rounded-lg active:scale-90 transition" title="Kirim ke WA">
                                     <svg class="w-3.5 h-3.5 transform -rotate-45 ml-0.5 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
                                 </button>
@@ -201,6 +209,9 @@
                         </td>
                         <td class="p-4">
                             <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <a href="/marketplace/{{ $product->id }}/edit" class="p-2 bg-white border border-gray-200 hover:bg-amber-50 text-amber-600 rounded-lg transition shadow-sm" title="Edit Produk">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                </a>
                                 <button type="button" data-id="{{ $product->id }}" data-pesan="{{ $defaultPesan }}" onclick="openBroadcastModal(this)" class="p-2 bg-white border border-gray-200 hover:bg-green-50 text-green-600 rounded-lg transition shadow-sm" title="Broadcast Iklan ke WA">
                                     <svg class="w-4 h-4 transform -rotate-45 ml-0.5 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
                                 </button>
@@ -229,5 +240,120 @@
         </div>
     </div>
 </div>
+
+<!-- MODAL EDIT PROFIL LAPAK -->
+<div id="profileModal" class="hidden fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 transition-opacity">
+    <div class="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl scale-95 origin-center animate-modal-in">
+        <div class="flex justify-between items-center p-5 border-b border-gray-100 bg-gray-50/50">
+            <div>
+                <h3 class="text-lg font-black text-gray-900 tracking-tight">Edit Lapak ✨</h3>
+                <p class="text-xs text-gray-500 font-medium">Ubah logo dan banner jualanmu.</p>
+            </div>
+            <button type="button" onclick="document.getElementById('profileModal').classList.add('hidden');" class="w-8 h-8 flex items-center justify-center bg-gray-100 text-gray-500 rounded-full hover:bg-gray-200 hover:text-gray-900 transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+        <form action="{{ route('marketplace.updateStoreProfile') }}" method="POST" enctype="multipart/form-data" class="p-6 space-y-5">
+            @csrf
+            
+            <div>
+                <label class="block text-[13px] font-bold text-gray-700 uppercase tracking-widest mb-2">Foto Profil Lapak Logo Baru</label>
+                <input type="file" name="store_photo" accept="image/*" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-red-500 focus:bg-white transition outline-none file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-[11px] file:font-black file:uppercase file:tracking-wider file:bg-red-50 file:text-red-700 hover:file:bg-red-100 cursor-pointer">
+                <p class="text-[10px] text-gray-400 mt-1 font-medium italic">Rekomendasi rasio 1:1 persegi. Ukuran maksimal 2MB.</p>
+                @error('store_photo')
+                    <div class="mt-2 text-[11px] text-red-500 font-bold bg-red-50 px-2.5 py-1 rounded inline-flex">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div>
+                <label class="block text-[13px] font-bold text-gray-700 uppercase tracking-widest mb-2">Banner Lapak Latar Belakang Baru</label>
+                <input type="file" name="store_banner" accept="image/*" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-red-500 focus:bg-white transition outline-none file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-[11px] file:font-black file:uppercase file:tracking-wider file:bg-red-50 file:text-red-700 hover:file:bg-red-100 cursor-pointer">
+                <p class="text-[10px] text-gray-400 mt-1 font-medium italic">Rekomendasi lanskap 4:1 memanjang. Ukuran maksimal 4MB.</p>
+                @error('store_banner')
+                    <div class="mt-2 text-[11px] text-red-500 font-bold bg-red-50 px-2.5 py-1 rounded inline-flex">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div class="flex gap-2 justify-end pt-2 border-t border-gray-50 mt-2">
+                <button type="button" onclick="document.getElementById('profileModal').classList.add('hidden');" class="px-5 py-3 rounded-xl bg-gray-100 text-gray-700 font-bold text-[13px] hover:bg-gray-200 transition active:scale-95">Batal</button>
+                <button type="submit" class="flex-1 px-5 py-3 rounded-xl bg-red-600 text-white font-bold text-[13px] hover:bg-red-700 transition active:scale-95 shadow-[0_8px_20px_rgba(220,38,38,0.25)] flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                    Simpan Lapak Ke Publik
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL TARIK SALDO -->
+<div id="wdModal" class="hidden fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 transition-opacity">
+    <div class="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl scale-95 origin-center animate-modal-in">
+        <div class="flex justify-between items-center p-5 border-b border-gray-100">
+            <h3 class="text-lg font-bold text-gray-900">Tarik Saldo Lapak</h3>
+            <button type="button" onclick="document.getElementById('wdModal').classList.add('hidden');" class="text-gray-400 hover:text-gray-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+        <form action="{{ route('marketplace.withdraw') }}" method="POST" class="p-5">
+            @csrf
+            
+            <div class="mb-4">
+                <label class="block text-[13px] font-semibold text-gray-700 mb-1.5">Nominal Penarikan (Rp)</label>
+                <input type="number" name="amount" min="10000" max="{{ auth()->user()->store_balance }}" placeholder="Min: 10000" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-emerald-500 outline-none transition text-sm" required>
+                <div class="text-xs text-gray-500 mt-1">Saldo tersedia: Rp {{ number_format(auth()->user()->store_balance, 0, ',', '.') }}</div>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-[13px] font-semibold text-gray-700 mb-1.5">Bank / E-Wallet</label>
+                <select name="bank_name" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-emerald-500 outline-none transition text-sm" required>
+                    <option value="">Pilih Bank / E-Wallet</option>
+                    <option value="DANA">DANA</option>
+                    <option value="GOPAY">GoPay</option>
+                    <option value="OVO">OVO</option>
+                    <option value="BCA">BCA</option>
+                    <option value="MANDIRI">Mandiri</option>
+                    <option value="BRI">BRI</option>
+                    <option value="BNI">BNI</option>
+                </select>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-[13px] font-semibold text-gray-700 mb-1.5">Nomor Rekening / E-Wallet</label>
+                <input type="text" name="account_number" placeholder="Contoh: 08123456789" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-emerald-500 outline-none transition text-sm" required>
+            </div>
+
+            <div class="mb-5">
+                <label class="block text-[13px] font-semibold text-gray-700 mb-1.5">Atas Nama (Pemilik Rekening)</label>
+                <input type="text" name="account_name" placeholder="Sesuai buku tabungan / aplikasi" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-emerald-500 outline-none transition text-sm" required>
+            </div>
+
+            <div class="flex gap-2 justify-end">
+                <button type="button" onclick="document.getElementById('wdModal').classList.add('hidden');" class="px-5 py-2.5 rounded-xl border border-gray-200 text-gray-600 font-medium text-sm hover:bg-gray-50 transition active:scale-95">Batal</button>
+                <button type="submit" class="px-5 py-2.5 rounded-xl bg-emerald-500 text-white font-medium text-sm hover:bg-emerald-600 shadow-sm transition active:scale-95">Ajukan Penarikan</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+@keyframes modal-in {
+    0% { transform: scale(0.95); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+.animate-modal-in {
+    animation: modal-in 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+</style>
+
+<script>
+    function openProfileModal() {
+        document.getElementById('profileModal').classList.remove('hidden');
+    }
+    
+    // Buka kembali modal jika terdapat error validasi foto lapak
+    @if($errors->has('store_photo') || $errors->has('store_banner'))
+        openProfileModal();
+    @endif
+</script>
 
 @endsection

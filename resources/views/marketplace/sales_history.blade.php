@@ -45,7 +45,7 @@
                 
                 <div class="flex-grow flex flex-col justify-center">
                     <h3 class="font-semibold text-[14px] md:text-[15px] text-gray-900 leading-tight mb-1 line-clamp-2">
-                        {{ $sale->marketplaceItem->title ?? 'Produk Dihapus' }}
+                        {{ $sale->marketplaceItem->item_name ?? 'Produk Dihapus' }}
                     </h3>
                     <p class="text-red-600 font-bold text-[14px]">
                         Rp {{ number_format($sale->amount, 0, ',', '.') }}
@@ -67,7 +67,22 @@
                 </div>
             </div>
 
-            <div class="mt-auto pt-2">
+            <div class="border border-gray-100 rounded-xl mb-4 p-3 bg-white shadow-sm space-y-2 text-[11px] md:text-[12px]">
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-500 font-medium">Metode Pembayaran</span>
+                    <span class="font-bold text-gray-800 uppercase text-red-600">{{ $sale->payment_method ?? 'QRIS / E-WALLET' }}</span>
+                </div>
+                <div class="flex justify-between items-center border-t border-gray-50 pt-2 mt-1">
+                    <span class="text-gray-500 font-medium">Waktu Pesanan dibuat</span>
+                    <span class="font-semibold text-gray-700">{{ $sale->created_at->format('d M Y, H:i') }} WIB</span>
+                </div>
+                <div class="flex justify-between items-center border-t border-gray-50 pt-2 mt-1">
+                    <span class="text-gray-500 font-medium">Update Pembayaran/Status</span>
+                    <span class="font-semibold text-gray-700">{{ $sale->updated_at->format('d M Y, H:i') }} WIB</span>
+                </div>
+            </div>
+
+            <div class="mt-auto pt-2 flex flex-col gap-2">
                 @if($sale->whatsapp_number)
                     @php
                         $cleanWa = preg_replace('/^0/', '62', $sale->whatsapp_number);
@@ -82,6 +97,37 @@
                         No WA Pembeli Tidak Tersedia
                     </button>
                 @endif
+
+                <div class="flex gap-2 w-full mt-1">
+                    {{-- UPDATE: Jika PAID/DIPROSES bisa diubah --}}
+                    @if(in_array($sale->status, ['PAID', 'DIPROSES']))
+                        <form action="{{ route('marketplace.transaction.status', $sale->id) }}" method="POST" class="flex-grow flex gap-2">
+                            @csrf @method('PUT')
+                            <select name="status" class="flex-grow bg-gray-50 border border-gray-200 text-gray-700 text-[13px] font-semibold py-2 px-3 rounded-xl focus:ring-2 focus:ring-emerald-100 outline-none h-11">
+                                <option value="DIPROSES" {{ $sale->status == 'DIPROSES' ? 'selected' : '' }}>Diproses</option>
+                                <option value="SELESAI">Selesai</option>
+                            </select>
+                            <button type="submit" class="bg-emerald-600 text-white text-[13px] font-bold px-4 rounded-xl hover:bg-emerald-700 transition active:scale-95 shadow-sm h-11 flex items-center justify-center shrink-0">
+                                Update
+                            </button>
+                        </form>
+                    @endif
+
+                    {{-- DELETE --}}
+                    @if(in_array($sale->status, ['DIBATALKAN', 'SELESAI', 'PENDING']))
+                        <form action="{{ route('marketplace.transaction.destroy', $sale->id) }}" method="POST" class="{{ in_array($sale->status, ['PAID', 'DIPROSES']) ? 'shrink-0' : 'w-full' }}" onsubmit="confirmSubmit(event, 'Hapus Riwayat?', 'Yakin ingin menghapus riwayat penjualan ini? Data tidak bisa dikembalikan', 'Ya, Hapus')">
+                            @csrf @method('DELETE')
+                            <button type="submit" class="w-full bg-white text-red-600 border border-red-200 hover:bg-red-50 text-[13px] font-semibold px-4 rounded-xl flex justify-center items-center transition shadow-sm active:scale-[0.98] h-11" title="Hapus Riwayat">
+                                @if(in_array($sale->status, ['DIBATALKAN', 'SELESAI', 'PENDING']) && !in_array($sale->status, ['PAID', 'DIPROSES']))
+                                    <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                    Hapus Riwayat
+                                @else
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                @endif
+                            </button>
+                        </form>
+                    @endif
+                </div>
             </div>
 
         </div>

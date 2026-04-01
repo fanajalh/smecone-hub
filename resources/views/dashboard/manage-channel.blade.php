@@ -62,6 +62,35 @@
                         Simpan Perubahan
                     </button>
                 </form>
+
+                @if($channel->is_private && $channel->invite_code)
+                <div class="mt-6 pt-5 border-t border-gray-100">
+                    <h3 class="text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">Link Undangan Privat</h3>
+                    <div class="flex items-center gap-2">
+                        <input type="text" readonly value="{{ url('/forum/invite/' . $channel->invite_code) }}" class="w-full bg-gray-50 border border-gray-200 text-xs text-gray-500 font-medium px-3 py-2 rounded-lg truncate cursor-text" id="inviteLinkInput">
+                        <button onclick="copyInviteLink()" class="bg-red-50 text-red-600 p-2 rounded-lg hover:bg-red-600 hover:text-white transition-colors border border-transparent hover:border-red-600" title="Copy Link">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                        </button>
+                    </div>
+                </div>
+                <script>
+                    function copyInviteLink() {
+                        var copyText = document.getElementById("inviteLinkInput");
+                        copyText.select();
+                        copyText.setSelectionRange(0, 99999); 
+                        navigator.clipboard.writeText(copyText.value);
+                        alert("Link undangan berhasil disalin!");
+                    }
+                </script>
+                @endif
+    
+                {{-- Tombol Export Rekap Nilai Keseluruhan --}}
+                <div class="mt-6 pt-5 border-t border-gray-100">
+                    <a href="/dashboard/channel/{{ $channel->id }}/export-grades" class="w-full bg-emerald-50 text-emerald-700 font-extrabold py-3.5 rounded-xl border border-emerald-200 hover:bg-emerald-600 hover:text-white hover:border-emerald-600 shadow-sm transition-all tap-effect flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        Export Rekap Semua Nilai (CSV)
+                    </a>
+                </div>
             </div>
 
             {{-- Card Danger Zone --}}
@@ -103,6 +132,32 @@
                         {{ count($channel->members) }} Orang
                     </span>
                 </div>
+
+                @if($pendingRequests->count() > 0)
+                <div class="mb-6 bg-yellow-50 border border-yellow-200 rounded-2xl p-4">
+                    <h3 class="text-sm font-black text-yellow-800 mb-3 flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                        Persetujuan Gabung ({{ $pendingRequests->count() }})
+                    </h3>
+                    <div class="space-y-2">
+                        @foreach($pendingRequests as $req)
+                        <div class="flex items-center justify-between bg-white px-4 py-2.5 rounded-xl border border-yellow-100 shadow-sm">
+                            <div class="text-sm font-bold text-gray-800">{{ $req->user->name }} <span class="text-xs font-medium text-gray-500">({{ $req->user->nis ?? '-' }})</span></div>
+                            <div class="flex gap-2">
+                                <form action="/dashboard/channel/{{ $channel->id }}/request/{{ $req->id }}/approve" method="POST">
+                                    @csrf 
+                                    <button type="submit" class="bg-green-100 text-green-700 hover:bg-green-600 hover:text-white border border-green-200 hover:border-green-600 px-3 py-1.5 rounded-lg text-[11px] font-bold transition">Terima</button>
+                                </form>
+                                <form action="/dashboard/channel/{{ $channel->id }}/request/{{ $req->id }}/reject" method="POST">
+                                    @csrf 
+                                    <button type="submit" class="bg-red-100 text-red-700 hover:bg-red-600 hover:text-white border border-red-200 hover:border-red-600 px-3 py-1.5 rounded-lg text-[11px] font-bold transition">Tolak</button>
+                                </form>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
                 
                 {{-- Form Tambah Anggota --}}
                 <div class="bg-gray-50/50 p-4 rounded-2xl border border-gray-100 mb-6">

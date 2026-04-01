@@ -23,13 +23,14 @@
         @endif
         <div class="ml-4 sm:ml-5 flex-1 mt-1 sm:mt-0">
             <span class="text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider">Ringkasan Pesanan</span>
-            <h3 class="font-bold text-lg sm:text-xl text-gray-800 leading-tight mt-1">{{ $item->title }}</h3>
-            <p class="text-red-600 font-extrabold text-lg sm:text-xl mt-1">Rp {{ number_format($item->price, 0, ',', '.') }}</p>
+            <h3 class="font-bold text-lg sm:text-xl text-gray-800 leading-tight mt-1">{{ $item->item_name ?? $item->title }}</h3>
+            <p class="text-red-600 font-extrabold text-lg sm:text-xl mt-1">Rp {{ number_format($item->price, 0, ',', '.') }} <span class="text-sm text-gray-500 font-medium">x {{ $qty }}</span></p>
         </div>
     </div>
 
     <form action="{{ route('marketplace.checkout.direct', $item->id) }}" method="POST">
         @csrf
+        <input type="hidden" name="qty" value="{{ $qty }}">
         <div class="mb-6">
             <label class="block text-sm font-bold text-gray-700 mb-2">Nomor WhatsApp Anda</label>
             <div class="flex">
@@ -105,6 +106,20 @@
                     </div>
                     <input type="radio" name="payment_method" value="GOPAY" class="w-5 h-5 text-emerald-600 focus:ring-emerald-500 border-gray-300" required>
                 </label>
+
+                <!-- COD (Bayar Langsung / Ketemu) -->
+                <label class="relative flex items-center justify-between p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-amber-50 hover:border-amber-300 transition-all duration-200 group has-[:checked]:border-amber-500 has-[:checked]:bg-amber-50/60 has-[:checked]:ring-1 has-[:checked]:ring-amber-500">
+                    <div class="flex items-center gap-4">
+                        <div class="w-14 h-10 bg-white border border-gray-100 rounded-lg flex items-center justify-center shadow-sm shrink-0">
+                            <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                        </div>
+                        <div>
+                            <span class="block font-bold text-gray-800 text-sm sm:text-base group-hover:text-amber-700 transition-colors">COD (Bayar Langsung)</span>
+                            <span class="block text-xs text-amber-600 font-bold mt-0.5">Ketemuan & bayar tunai</span>
+                        </div>
+                    </div>
+                    <input type="radio" name="payment_method" value="COD" class="w-5 h-5 text-amber-600 focus:ring-amber-500 border-gray-300" required>
+                </label>
             </div>
         </div>
 
@@ -113,7 +128,7 @@
             <button type="submit" class="w-full bg-red-600 text-white py-3.5 sm:py-4 rounded-xl font-bold text-sm sm:text-lg hover:bg-red-700 hover:shadow-lg sm:hover:-translate-y-0.5 transition-all duration-200 flex justify-between items-center sm:block px-6 sm:px-0">
                 <span class="sm:hidden text-left flex flex-col">
                     <span class="text-[10px] text-red-200 font-medium">Total Pembayaran</span>
-                    <span class="text-base sm:text-lg">Rp {{ number_format($item->price, 0, ',', '.') }}</span>
+                    <span class="text-base sm:text-lg">Rp {{ number_format($item->price * $qty, 0, ',', '.') }}</span>
                 </span>
                 <span class="sm:inline-block">Bayar Sekarang <span class="hidden sm:inline-block ml-1">&rarr;</span></span>
     </button>

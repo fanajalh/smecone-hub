@@ -99,7 +99,42 @@ class MarketplaceController extends Controller
         $soldProducts = $products->where('is_sold', true)->count();
         $activeProducts = $totalProducts - $soldProducts;
 
-        return view('marketplace.lapak', compact('products', 'totalViews', 'totalProducts', 'soldProducts', 'activeProducts'));
+        // Hitung Total Pendapatan dari Transaksi yang berstatus PAID (Lunas via Xendit)
+        $totalRevenue = \App\Models\Transaction::whereHas('marketplaceItem', function($query) {
+            $query->where('user_id', auth()->id());
+        })->where('status', 'PAID')->sum('amount');
+
+        // Pastikan variabel $totalRevenue ditambahkan ke compact()
+        return view('marketplace.lapak', compact('products', 'totalViews', 'totalProducts', 'soldProducts', 'activeProducts', 'totalRevenue'));
+    }
+
+    public function requestWithdrawal(Request $request)
+    {
+        $request->validate([
+            'amount' => 'required|numeric|min:10000',
+            'bank_name' => 'required|string',
+            'account_number' => 'required|string',
+            'account_name' => 'required|string',
+        ]);
+
+        $user = auth()->user();
+
+        if ($user->store_balance < $request->amount) {
+            return back()->with('error', 'Saldo tidak mencukupi untuk penarikan.');
+        }
+
+        $user->decrement('store_balance', $request->amount);
+
+        \App\Models\Withdrawal::create([
+            'user_id' => $user->id,
+            'amount' => $request->amount,
+            'bank_name' => $request->bank_name,
+            'account_number' => $request->account_number,
+            'account_name' => $request->account_name,
+            'status' => 'PENDING',
+        ]);
+
+        return back()->with('success', 'Permintaan penarikan dana diproses! Mohon tunggu admin mencairkannya.');
     }
 
     public function create() 
@@ -115,9 +150,11 @@ class MarketplaceController extends Controller
 
     public function store(Request $request)
     {
+        // 1. Tambahkan validasi untuk stok
         $request->validate([
             'item_name' => 'required|string|max:255',
             'price' => 'required|numeric',
+            'stock' => 'required|integer|min:1', // <-- Ini baru
             'description' => 'required',
             'category' => 'required',
             'image' => 'nullable|image|max:2048'
@@ -128,10 +165,12 @@ class MarketplaceController extends Controller
             $path = $request->file('image')->store('marketplaces', 'public');
         }
 
+        // 2. Masukkan field stock ke saat melakukan Create
         Marketplace::create([
             'user_id' => auth()->id(),
             'item_name' => $request->item_name,
             'price' => $request->price,
+            'stock' => $request->stock, // <-- Ini baru
             'description' => $request->description,
             'category' => $request->category,
             'type' => $request->type ?? 'Ready Stock',
@@ -143,6 +182,57 @@ class MarketplaceController extends Controller
         ]);
 
         return redirect('/marketplace')->with('success', 'Produk berhasil dipasang!');
+    }
+
+    public function edit($id)
+    {
+        $product = Marketplace::findOrFail($id);
+
+        // Hanya pemilik yang boleh edit
+        if ($product->user_id !== auth()->id()) {
+            abort(403, 'Anda tidak berhak mengedit produk ini.');
+        }
+
+        return view('marketplace.edit', compact('product'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $product = Marketplace::findOrFail($id);
+
+        if ($product->user_id !== auth()->id()) {
+            abort(403, 'Anda tidak berhak mengedit produk ini.');
+        }
+
+        $request->validate([
+            'item_name'   => 'required|string|max:255',
+            'price'       => 'required|numeric|min:0',
+            'stock'       => 'required|integer|min:0',
+            'description' => 'required',
+            'category'    => 'required',
+            'image'       => 'nullable|image|max:2048',
+        ]);
+
+        // Jika ada gambar baru, hapus yang lama lalu upload baru
+        if ($request->hasFile('image')) {
+            if ($product->image && Storage::disk('public')->exists($product->image)) {
+                Storage::disk('public')->delete($product->image);
+            }
+            $product->image = $request->file('image')->store('marketplaces', 'public');
+        }
+
+        $product->update([
+            'item_name'   => $request->item_name,
+            'price'       => $request->price,
+            'stock'       => $request->stock,
+            'description' => $request->description,
+            'category'    => $request->category,
+            'type'        => $request->type ?? $product->type,
+            'location'    => $request->location,
+            'image'       => $product->image,
+        ]);
+
+        return redirect('/marketplace/lapak-saya')->with('success', 'Produk berhasil diperbarui!');
     }
 
     public function show($id)

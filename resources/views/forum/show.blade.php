@@ -146,9 +146,15 @@
 
                 <div class="mt-auto pl-2">
                     @if(auth()->user()->is_teacher)
-                        <button onclick="toggleSubmissionsModal({{ $assignment->id }})" class="w-full bg-gray-900 text-white text-[11px] font-black py-2.5 rounded-xl hover:bg-black transition shadow-sm tap-effect">
-                            LIHAT PENGUMPULAN ({{ $assignment->submissions->count() }})
-                        </button>
+                        <div class="flex flex-col gap-2 w-full">
+                            <button onclick="toggleSubmissionsModal({{ $assignment->id }})" class="w-full bg-gray-900 text-white text-[11px] font-black py-2.5 rounded-xl hover:bg-black transition shadow-sm tap-effect">
+                                LIHAT PENGUMPULAN ({{ $assignment->submissions->count() }})
+                            </button>
+                            <a href="/assignment/{{ $assignment->id }}/export" class="w-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[11px] font-black py-2.5 rounded-xl text-center hover:bg-emerald-600 hover:text-white transition tap-effect flex items-center justify-center gap-1.5">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                EXPORT CSV
+                            </a>
+                        </div>
                     @else
                         @if($mySubmission)
                             <div class="flex gap-2">
