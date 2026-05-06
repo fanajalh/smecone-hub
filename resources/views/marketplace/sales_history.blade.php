@@ -34,8 +34,18 @@
         </div>
     </div>
     
-    <div class="max-w-4xl mx-auto px-4 md:px-6 grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-5">
-        @forelse($sales as $sale)
+    <div class="max-w-4xl mx-auto px-4 md:px-6">
+        @forelse($sales as $date => $dailySales)
+        <div class="mb-8">
+            <div class="flex items-center mb-4">
+                <div class="w-1.5 h-4 bg-red-500 rounded-full mr-2"></div>
+                <h3 class="text-sm font-bold text-gray-700 uppercase tracking-wide">
+                    {{ \Carbon\Carbon::parse($date)->isoFormat('dddd, D MMMM Y') }}
+                </h3>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-5">
+                @foreach($dailySales as $sale)
         
         {{-- BUNGKUS ALPINE JS (Isolasi Modal Per Item) --}}
         <div x-data="{ showModal: false }">
@@ -45,7 +55,15 @@
                 
                 {{-- ID & Status --}}
                 <div class="flex justify-between items-center mb-3">
-                    <span class="font-mono font-bold text-gray-500 text-[12px]">#TRX-{{ str_pad($sale->id, 5, '0', STR_PAD_LEFT) }}</span>
+                    <div class="flex flex-col gap-1">
+                        <span class="font-mono font-bold text-gray-500 text-[12px]">#TRX-{{ str_pad($sale->id, 5, '0', STR_PAD_LEFT) }}</span>
+                        @if($sale->marketplaceItem->format === 'Digital' && in_array($sale->status, ['PAID', 'SELESAI']))
+                            <span class="inline-flex w-max px-2 py-0.5 rounded shadow-sm text-[9px] font-extrabold uppercase border bg-indigo-50 text-indigo-600 border-indigo-100 items-center justify-center gap-1 mt-0.5">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                                Sent via Email
+                            </span>
+                        @endif
+                    </div>
                     @php
                         $statusColor = 'bg-gray-50 text-gray-600 border-gray-200';
                         $statusText = $sale->status;
@@ -76,6 +94,9 @@
                     @endif
                     <div>
                         <h3 class="font-bold text-[14px] text-gray-900 leading-tight line-clamp-1 mb-0.5">{{ $sale->marketplaceItem->item_name ?? 'Item Dihapus' }}</h3>
+                        @if($sale->variant_selected)
+                            <span class="text-[10px] font-black text-white bg-blue-500 rounded px-1.5 py-0.5 mb-1 inline-block">{{ $sale->variant_selected }}</span>
+                        @endif
                         <p class="text-[#E21F26] font-black text-[15px]">Rp {{ number_format($sale->amount, 0, ',', '.') }}</p>
                     </div>
                 </div>
@@ -162,7 +183,10 @@
                                         <div class="flex items-start justify-between gap-3 font-mono text-[12px]">
                                             <div class="flex-grow">
                                                 <p class="font-bold text-gray-900 leading-tight">{{ $sale->marketplaceItem->item_name ?? 'Produk Dihapus' }}</p>
-                                                <p class="text-[10px] text-gray-500 mt-1">1 x Rp {{ number_format($sale->amount, 0, ',', '.') }}</p>
+                                                @if($sale->variant_selected)
+                                                    <p class="text-[10px] text-blue-600 font-bold mt-0.5">Varian: {{ $sale->variant_selected }}</p>
+                                                @endif
+                                                <p class="text-[10px] text-gray-500 mt-1">{{ $sale->qty }} x Rp {{ number_format($sale->amount / max($sale->qty, 1), 0, ',', '.') }}</p>
                                             </div>
                                             <p class="font-bold text-gray-900 whitespace-nowrap">Rp {{ number_format($sale->amount, 0, ',', '.') }}</p>
                                         </div>
@@ -283,6 +307,9 @@
             
         </div>
         {{-- AKHIR BUNGKUS ALPINE JS --}}
+                @endforeach
+            </div>
+        </div>
         
         @empty
         <div class="col-span-full bg-white py-20 px-6 text-center rounded-[2.5rem] border border-dashed border-gray-200 shadow-sm md:mt-10">

@@ -10,12 +10,12 @@ use Illuminate\Support\Facades\Auth;
 
 class PaymentController extends Controller
 {
-    // 1. FUNGSI UNTUK MENAMPILKAN HALAMAN PILIH METODE BAYAR
     public function checkoutConfirm(Request $request, $id)
     {
         $item = Marketplace::findOrFail($id);
         $qty = $request->query('qty', 1);
-        return view('marketplace.checkout_confirm', compact('item', 'qty'));
+        $variant = $request->query('variant');
+        return view('marketplace.checkout_confirm', compact('item', 'qty', 'variant'));
     }
 
     // 2. FUNGSI UNTUK MEMPROSES API XENDIT
@@ -24,7 +24,8 @@ class PaymentController extends Controller
         // Validasi ditambah wajib isi nomor WA
         $request->validate([
             'payment_method' => 'required|in:QRIS,DANA,GOPAY,COD',
-            'whatsapp_number' => 'required'
+            'whatsapp_number' => 'required',
+            'target_email' => 'nullable|email'
         ]);
 
         // ==========================================
@@ -49,6 +50,8 @@ class PaymentController extends Controller
         $item = Marketplace::findOrFail($id);
         
         $qty = $request->input('qty', 1);
+        $variant = $request->input('variant');
+
         $totalAmount = $item->price * $qty;
 
         // Validasi Stok
@@ -57,13 +60,26 @@ class PaymentController extends Controller
             return back()->with('error', 'Maaf, stok barang tidak mencukupi atau sudah habis terjual.');
         }
 
-        // Tambahkan whatsapp_number ke database
+        // Auto Clear dari Keranjang jika ada
+        \App\Models\Cart::where('user_id', Auth::id())
+            ->where('marketplace_id', $item->id)
+            ->where(function($q) use ($variant) {
+                if ($variant) {
+                    $q->where('variant_selected', $variant);
+                } else {
+                    $q->whereNull('variant_selected');
+                }
+            })->delete();
+
+        // Tambahkan whatsapp_number dan target_email ke database
         $transaction = Transaction::create([
             'user_id' => Auth::id(),
             'marketplace_item_id' => $item->id,
             'qty' => $qty,
+            'variant_selected' => $variant,
             'amount' => $totalAmount,
             'whatsapp_number' => $waNumber, 
+            'target_email' => $request->target_email,
             'payment_method' => $method,
             'status' => 'PENDING',
         ]);
@@ -238,9 +254,108 @@ class PaymentController extends Controller
         $sales = Transaction::with(['user', 'marketplaceItem'])
             ->whereHas('marketplaceItem', function($q) {
                 $q->where('user_id', Auth::id()); 
-            })->latest()->get();
+            })->latest()->get()->groupBy(function($item) {
+                return $item->created_at->format('Y-m-d');
+            });
 
         return view('marketplace.sales_history', compact('sales'));
+    }
+
+    // REKAP PENJUALAN PER PRODUK
+    public function salesRecap()
+    {
+        $products = Marketplace::where('user_id', Auth::id())->get();
+
+        $recap = [];
+        foreach ($products as $product) {
+            $transactions = Transaction::with('user')->where('marketplace_item_id', $product->id)->latest()->get();
+            
+            $totalQty = $transactions->whereIn('status', ['PAID', 'DIPROSES', 'SELESAI'])->sum('qty');
+            $totalRevenue = $transactions->whereIn('status', ['PAID', 'DIPROSES', 'SELESAI'])->sum('amount');
+            $totalPending = $transactions->where('status', 'PENDING')->sum('amount');
+            $totalCancelled = $transactions->where('status', 'DIBATALKAN')->count();
+            $totalTransactions = $transactions->count();
+            $paidTransactions = $transactions->whereIn('status', ['PAID', 'DIPROSES', 'SELESAI'])->count();
+
+            $recap[] = [
+                'product' => $product,
+                'total_qty' => $totalQty,
+                'total_revenue' => $totalRevenue,
+                'total_pending' => $totalPending,
+                'total_cancelled' => $totalCancelled,
+                'total_transactions' => $totalTransactions,
+                'paid_transactions' => $paidTransactions,
+                'transactions' => $transactions,
+            ];
+        }
+
+        // Sort by revenue descending
+        usort($recap, function($a, $b) {
+            return $b['total_revenue'] <=> $a['total_revenue'];
+        });
+
+        $grandTotalRevenue = array_sum(array_column($recap, 'total_revenue'));
+        $grandTotalQty = array_sum(array_column($recap, 'total_qty'));
+        $grandTotalTransactions = array_sum(array_column($recap, 'paid_transactions'));
+
+        return view('marketplace.sales_recap', compact('recap', 'grandTotalRevenue', 'grandTotalQty', 'grandTotalTransactions'));
+    }
+
+    // EXPORT REKAP PENJUALAN KE CSV
+    public function exportSalesRecap()
+    {
+        $products = Marketplace::where('user_id', Auth::id())->get();
+        $storeName = Auth::user()->store_name ?? 'Lapak';
+
+        $fileName = 'rekap_penjualan_' . \Illuminate\Support\Str::slug($storeName) . '_' . date('Y-m-d') . '.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"{$fileName}\"",
+        ];
+
+        $callback = function() use ($products) {
+            $file = fopen('php://output', 'w');
+            // BOM for Excel UTF-8
+            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+
+            fputcsv($file, [
+                'No', 'Nama Produk', 'Kategori', 'Format', 'Harga Satuan',
+                'Pembeli', 'Tanggal', 'Qty', 'Total Bayar', 'Status', 'Varian'
+            ]);
+
+            $no = 1;
+            foreach ($products as $product) {
+                $transactions = Transaction::with('user')->where('marketplace_item_id', $product->id)->latest()->get();
+                
+                if ($transactions->isEmpty()) {
+                    fputcsv($file, [
+                        $no++, $product->item_name, $product->category, $product->format,
+                        $product->price, '-', '-', 0, 0, 'Belum ada transaksi', '-'
+                    ]);
+                } else {
+                    foreach ($transactions as $trx) {
+                        fputcsv($file, [
+                            $no++,
+                            $product->item_name,
+                            $product->category,
+                            $product->format,
+                            $product->price,
+                            $trx->user->name ?? 'Anonim',
+                            $trx->created_at->format('d/m/Y H:i'),
+                            $trx->qty,
+                            $trx->amount,
+                            $trx->status,
+                            $trx->variant_selected ?? '-',
+                        ]);
+                    }
+                }
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 
     // 5. FUNGSI WEBHOOK UNTUK MENERIMA SINYAL DARI XENDIT / NGROK
@@ -297,19 +412,30 @@ class PaymentController extends Controller
             }
 
             // ==========================================
-            // TRIGGER WHATSAPP BOT (KE PEMBELI & PENJUAL)
+            // TRIGGER EMAIL (PRODUK DIGITAL) / WHATSAPP BOT (PRODUK FISIK)
             // ==========================================
+            
             $botUrl = 'http://localhost:3000/send-message'; 
             
-            // 1. Notif ke Pembeli
-            if ($transaction->whatsapp_number && $transaction->marketplaceItem) {
+            // Cek jika produk digital
+            if ($transaction->marketplaceItem && $transaction->marketplaceItem->format === 'Digital') {
                 try {
-                    Http::timeout(5)->post($botUrl, [
-                        'number' => $transaction->whatsapp_number,
-                        'message' => "Halo kak *{$transaction->user->name}*! 🛒\n\nPembayaran kakak untuk pesanan *{$transaction->marketplaceItem->item_name}* sebesar *Rp ".number_format($transaction->amount, 0, ',', '.')."* telah kami terima dan *BERHASIL*.\n\nPenjual akan segera memproses pesanan kakak. Mohon kesediaannya untuk menunggu ya. Terima kasih! 🚀\n\n_SMEconE Hub_"
-                    ]);
+                    $emailTujuan = $transaction->target_email ?? $transaction->user->email;
+                    \Illuminate\Support\Facades\Mail::to($emailTujuan)->send(new \App\Mail\DigitalProductDelivered($transaction));
                 } catch (\Exception $e) {
-                    // Abaikan error agar tidak mengganggu proses lunas Xendit
+                    \Illuminate\Support\Facades\Log::error('Gagal mengirim email produk digital: ' . $e->getMessage());
+                }
+            } else {
+                // 1. Notif ke Pembeli
+                if ($transaction->whatsapp_number && $transaction->marketplaceItem) {
+                    try {
+                        Http::timeout(5)->post($botUrl, [
+                            'number' => $transaction->whatsapp_number,
+                            'message' => "Halo kak *{$transaction->user->name}*! 🛒\n\nPembayaran kakak untuk pesanan *{$transaction->marketplaceItem->item_name}* sebesar *Rp ".number_format($transaction->amount, 0, ',', '.')."* telah kami terima dan *BERHASIL*.\n\nPenjual akan segera memproses pesanan kakak. Mohon kesediaannya untuk menunggu ya. Terima kasih! 🚀\n\n_SMEconE Hub_"
+                        ]);
+                    } catch (\Exception $e) {
+                        // Abaikan error agar tidak mengganggu proses lunas Xendit
+                    }
                 }
             }
 
@@ -341,7 +467,9 @@ class PaymentController extends Controller
         $purchases = Transaction::with(['marketplaceItem.user'])
             ->where('user_id', Auth::id())
             ->latest()
-            ->get();
+            ->get()->groupBy(function($item) {
+                return $item->created_at->format('Y-m-d');
+            });
 
         return view('marketplace.purchase_history', compact('purchases'));
     }

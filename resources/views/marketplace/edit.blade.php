@@ -18,7 +18,7 @@
         </div>
     @endif
 
-    <form action="{{ route('marketplace.update', $product->id) }}" method="POST" enctype="multipart/form-data" class="bg-white p-6 md:p-10 rounded-[32px] border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] space-y-7 relative overflow-hidden">
+    <form x-data="{ format: '{{ old('format', $product->format ?? 'Fisik') }}' }" action="{{ route('marketplace.update', $product->id) }}" method="POST" enctype="multipart/form-data" class="bg-white p-6 md:p-10 rounded-[32px] border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] space-y-7 relative overflow-hidden">
         @csrf
         @method('PUT')
         
@@ -72,13 +72,55 @@
             </div>
         </div>
 
+        {{-- FORMAT PRODUK & VARIAN/LINK --}}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 relative z-10">
+            <div>
+                <label class="block text-[11px] font-black uppercase tracking-widest text-gray-400 mb-2.5 ml-1">Format Produk <span class="text-red-500">*</span></label>
+                <div class="flex bg-gray-50 p-1.5 rounded-[20px] border border-gray-200 relative">
+                    <label class="flex-1 text-center cursor-pointer relative z-10">
+                        <input type="radio" name="format" value="Fisik" x-model="format" class="peer sr-only">
+                        <div class="py-3.5 rounded-[16px] text-[13px] font-extrabold text-gray-400 transition-all peer-checked:bg-white peer-checked:text-blue-600 peer-checked:shadow-sm">
+                            📦 Fisik
+                        </div>
+                    </label>
+                    <label class="flex-1 text-center cursor-pointer relative z-10">
+                        <input type="radio" name="format" value="Digital" x-model="format" class="peer sr-only">
+                        <div class="py-3.5 rounded-[16px] text-[13px] font-extrabold text-gray-400 transition-all peer-checked:bg-white peer-checked:text-purple-600 peer-checked:shadow-sm">
+                            🌐 Digital
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <div x-show="format === 'Digital'" style="display: none;">
+                <label class="block text-[11px] font-black uppercase tracking-widest text-gray-400 mb-2.5 ml-1">Link File / G-Drive <span class="text-red-500">*</span></label>
+                <div class="relative flex items-center">
+                    <div class="absolute left-4 text-gray-400 pointer-events-none">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                    </div>
+                    <input type="url" name="digital_link" value="{{ old('digital_link', $product->digital_link) }}" :required="format === 'Digital'" placeholder="https://drive.google.com/..." 
+                           class="w-full bg-gray-50 border border-gray-200 rounded-[20px] py-3.5 pl-11 pr-5 text-[14px] font-bold text-gray-800 placeholder-gray-400 focus:bg-white focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 transition-all">
+                </div>
+            </div>
+
+            <div x-show="format === 'Fisik'">
+                <label class="block text-[11px] font-black uppercase tracking-widest text-gray-400 mb-2.5 ml-1">Varian / Topping <span class="text-gray-300">(Opsional)</span></label>
+                <div class="relative flex items-center">
+                    <div class="absolute left-4 text-gray-400 pointer-events-none text-[13px]">🏷️</div>
+                    @php $variantsStr = $product->variants_config ? implode(', ', json_decode($product->variants_config, true) ?: []) : ''; @endphp
+                    <input type="text" name="variants_config" value="{{ old('variants_config', $variantsStr) }}" placeholder="Koma (,) untuk pisah: Keju, Cokelat, Besar" 
+                           class="w-full bg-gray-50 border border-gray-200 rounded-[20px] py-3.5 pl-11 pr-5 text-[14px] font-bold text-gray-800 placeholder-gray-400 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all">
+                </div>
+            </div>
+        </div>
+
         {{-- KATEGORI, STOK, TIPE --}}
         <div class="grid grid-cols-1 md:grid-cols-3 gap-5 relative z-10">
             <div>
                 <label class="block text-[11px] font-black uppercase tracking-widest text-gray-400 mb-2.5 ml-1">Kategori <span class="text-red-500">*</span></label>
                 <div class="relative">
-                    <select name="category" required class="w-full bg-gray-50 border border-gray-200 rounded-[20px] py-3.5 px-5 text-[14px] font-bold text-gray-800 appearance-none focus:bg-white focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 transition-all cursor-pointer">
-                        @php $cats = ['Makanan' => '🍔 Makanan & Minuman', 'Alat Tulis' => '✏️ Alat Tulis', 'Elektronik' => '📱 Elektronik', 'Jasa' => '🎨 Jasa (Desain, dll)', 'Lainnya' => '📦 Lainnya']; @endphp
+                    <select name="category" x-on:change="$event.target.value === 'Produk Digital' ? format = 'Digital' : ''" required class="w-full bg-gray-50 border border-gray-200 rounded-[20px] py-3.5 px-5 text-[14px] font-bold text-gray-800 appearance-none focus:bg-white focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 transition-all cursor-pointer">
+                        @php $cats = ['Makanan' => '🍔 Makanan & Minuman', 'Alat Tulis' => '✏️ Alat Tulis', 'Elektronik' => '📱 Elektronik', 'Jasa' => '🎨 Jasa (Desain, dll)', 'Produk Digital' => '💻 Produk Digital', 'Lainnya' => '📦 Lainnya']; @endphp
                         @foreach($cats as $val => $label)
                             <option value="{{ $val }}" {{ $product->category == $val ? 'selected' : '' }}>{{ $label }}</option>
                         @endforeach
@@ -118,7 +160,7 @@
         </div>
 
         {{-- LOKASI --}}
-        <div class="relative z-10">
+        <div class="relative z-10" x-show="format === 'Fisik'">
             <label class="block text-[11px] font-black uppercase tracking-widest text-gray-400 mb-2.5 ml-1">Lokasi COD / Posisi <span class="text-gray-300">(Opsional)</span></label>
             <div class="relative flex items-center">
                 <div class="absolute left-4 text-gray-400 pointer-events-none">
@@ -151,6 +193,9 @@
         <p class="text-center text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-4">Pastikan data sesuai aturan Smecone</p>
     </form>
 </div>
+
+<!-- Include Alpine JS -->
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
 
 <script>
     const fileInput = document.getElementById('fileInput');

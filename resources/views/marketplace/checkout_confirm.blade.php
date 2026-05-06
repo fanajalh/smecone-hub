@@ -23,7 +23,12 @@
         @endif
         <div class="ml-4 sm:ml-5 flex-1 mt-1 sm:mt-0">
             <span class="text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider">Ringkasan Pesanan</span>
-            <h3 class="font-bold text-lg sm:text-xl text-gray-800 leading-tight mt-1">{{ $item->item_name ?? $item->title }}</h3>
+            <div class="flex flex-col mb-1">
+                <h3 class="font-bold text-lg sm:text-xl text-gray-800 leading-tight mt-1">{{ $item->item_name ?? $item->title }}</h3>
+                @if(!empty($variant))
+                    <span class="text-[12px] font-black text-white bg-blue-500 rounded-lg px-2 py-0.5 mt-1 self-start">Variasi: {{ $variant }}</span>
+                @endif
+            </div>
             <p class="text-red-600 font-extrabold text-lg sm:text-xl mt-1">Rp {{ number_format($item->price, 0, ',', '.') }} <span class="text-sm text-gray-500 font-medium">x {{ $qty }}</span></p>
         </div>
     </div>
@@ -31,6 +36,7 @@
     <form action="{{ route('marketplace.checkout.direct', $item->id) }}" method="POST">
         @csrf
         <input type="hidden" name="qty" value="{{ $qty }}">
+        <input type="hidden" name="variant" value="{{ $variant }}">
         <div class="mb-6">
             <label class="block text-sm font-bold text-gray-700 mb-2">Nomor WhatsApp Anda</label>
             <div class="flex">
@@ -43,6 +49,15 @@
             </div>
             <p class="text-xs text-gray-500 mt-2">Nomor ini diperlukan untuk mengirimkan rincian pesanan.</p>
         </div>
+
+        @if($item->format === 'Digital')
+        <div class="mb-6">
+            <label class="block text-sm font-bold text-gray-700 mb-2">Email Tujuan (Untuk Produk Digital)</label>
+            <input type="email" name="target_email" required value="{{ auth()->user()->email }}" placeholder="contoh@email.com" 
+                   class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-red-500 focus:ring-red-500 focus:ring-2 outline-none transition duration-200 text-base">
+            <p class="text-xs text-gray-500 mt-2">Link produk digital atau file akan dikirimkan ke email ini setelah pembayaran lunas.</p>
+        </div>
+        @endif
         
         <div class="mb-8">
             <div class="flex items-center justify-between mb-4">

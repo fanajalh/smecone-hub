@@ -86,6 +86,8 @@ Route::middleware(['auth', 'App\Http\Middleware\IsStudent'])->group(function () 
     Route::get('/marketplace/lapak-saya', [MarketplaceController::class, 'myLapak'])->name('marketplace.lapak');
     Route::get('/marketplace/penjualan', [PaymentController::class, 'salesHistory'])->name('marketplace.sales');
     Route::get('/marketplace/purchases', [App\Http\Controllers\PaymentController::class, 'purchaseHistory'])->name('marketplace.purchases');
+    Route::get('/marketplace/rekap-penjualan', [App\Http\Controllers\PaymentController::class, 'salesRecap'])->name('marketplace.recap');
+    Route::get('/marketplace/rekap-penjualan/export', [App\Http\Controllers\PaymentController::class, 'exportSalesRecap'])->name('marketplace.recap.export');
     Route::post('/marketplace/register-store', [MarketplaceController::class, 'registerStore']);
     Route::post('/marketplace/store', [MarketplaceController::class, 'store']);
     Route::post('/marketplace/{id}/broadcast', [MarketplaceController::class, 'broadcastKeWa']);          
@@ -186,64 +188,73 @@ Route::post('/api/docs/push', [RepositoryController::class, 'pushFromCli'])->wit
 // WEBHOOK XENDIT
 Route::post('/api/xendit/callback', [PaymentController::class, 'handleWebhook'])->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
 Route::get('/tes-bayar/{id}', function($id) {
-    // Tambahin ->with() biar data nama user & judul barang kebawa buat isi pesan WA
     $transaction = \App\Models\Transaction::with(['user', 'marketplaceItem', 'marketplaceItem.user'])->find($id);
     
     if(!$transaction) return "Transaksi nggak ketemu bos!";
 
-    // 1. LANGSUNG HACK DATABASE JADI LUNAS
+    $log = [];
+
     $transaction->update(['status' => 'PAID']);
+    $log[] = "✅ Database: Status diubah ke PAID";
     
     if ($transaction->marketplaceItem) {
-        // Pengurangan stok
         if ($transaction->marketplaceItem->stock - $transaction->qty <= 0) {
-            $transaction->marketplaceItem->update([
-                'is_sold' => true,
-                'stock' => 0
-            ]);
+            $transaction->marketplaceItem->update(['is_sold' => true, 'stock' => 0]);
         } else {
             $transaction->marketplaceItem->decrement('stock', $transaction->qty);
         }
+        $log[] = "✅ Stok: Dikurangi " . $transaction->qty;
 
-        // Penambahan saldo lapak penjual
         $seller = $transaction->marketplaceItem->user;
         if ($seller) {
             $seller->increment('store_balance', $transaction->amount);
+            $log[] = "✅ Saldo penjual ditambah";
         }
     }
 
-    // 2. TRIGGER WHATSAPP BOT LANGSUNG DARI SINI! 🚀
     $botUrl = 'http://localhost:3000/send-message'; 
     
-    // Notif ke Pembeli
-    if ($transaction->whatsapp_number) {
+    if ($transaction->marketplaceItem && $transaction->marketplaceItem->format === 'Digital') {
+        $emailTujuan = $transaction->target_email ?? $transaction->user->email;
+        $log[] = "📧 Produk DIGITAL terdeteksi! Kirim email ke: " . $emailTujuan;
+        $log[] = "📧 Digital Link: " . ($transaction->marketplaceItem->digital_link ?? 'KOSONG');
+        
         try {
-            \Illuminate\Support\Facades\Http::timeout(5)->post($botUrl, [
-                'number' => $transaction->whatsapp_number,
-                'message' => "Halo kak *{$transaction->user->name}*! 🛒\n\nPembayaran kakak untuk pesanan *{$transaction->marketplaceItem->item_name}* sebesar *Rp ".number_format($transaction->amount, 0, ',', '.')."* telah kami terima dan *BERHASIL*.\n\nPenjual akan segera memproses pesanan kakak. Mohon kesediaannya untuk menunggu ya. Terima kasih! 🚀\n\n_SMEconE Hub_"
-            ]);
+            \Illuminate\Support\Facades\Mail::to($emailTujuan)->send(new \App\Mail\DigitalProductDelivered($transaction));
+            $log[] = "✅ EMAIL BERHASIL DIKIRIM!";
         } catch (\Exception $e) {
-            // Abaikan error
+            $log[] = "❌ EMAIL GAGAL: " . $e->getMessage();
+            \Illuminate\Support\Facades\Log::error('Email digital gagal: ' . $e->getMessage());
+        }
+    } else {
+        $log[] = "📦 Produk FISIK (format: " . ($transaction->marketplaceItem->format ?? 'null') . ") - kirim WA";
+        if ($transaction->whatsapp_number) {
+            try {
+                \Illuminate\Support\Facades\Http::timeout(5)->post($botUrl, [
+                    'number' => $transaction->whatsapp_number,
+                    'message' => "Halo kak *{$transaction->user->name}*! Pembayaran *{$transaction->marketplaceItem->item_name}* BERHASIL. Penjual akan segera proses. _SMEconE Hub_"
+                ]);
+                $log[] = "✅ WA Pembeli dikirim";
+            } catch (\Exception $e) {
+                $log[] = "⚠️ WA Pembeli gagal: " . $e->getMessage();
+            }
         }
     }
 
-    // Notif ke Penjual
     $sellerWa = $transaction->marketplaceItem->user->whatsapp_number ?? null;
     if ($sellerWa) {
         try {
-            $waPembeli = str_starts_with($transaction->whatsapp_number, '62') ? '+' . $transaction->whatsapp_number : $transaction->whatsapp_number;
             $linkWaPembeli = 'https://wa.me/' . ltrim($transaction->whatsapp_number, '+');
-
             \Illuminate\Support\Facades\Http::timeout(5)->post($botUrl, [
                 'number' => $sellerWa,
-                'message' => "🔔 *PESANAN BARU MASUK!* 🔔\n\nSelamat! Barang jualanmu *{$transaction->marketplaceItem->item_name}* telah LUNAS dibayar oleh *{$transaction->user->name}*.\n\n*Detail Pesanan:*\nNominal: Rp ".number_format($transaction->amount, 0, ',', '.')."\nNomor WA Pembeli: {$waPembeli}\n\nSilakan segera hubungi pembeli untuk proses penyerahan barang ya! 📦\n\nKlik untuk chat pembeli: {$linkWaPembeli}\n\n_SMEconE Hub_"
+                'message' => "🔔 PESANAN BARU! {$transaction->marketplaceItem->item_name} LUNAS oleh {$transaction->user->name}. Chat pembeli: {$linkWaPembeli} _SMEconE Hub_"
             ]);
+            $log[] = "✅ WA Penjual dikirim";
         } catch (\Exception $e) {
-            // Abaikan error
+            $log[] = "⚠️ WA Penjual gagal: " . $e->getMessage();
         }
     }
 
-    // 3. Tetap coba kirim sinyal ke Xendit (Opsional)
     try {
         if ($transaction->invoice_id) {
             \Illuminate\Support\Facades\Http::withHeaders(['api-version' => '2022-07-31'])
@@ -252,9 +263,12 @@ Route::get('/tes-bayar/{id}', function($id) {
                     'amount' => (int) $transaction->amount
                 ]);
         }
-    } catch (\Exception $e) {
-        // Abaikan kalau Xendit error
-    }
+    } catch (\Exception $e) {}
 
-    return "🔥 SUKSES BERAT! Database udah LUNAS & Pesan WA (Pembeli dan Penjual) udah dipicu ke bot. Coba cek terminal bot NodeJS-nya sekarang! Balik ke web dan refresh.";
+    $output = "<h2>🔥 TES BAYAR - TRANSAKSI #{$id}</h2><hr>";
+    foreach ($log as $line) {
+        $output .= "<p>{$line}</p>";
+    }
+    $output .= "<hr><p>Balik ke web dan refresh.</p>";
+    return $output;
 });

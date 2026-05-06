@@ -38,12 +38,15 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-4 md:flex md:gap-3 gap-2">
+            <div class="grid grid-cols-5 md:flex md:gap-3 gap-2">
                 <a href="/marketplace/toko/{{ auth()->id() }}" class="col-span-2 md:flex-none md:px-6 flex items-center justify-center bg-gray-50 border border-gray-100 hover:bg-gray-100 text-gray-700 py-2.5 rounded-xl text-[13px] md:text-[14px] font-medium transition active:scale-95">
                     Lihat Lapak
                 </a>
                 <a href="{{ route('marketplace.sales') }}" class="col-span-1 md:w-12 flex items-center justify-center bg-gray-50 border border-gray-100 hover:bg-gray-100 text-gray-700 py-2.5 rounded-xl transition active:scale-95" title="Riwayat Penjualan">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                </a>
+                <a href="{{ route('marketplace.recap') }}" class="col-span-1 md:w-12 flex items-center justify-center bg-emerald-50 border border-emerald-100 hover:bg-emerald-100 text-emerald-700 py-2.5 rounded-xl transition active:scale-95" title="Rekap Penjualan">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
                 </a>
                 <a href="/marketplace/create" class="col-span-1 md:flex-none md:px-6 flex items-center justify-center gap-2 bg-red-50 text-red-600 md:bg-red-600 md:text-white py-2.5 rounded-xl transition active:scale-95 font-medium text-[14px]" title="Tambah Produk">
                     <svg class="w-5 h-5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>

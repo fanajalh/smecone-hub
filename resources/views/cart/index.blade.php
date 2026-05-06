@@ -325,7 +325,11 @@ function cartPage() {
             const selectedCartId = this.selectedItems[0];
             const cartItem = this.cartItems.find(i => i.id == selectedCartId);
 
-            window.location.href = '/marketplace/' + cartItem.product_id + '/checkout?qty=' + cartItem.qty;
+            let checkoutUrl = '/marketplace/' + cartItem.product_id + '/checkout?qty=' + cartItem.qty;
+            if (cartItem.variant) {
+                checkoutUrl += '&variant=' + encodeURIComponent(cartItem.variant);
+            }
+            window.location.href = checkoutUrl;
         },
 
         showToast(message) {

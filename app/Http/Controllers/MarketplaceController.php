@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Marketplace;
+use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Http;
@@ -92,6 +93,12 @@ class MarketplaceController extends Controller
 
     public function myLapak()
     {
+        $user = auth()->user();
+
+        if (empty($user->store_name)) {
+            return view('marketplace.register-store');
+        }
+
         $products = Marketplace::where('user_id', auth()->id())->latest()->get();
         
         $totalViews = $products->sum('views_count');
@@ -150,13 +157,15 @@ class MarketplaceController extends Controller
 
     public function store(Request $request)
     {
-        // 1. Tambahkan validasi untuk stok
         $request->validate([
             'item_name' => 'required|string|max:255',
             'price' => 'required|numeric',
-            'stock' => 'required|integer|min:1', // <-- Ini baru
+            'stock' => 'required|integer|min:1',
             'description' => 'required',
             'category' => 'required',
+            'format' => 'required|in:Fisik,Digital',
+            'digital_link' => 'nullable|url',
+            'variants_config' => 'nullable|string',
             'image' => 'nullable|image|max:2048'
         ]);
 
@@ -165,16 +174,25 @@ class MarketplaceController extends Controller
             $path = $request->file('image')->store('marketplaces', 'public');
         }
 
-        // 2. Masukkan field stock ke saat melakukan Create
+        // Parse variants string to JSON array (e.g., "Keju, Cokelat" -> ["Keju", "Cokelat"])
+        $variants = null;
+        if ($request->variants_config) {
+            $variantsInput = array_map('trim', explode(',', $request->variants_config));
+            $variants = json_encode(array_filter($variantsInput));
+        }
+
         Marketplace::create([
             'user_id' => auth()->id(),
             'item_name' => $request->item_name,
             'price' => $request->price,
-            'stock' => $request->stock, // <-- Ini baru
+            'stock' => $request->stock,
             'description' => $request->description,
             'category' => $request->category,
             'type' => $request->type ?? 'Ready Stock',
             'location' => $request->location,
+            'format' => $request->format,
+            'digital_link' => $request->format === 'Digital' ? $request->digital_link : null,
+            'variants_config' => $request->format === 'Fisik' ? $variants : null,
             'image' => $path,
             'is_sold' => false,
             'views_count' => 0,
@@ -210,15 +228,23 @@ class MarketplaceController extends Controller
             'stock'       => 'required|integer|min:0',
             'description' => 'required',
             'category'    => 'required',
+            'format'      => 'required|in:Fisik,Digital',
+            'digital_link'=> 'nullable|url',
+            'variants_config' => 'nullable|string',
             'image'       => 'nullable|image|max:2048',
         ]);
 
-        // Jika ada gambar baru, hapus yang lama lalu upload baru
         if ($request->hasFile('image')) {
             if ($product->image && Storage::disk('public')->exists($product->image)) {
                 Storage::disk('public')->delete($product->image);
             }
             $product->image = $request->file('image')->store('marketplaces', 'public');
+        }
+
+        $variants = null;
+        if ($request->variants_config) {
+            $variantsInput = array_map('trim', explode(',', $request->variants_config));
+            $variants = json_encode(array_filter($variantsInput));
         }
 
         $product->update([
@@ -229,6 +255,9 @@ class MarketplaceController extends Controller
             'category'    => $request->category,
             'type'        => $request->type ?? $product->type,
             'location'    => $request->location,
+            'format'      => $request->format,
+            'digital_link'=> $request->format === 'Digital' ? $request->digital_link : null,
+            'variants_config' => $request->format === 'Fisik' ? $variants : null,
             'image'       => $product->image,
         ]);
 

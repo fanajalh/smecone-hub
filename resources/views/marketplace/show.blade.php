@@ -160,7 +160,8 @@
 </div>
 
 {{-- ================= FLOATING BOTTOM BAR (DESAIN BARU) ================= --}}
-<div x-data="{ qty: 1, stock: {{ $product->stock ?? 99 }} }" class="fixed bottom-0 left-0 right-0 z-50 flex justify-center pointer-events-none pb-safe">
+@php $variantsArr = $product->variants_config ? json_decode($product->variants_config) : []; @endphp
+<div x-data="{ qty: 1, stock: {{ $product->stock ?? 999 }}, variant: '', variants: {{ json_encode($variantsArr) }} }" class="fixed bottom-0 left-0 right-0 z-50 flex justify-center pointer-events-none pb-safe">
     <div class="bg-white w-full max-w-[480px] rounded-t-[2.5rem] shadow-[0_-10px_40px_rgba(0,0,0,0.08)] border-t border-gray-50 pointer-events-auto flex flex-col px-6 py-5">
         
         {{-- ==== LOGIKA PEMBELI ==== --}}
@@ -188,6 +189,19 @@
                 @endif
             </div>
 
+            {{-- Varian Selector --}}
+            <template x-if="variants.length > 0 && !{{ $product->is_sold ? 'true' : 'false' }}">
+                <div class="mb-4">
+                    <p class="text-[11px] font-bold text-gray-400 mb-1.5 uppercase tracking-wider">Pilih Varian / Topping</p>
+                    <select x-model="variant" class="w-full bg-gray-50 border border-gray-200 rounded-[12px] py-2.5 px-3 text-[13px] font-bold text-gray-800 outline-none focus:border-red-500 focus:ring-2 focus:ring-red-100 transition-all cursor-pointer">
+                        <option value="" disabled selected hidden>-- Pilih Varian --</option>
+                        <template x-for="v in variants" :key="v">
+                            <option :value="v" x-text="v"></option>
+                        </template>
+                    </select>
+                </div>
+            </template>
+
             {{-- Bagian Bawah: Aksi Tombol --}}
             <div class="flex items-center gap-2.5 h-[52px]">
                 @php
@@ -203,14 +217,16 @@
                 </a>
 
                 {{-- Ikon Keranjang --}}
-                <button type="button" @click="addToCart({{ $product->id }}, qty)" 
+                <button type="button" @click="if(variants.length > 0 && !variant) { Swal.fire('Pilih Varian', 'Harap pilih varian terlebih dahulu!', 'warning') } else { addToCart({{ $product->id }}, qty, variant) }" 
                         class="w-[52px] h-[52px] flex items-center justify-center rounded-[1.2rem] bg-white border border-gray-200 text-gray-500 hover:text-[#E21F26] hover:border-red-200 hover:bg-red-50 transition tap-effect shrink-0 shadow-sm {{ $product->is_sold ? 'opacity-50 cursor-not-allowed' : '' }}" {{ $product->is_sold ? 'disabled' : '' }}>
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
                 </button>
 
                 {{-- Form Beli Sekarang --}}
-                <form action="{{ route('marketplace.checkout.confirm', $product->id) }}" method="GET" class="flex-1 h-full">
+                <form action="{{ route('marketplace.checkout.confirm', $product->id) }}" method="GET" class="flex-1 h-full"
+                      @submit.prevent="if(variants.length > 0 && !variant) { Swal.fire('Pilih Varian', 'Harap pilih varian terlebih dahulu!', 'warning') } else { $el.submit() }">
                     <input type="hidden" name="qty" :value="qty">
+                    <input type="hidden" name="variant" :value="variant">
                     <button type="submit" 
                             class="w-full h-[52px] rounded-[1.2rem] font-bold text-[15px] flex items-center justify-center transition tap-effect {{ $product->is_sold ? 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-none' : 'bg-[#E21F26] text-white shadow-[0_8px_20px_rgba(226,31,38,0.25)] hover:bg-red-700 hover:-translate-y-0.5' }}" 
                             {{ $product->is_sold ? 'disabled' : '' }}>
@@ -240,8 +256,11 @@
 </div>
 
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-function addToCart(productId, qtyToAdd) {
+function addToCart(productId, qtyToAdd, variant = null) {
+    if (!qtyToAdd) qtyToAdd = 1;
+    
     fetch('/cart/add', {
         method: 'POST',
         headers: {
@@ -249,21 +268,42 @@ function addToCart(productId, qtyToAdd) {
             'Accept': 'application/json',
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
         },
-        body: JSON.stringify({ product_id: productId, qty: qtyToAdd })
+        body: JSON.stringify({ product_id: productId, qty: qtyToAdd, variant: variant })
     })
     .then(async response => {
         const data = await response.json();
         if (!response.ok) {
-            alert(data.message || 'Gagal menambahkan ke keranjang');
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal',
+                text: data.message || 'Gagal menambahkan ke keranjang',
+                confirmButtonColor: '#E21F26'
+            });
             return;
         }
-        if (confirm(data.message + '\n\nBuka halaman Keranjang sekarang?')) {
-            window.location.href = '/keranjang';
-        }
+
+        // Tampilkan animasi pop-up cart
+        Swal.fire({
+            title: 'Berhasil!',
+            text: data.message,
+            icon: 'success',
+            showCancelButton: true,
+            confirmButtonText: 'Lihat Keranjang',
+            cancelButtonText: 'Belanja Lagi',
+            confirmButtonColor: '#E21F26',
+            cancelButtonColor: '#9CA3AF'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = '/keranjang';
+            }
+        });
+        
+        // Polling badge untuk update keranjang di menu Header (opsional jika ada global script badge)
+        if(typeof window.updateCartBadge === 'function') window.updateCartBadge();
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('Terjadi kesalahan sistem.');
+        Swal.fire('Oops!', 'Terjadi kesalahan sistem.', 'error');
     });
 }
 </script>

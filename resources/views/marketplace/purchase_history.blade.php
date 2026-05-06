@@ -34,8 +34,18 @@
         </div>
     </div>
     
-    <div class="max-w-4xl mx-auto px-4 md:px-6 grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-5">
-        @forelse($purchases as $purchase)
+    <div class="max-w-4xl mx-auto px-4 md:px-6">
+        @forelse($purchases as $date => $dailyPurchases)
+        <div class="mb-8">
+            <div class="flex items-center mb-4">
+                <div class="w-1.5 h-4 bg-red-500 rounded-full mr-2"></div>
+                <h3 class="text-sm font-bold text-gray-700 uppercase tracking-wide">
+                    {{ \Carbon\Carbon::parse($date)->isoFormat('dddd, D MMMM Y') }}
+                </h3>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-5">
+                @foreach($dailyPurchases as $purchase)
         
         {{-- BUNGKUS ALPINE JS (Isolasi Modal Per Item) --}}
         <div x-data="{ showModal: false }">
@@ -76,6 +86,9 @@
                     @endif
                     <div>
                         <h3 class="font-bold text-[14px] text-gray-900 leading-tight line-clamp-1 mb-0.5">{{ $purchase->marketplaceItem->item_name ?? 'Produk Dihapus' }}</h3>
+                        @if($purchase->variant_selected)
+                            <span class="text-[10px] font-black text-white bg-blue-500 rounded px-1.5 py-0.5 mb-1 inline-block">{{ $purchase->variant_selected }}</span>
+                        @endif
                         <p class="text-[#E21F26] font-black text-[15px]">Rp {{ number_format($purchase->amount, 0, ',', '.') }}</p>
                     </div>
                 </div>
@@ -158,7 +171,10 @@
                                         <div class="flex items-start justify-between gap-3 font-mono text-[12px]">
                                             <div class="flex-grow">
                                                 <p class="font-bold text-gray-900 leading-tight">{{ $purchase->marketplaceItem->item_name ?? 'Produk Dihapus' }}</p>
-                                                <p class="text-[10px] text-gray-500 mt-1">1 x Rp {{ number_format($purchase->amount, 0, ',', '.') }}</p>
+                                                @if($purchase->variant_selected)
+                                                    <p class="text-[10px] text-blue-600 font-bold mt-0.5">Varian: {{ $purchase->variant_selected }}</p>
+                                                @endif
+                                                <p class="text-[10px] text-gray-500 mt-1">{{ $purchase->qty }} x Rp {{ number_format($purchase->amount / max($purchase->qty, 1), 0, ',', '.') }}</p>
                                             </div>
                                             <p class="font-bold text-gray-900 whitespace-nowrap">Rp {{ number_format($purchase->amount, 0, ',', '.') }}</p>
                                         </div>
@@ -282,6 +298,9 @@
             
         </div>
         {{-- AKHIR BUNGKUS ALPINE JS --}}
+                @endforeach
+            </div>
+        </div>
         
         @empty
         <div class="col-span-full bg-white py-20 px-6 text-center rounded-[2.5rem] border border-dashed border-gray-200 shadow-sm md:mt-10">

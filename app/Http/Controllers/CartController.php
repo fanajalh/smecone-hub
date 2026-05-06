@@ -33,7 +33,7 @@ class CartController extends Controller
                 return [
                     'id'         => $c->id,
                     'product_id' => $c->marketplace_id,
-                    'name'       => $c->item->item_name ?? 'Produk Dihapus',
+                    'name'       => ($c->item->item_name ?? 'Produk Dihapus') . ($c->variant_selected ? ' ('.$c->variant_selected.')' : ''),
                     'price'      => (int) ($c->item->price ?? 0),
                     'image'      => $c->item && $c->item->image
                                         ? asset('storage/' . $c->item->image)
@@ -41,6 +41,7 @@ class CartController extends Controller
                     'qty'        => $c->qty,
                     'is_sold'    => (bool) ($c->item->is_sold ?? false),
                     'seller'     => $c->item->user->name ?? '-',
+                    'variant'    => $c->variant_selected,
                 ];
             });
 
@@ -55,7 +56,8 @@ class CartController extends Controller
     {
         $request->validate([
             'product_id' => 'required|exists:marketplaces,id',
-            'qty' => 'nullable|integer|min:1'
+            'qty' => 'nullable|integer|min:1',
+            'variant' => 'nullable|string'
         ]);
 
         $product = Marketplace::findOrFail($request->product_id);
@@ -68,7 +70,11 @@ class CartController extends Controller
         }
 
         $cart = Cart::firstOrCreate(
-            ['user_id' => Auth::id(), 'marketplace_id' => $product->id],
+            [
+                'user_id' => Auth::id(), 
+                'marketplace_id' => $product->id,
+                'variant_selected' => $request->variant
+            ],
             ['qty' => 0]
         );
 
@@ -82,7 +88,7 @@ class CartController extends Controller
         $cart->save();
 
         return response()->json([
-            'message' => $product->item_name . ' ditambahkan ke keranjang!',
+            'message' => $product->item_name . ($request->variant ? ' ('.$request->variant.')' : '') . ' ditambahkan ke keranjang!',
             'count'   => Cart::where('user_id', Auth::id())->sum('qty'),
         ]);
     }

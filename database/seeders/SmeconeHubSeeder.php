@@ -110,7 +110,7 @@ class SmeconeHubSeeder extends Seeder
         // ==========================================
         $items = [];
         $itemNames = ['Jasa Pembuatan Web Company Profile', 'Template Admin Dashboard Tailwind', 'Source Code Sistem Kasir (POS)', 'E-Book Panduan Mahir Laravel', 'Jasa Desain Logo Estetik'];
-        $categories = ['Jasa', 'Digital', 'Digital', 'Digital', 'Jasa'];
+        $categories = ['Jasa', 'Lainnya', 'Lainnya', 'Elektronik', 'Jasa'];
 
         foreach ($itemNames as $i => $name) {
             $item = Marketplace::create([
@@ -119,7 +119,7 @@ class SmeconeHubSeeder extends Seeder
                 'description' => $faker->paragraph(2),
                 'price' => rand(50000, 500000),
                 'category' => $categories[$i],
-                'type' => 'digital',
+                'type' => 'Ready Stock',
                 'is_sold' => false,
                 'views_count' => rand(10, 100),
                 'stock' => rand(5, 50),
@@ -169,7 +169,7 @@ class SmeconeHubSeeder extends Seeder
             // Add dummy comments & likes to Event
             $event->comments()->create([
                 'user_id' => $users[array_rand($users)]->id,
-                'content' => 'Wah wajib ikut nih, keren banget acaranya!',
+                'body' => 'Wah wajib ikut nih, keren banget acaranya!',
             ]);
             $event->likes()->create(['user_id' => $users[array_rand($users)]->id]);
             $event->likes()->create(['user_id' => $users[array_rand($users)]->id]);
@@ -205,8 +205,8 @@ class SmeconeHubSeeder extends Seeder
         // 6. SEED LOST AND FOUND
         // ==========================================
         $lafItems = [
-            ['Ditemukan Kunci Motor Honda', 'Ditemukan di parkiran dekat kantin, ada gantungan kunci beruang.', 'found', 'open'],
-            ['Kehilangan Flashdisk Sandisk 32GB', 'Flashdisk warna merah hitam, terakhir dipakai di Lab Komputer 2.', 'lost', 'open'],
+            ['Ditemukan Kunci Motor Honda', 'Ditemukan di parkiran dekat kantin, ada gantungan kunci beruang.', 'found', 'active'],
+            ['Kehilangan Flashdisk Sandisk 32GB', 'Flashdisk warna merah hitam, terakhir dipakai di Lab Komputer 2.', 'lost', 'active'],
             ['Ditemukan Dompet Hitam', 'Berisi KTP, KTM dan beberapa kartu. Ditemukan di lapangan.', 'found', 'resolved']
         ];
 
