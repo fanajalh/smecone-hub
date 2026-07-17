@@ -100,7 +100,7 @@
     <div class="max-w-6xl w-full bg-white rounded-[2.5rem] shadow-2xl flex flex-col md:flex-row overflow-hidden min-h-[650px] border border-gray-100">
         
         <!-- LEFT PANEL (Illustration - Hidden on Mobile) -->
-        <div class="hidden md:flex w-1/2 bg-red-50 relative p-12 flex-col justify-between illus-enter items-center overflow-hidden group">
+        <div class="hidden md:flex w-1/2 bg-red-50 relative p-8 flex-col justify-between illus-enter items-center overflow-hidden group">
             <!-- Decorative Blobs -->
             <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
                 <div class="absolute top-[-10%] left-[-10%] w-96 h-96 bg-red-200 rounded-full mix-blend-multiply filter blur-3xl opacity-70 group-hover:scale-110 transition-transform duration-1000"></div>
@@ -109,7 +109,7 @@
 
             <!-- Top Left Logo -->
             <div class="relative z-10 w-full text-left">
-                <div class="flex items-center gap-2 mb-8">
+                <div class="flex items-center gap-2 mb-4">
                     <div class="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-md">S</div>
                     <span class="font-bold text-gray-800 tracking-wider text-sm">SMECONE HUB</span>
                 </div>
@@ -117,15 +117,15 @@
 
             <!-- Illustration Area -->
             <div class="relative z-10 w-full max-w-sm flex-grow flex items-center justify-center">
-                <div class="w-full h-72 relative flex items-center justify-center">
+                <div class="w-full h-64 relative flex items-center justify-center">
                     
                     <!-- Ini adalah gambar placeholder dari Popsy. Anda bisa ganti URL src ini dengan path gambar 3D milik Anda seperti asset('images/3d-login.png') -->
                     <img src="https://illustrations.popsy.co/red/surreal-hourglass.svg" alt="Login Illustration" class="w-full h-full object-contain filter drop-shadow-2xl transform transition-transform duration-700 hover:scale-105" onerror="this.style.display='none'; document.getElementById('css-fallback').style.display='flex';">
                     
                     <div id="css-fallback" class="hidden absolute inset-0 flex-col items-center justify-center">
-                        <div class="w-48 h-48 bg-white/80 rounded-3xl shadow-xl flex items-center justify-center relative rotate-3 hover:rotate-0 transition-transform duration-500 backdrop-blur-sm border border-white">
+                        <div class="w-40 h-40 bg-white/80 rounded-3xl shadow-xl flex items-center justify-center relative rotate-3 hover:rotate-0 transition-transform duration-500 backdrop-blur-sm border border-white">
                             <div class="absolute inset-4 bg-red-50/50 rounded-2xl border-2 border-dashed border-red-200 flex items-center justify-center">
-                                <svg class="w-16 h-16 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                <svg class="w-12 h-12 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                             </div>
                         </div>
                     </div>
@@ -133,14 +133,14 @@
             </div>
 
             <!-- Bottom Left Info Card -->
-            <div class="relative z-10 w-full mt-8 glass-card p-6 rounded-2xl text-left border border-white shadow-lg">
-                <h3 class="font-bold text-gray-800 text-lg mb-2">Platform Terintegrasi</h3>
-                <p class="text-sm text-gray-600 leading-relaxed">Kelola semua kebutuhan bisnis Anda dalam satu ekosistem digital yang canggih dan mudah digunakan.</p>
+            <div class="relative z-10 w-full mt-6 glass-card p-5 rounded-2xl text-left border border-white shadow-lg">
+                <h3 class="font-bold text-gray-800 text-base mb-1">Platform Terintegrasi</h3>
+                <p class="text-xs text-gray-600 leading-relaxed">Kelola semua kebutuhan bisnis Anda dalam satu ekosistem digital yang canggih dan mudah digunakan.</p>
             </div>
         </div>
 
         <!-- RIGHT PANEL (Form) -->
-        <div class="w-full md:w-1/2 p-8 sm:p-12 lg:p-16 flex flex-col justify-center bg-white relative form-enter">
+        <div class="w-full md:w-1/2 p-6 sm:p-8 lg:p-10 flex flex-col justify-center bg-white relative form-enter">
             <!-- Mobile Logo -->
             <div class="md:hidden flex items-center gap-2 mb-8 justify-center">
                 <div class="w-10 h-10 bg-red-600 rounded-xl flex items-center justify-center text-white font-black text-xl shadow-lg">S</div>
