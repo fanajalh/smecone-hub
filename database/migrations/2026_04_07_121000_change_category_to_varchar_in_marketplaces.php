@@ -1,18 +1,22 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
     public function up()
     {
-        // Alter category enum to include Produk Digital
-        DB::statement("ALTER TABLE marketplaces MODIFY category VARCHAR(255)");
+        Schema::table('marketplaces', function (Blueprint $table) {
+            $table->string('category', 255)->change();
+        });
     }
 
     public function down()
     {
-        DB::statement("ALTER TABLE marketplaces MODIFY category ENUM('Makanan', 'Alat Tulis', 'Elektronik', 'Jasa', 'Lainnya')");
+        Schema::table('marketplaces', function (Blueprint $table) {
+            $table->string('category', 255)->change();
+        });
     }
 };

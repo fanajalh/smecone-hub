@@ -26,14 +26,9 @@ return new class extends Migration
             }
         }
 
-        // 2. Change column to JSON
-        Schema::table('prestasis', function (Blueprint $table) {
-            $table->json('gambar')->nullable()->change();
-        });
-        
-        Schema::table('events', function (Blueprint $table) {
-            $table->json('gambar')->nullable()->change();
-        });
+        // 2. Change column to JSON using raw SQL for PostgreSQL compatibility
+        DB::statement('ALTER TABLE prestasis ALTER COLUMN gambar TYPE json USING gambar::json');
+        DB::statement('ALTER TABLE events ALTER COLUMN gambar TYPE json USING gambar::json');
     }
 
     public function down(): void

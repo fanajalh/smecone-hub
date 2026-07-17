@@ -5,7 +5,6 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\RepositoryController;
 use App\Http\Controllers\MarketplaceController;
-use App\Http\Controllers\LostAndFoundController;
 use App\Http\Controllers\ForumController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AdminController;
