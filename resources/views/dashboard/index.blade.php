@@ -314,12 +314,6 @@
                         </div>
                         <span class="text-[10px] md:text-[11px] font-bold text-gray-700 leading-tight group-hover:text-orange-700">Lapakku</span>
                     </a>
-                    <a href="/lost-found" class="group flex flex-col items-center gap-2 p-2 hover:bg-indigo-50 rounded-2xl transition-all text-center">
-                        <div class="w-12 h-12 bg-indigo-50 border border-indigo-100 rounded-xl flex items-center justify-center text-indigo-600 group-hover:scale-110 transition-transform">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                        </div>
-                        <span class="text-[10px] md:text-[11px] font-bold text-gray-700 leading-tight group-hover:text-indigo-700">Barang</span>
-                    </a>
                 </div>
             `,
             showConfirmButton: false,
