@@ -95,7 +95,7 @@ return [
             'prefix' => '',
             'prefix_indexes' => true,
             'search_path' => 'public',
-            'sslmode' => env('DB_SSLMODE', 'prefer'),
+            'sslmode' => env('DB_SSLMODE', 'prefer') . (str_contains(env('DB_HOST', ''), 'neon.tech') ? ';options=endpoint=' . explode('.', env('DB_HOST'))[0] : ''),
         ],
 
         'sqlsrv' => [
