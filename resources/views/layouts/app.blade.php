@@ -49,8 +49,8 @@
         <div class="flex items-center gap-10">
             {{-- Logo Brand --}}
             <a href="/dashboard" class="flex items-center gap-3 group tap-effect">
-                <div class="w-10 h-10 bg-gradient-to-br from-[#E21F26] to-[#B9151D] rounded-[1rem] flex items-center justify-center text-white font-black text-xl shadow-[0_4px_12px_rgba(226,31,38,0.25)] group-hover:rotate-6 group-hover:scale-105 transition-all duration-300">
-                    S
+                <div class="w-10 h-10 rounded-[1rem] flex items-center justify-center bg-white shadow-[0_4px_12px_rgba(226,31,38,0.25)] group-hover:rotate-6 group-hover:scale-105 transition-all duration-300 overflow-hidden">
+                    <img src="https://graph.facebook.com/smkn1purwokerto/picture?type=large" alt="SMKN 1 Purwokerto Logo" class="w-full h-full object-cover">
                 </div>
                 <span class="text-xl font-extrabold text-gray-900 tracking-tight">Smecone<span class="text-[#E21F26]">Hub</span></span>
             </a>

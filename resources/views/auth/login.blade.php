@@ -87,8 +87,8 @@
 <!-- WELCOME ANIMATION -->
 <div id="company-welcome" class="company-overlay flex flex-col items-center justify-center relative">
     <div class="flex items-center gap-3 mb-2 brand-logo-anim">
-        <div class="w-12 h-12 bg-red-600 rounded-xl flex items-center justify-center text-white font-black text-2xl shadow-lg shadow-red-600/30">
-            S
+        <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-lg shadow-red-600/30 overflow-hidden">
+            <img src="https://graph.facebook.com/smkn1purwokerto/picture?type=large" alt="SMKN 1 Purwokerto Logo" class="w-full h-full object-cover">
         </div>
         <h1 class="text-4xl font-black text-gray-900 tracking-tight brand-text-anim">SMECONE</h1>
     </div>
@@ -110,7 +110,9 @@
             <!-- Top Left Logo -->
             <div class="relative z-10 w-full text-left">
                 <div class="flex items-center gap-2 mb-2">
-                    <div class="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-md">S</div>
+                    <div class="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-md overflow-hidden">
+                    <img src="https://graph.facebook.com/smkn1purwokerto/picture?type=large" alt="SMKN 1 Purwokerto Logo" class="w-full h-full object-cover">
+                </div>
                     <span class="font-bold text-gray-800 tracking-wider text-sm">SMECONE HUB</span>
                 </div>
             </div>
@@ -143,7 +145,9 @@
         <div class="w-full md:w-1/2 p-6 sm:p-8 flex flex-col justify-center bg-white relative form-enter">
             <!-- Mobile Logo -->
             <div class="md:hidden flex items-center gap-2 mb-6 justify-center">
-                <div class="w-8 h-8 bg-red-600 rounded-xl flex items-center justify-center text-white font-black text-lg shadow-lg">S</div>
+                <div class="w-8 h-8 bg-white rounded-xl flex items-center justify-center shadow-lg overflow-hidden">
+                    <img src="https://graph.facebook.com/smkn1purwokerto/picture?type=large" alt="SMKN 1 Purwokerto Logo" class="w-full h-full object-cover">
+                </div>
                 <span class="font-bold text-gray-900 text-lg tracking-tight">SMECONE</span>
             </div>
 
