@@ -73,6 +73,16 @@
                 <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
                 <span class="text-[13px] font-extrabold text-gray-800">{{ auth()->user()->reputation_points ?? 0 }} <span class="opacity-60 text-[11px]">Pts</span></span>
             </div>
+            {{-- Notifikasi --}}
+            <a href="/notifikasi" class="relative flex items-center justify-center w-10 h-10 rounded-[1rem] bg-gray-50 border border-gray-100 hover:bg-red-50 hover:border-red-100 text-gray-500 hover:text-[#E21F26] transition-colors tap-effect group">
+                <svg class="w-5 h-5 group-hover:animate-[wiggle_1s_ease-in-out_infinite]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                @if(auth()->user()->unread_notifications_count > 0)
+                <span class="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-4 w-4 bg-[#E21F26] text-[9px] font-bold text-white items-center justify-center border-2 border-white">{{ auth()->user()->unread_notifications_count > 99 ? '99+' : auth()->user()->unread_notifications_count }}</span>
+                </span>
+                @endif
+            </a>
 
             {{-- User Profil --}}
             <a href="/profile" class="w-10 h-10 rounded-[1rem] border-2 border-gray-100 overflow-hidden tap-effect shadow-sm hover:border-[#E21F26] transition-colors">
@@ -124,11 +134,17 @@
             </div>
         </a>
 
-        <a href="/event" class="flex flex-col items-center justify-center w-full py-1 group tap-effect">
-            <div class="p-1.5 rounded-[1rem] transition-all duration-300 {{ request()->is('event*') ? 'bg-red-50 text-[#E21F26]' : 'text-gray-400 group-hover:text-gray-700' }}">
-                <svg class="w-6 h-6" fill="{{ request()->is('event*') ? 'currentColor' : 'none' }}" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+        <a href="/notifikasi" class="relative flex flex-col items-center justify-center w-full py-1 group tap-effect">
+            <div class="relative flex items-center justify-center w-10 h-10 rounded-[1rem] transition-all duration-300 {{ request()->is('notifikasi*') ? 'bg-red-50 text-[#E21F26]' : 'text-gray-400 hover:text-gray-900 hover:bg-gray-50' }}">
+                <svg class="w-6 h-6" fill="{{ request()->is('notifikasi*') ? 'currentColor' : 'none' }}" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                @if(auth()->user()->unread_notifications_count > 0)
+                <span class="absolute top-1 right-2 flex h-3 w-3 items-center justify-center">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-3 w-3 bg-[#E21F26] border border-white"></span>
+                </span>
+                @endif
             </div>
-            <span class="text-[10px] mt-1 font-bold {{ request()->is('event*') ? 'text-[#E21F26]' : 'text-gray-500' }}">Event</span>
+            <span class="text-[10px] mt-1 font-bold {{ request()->is('notifikasi*') ? 'text-[#E21F26]' : 'text-gray-500' }}">Notif</span>
         </a>
 
         <a href="/profile" class="flex flex-col items-center justify-center w-full py-1 group tap-effect">
