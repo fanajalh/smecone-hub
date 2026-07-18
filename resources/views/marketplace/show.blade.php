@@ -11,7 +11,7 @@
     .tap-effect:active { transform: scale(0.96); transition: transform 0.1s; }
 </style>
 
-<div class="pb-[140px] md:pb-[200px] font-sans text-gray-800 selection:bg-red-100 selection:text-red-900 md:pt-6">
+<div class="pt-24 md:pt-32 pb-[140px] md:pb-[200px] font-sans text-gray-800 selection:bg-red-100 selection:text-red-900">
     
     <div class="max-w-[480px] mx-auto bg-white relative md:rounded-3xl md:shadow-[0_4px_25px_rgba(0,0,0,0.03)] md:border md:border-gray-100 overflow-hidden">
         
@@ -28,7 +28,32 @@
             @endif
 
             @if($product->image)
-                <img src="{{ asset('storage/' . $product->image) }}" class="w-full h-full object-cover transition duration-700 group-hover:scale-105">
+                @php 
+                    $decoded = json_decode($product->image, true);
+                    $images = is_array($decoded) ? $decoded : [$product->image];
+                @endphp
+                <div class="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar w-full h-full relative" id="imageGallery">
+                    @foreach($images as $img)
+                        <div class="min-w-full h-full snap-center shrink-0 relative">
+                            <img src="{{ asset('storage/' . $img) }}" class="w-full h-full object-cover transition duration-700 group-hover:scale-105">
+                        </div>
+                    @endforeach
+                </div>
+                @if(count($images) > 1)
+                <div class="absolute bottom-4 right-4 bg-black/40 backdrop-blur-md text-white text-[10px] font-bold px-2.5 py-1 rounded-full z-10">
+                    1 / {{ count($images) }}
+                </div>
+                <script>
+                    const gallery = document.getElementById('imageGallery');
+                    const indicator = gallery.nextElementSibling;
+                    gallery.addEventListener('scroll', () => {
+                        const index = Math.round(gallery.scrollLeft / gallery.clientWidth) + 1;
+                        if(indicator && indicator.innerText.includes('/')) {
+                            indicator.innerText = index + ' / {{ count($images) }}';
+                        }
+                    });
+                </script>
+                @endif
             @else
                 <div class="text-gray-400 flex flex-col items-center">
                     <svg class="w-16 h-16 opacity-30 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
@@ -114,17 +139,83 @@
 
         <div class="h-2 w-full bg-gray-50"></div>
 
-        <div class="bg-white p-4 md:p-5">
+        <div class="bg-white p-4 md:p-5" x-data="{ filter: 0 }">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-[14px] font-semibold text-gray-900 flex items-center gap-2">
                     <svg class="w-4 h-4 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path></svg>
                     Penilaian
                 </h2>
-                <a href="#" class="text-[11px] text-red-600 font-medium flex items-center hover:underline">Lihat Semua <svg class="w-3 h-3 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5l7 7-7 7"></path></svg></a>
+                <span class="text-[11px] text-gray-500 font-medium">{{ number_format($averageRating ?? 0, 1) }} / 5.0 ({{ $totalReviews ?? 0 }} Ulasan)</span>
             </div>
-            <div class="text-center py-6 bg-gray-50/50 rounded-xl border border-gray-100">
-                <p class="text-[12px] font-normal text-gray-400">Belum ada penilaian untuk produk ini.</p>
+
+            {{-- Form Ulasan --}}
+            @if(isset($canReview) && $canReview && isset($unreviewedTransaction))
+            <div class="mb-5 bg-gray-50 p-4 rounded-xl border border-gray-100 animate-fade-in-up">
+                <h3 class="text-[12px] font-bold text-gray-800 mb-2">Tulis Ulasan Anda</h3>
+                <form action="{{ url('/marketplace/'.$product->id.'/review') }}" method="POST" x-data="{ rating: 5, hoverRating: 0 }">
+                    @csrf
+                    <div class="flex gap-1 mb-3">
+                        <template x-for="i in 5">
+                            <button type="button" @click="rating = i" @mouseenter="hoverRating = i" @mouseleave="hoverRating = 0" class="focus:outline-none tap-effect transition-transform">
+                                <svg class="w-7 h-7 transition-colors duration-200" :class="(hoverRating >= i || (hoverRating == 0 && rating >= i)) ? 'text-yellow-400 drop-shadow-sm' : 'text-gray-200'" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                </svg>
+                            </button>
+                        </template>
+                    </div>
+                    <input type="hidden" name="rating" x-model="rating">
+                    <textarea name="comment" rows="2" class="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-[12px] focus:ring-1 focus:ring-red-500 focus:border-red-500 outline-none transition mb-3" placeholder="Ceritakan kepuasan Anda (opsional)"></textarea>
+                    <button type="submit" class="bg-red-600 text-white font-bold text-[11px] px-5 py-2.5 rounded-lg hover:bg-red-700 transition active:scale-95 shadow-sm">Kirim Ulasan</button>
+                </form>
             </div>
+            @endif
+
+            {{-- Filter Bintang --}}
+            @if(isset($totalReviews) && $totalReviews > 0)
+            <div class="flex items-center gap-2 overflow-x-auto hide-scrollbar mb-5 pb-1">
+                <button @click="filter = 0" :class="filter === 0 ? 'bg-red-50 text-red-600 border-red-200' : 'bg-white text-gray-500 border-gray-100 hover:bg-gray-50'" class="px-3 py-1.5 rounded-full border text-[11px] font-bold whitespace-nowrap transition tap-effect">Semua</button>
+                @for($i = 5; $i >= 1; $i--)
+                <button @click="filter = {{ $i }}" :class="filter === {{ $i }} ? 'bg-yellow-50 text-yellow-700 border-yellow-300 shadow-sm' : 'bg-white text-gray-500 border-gray-100 hover:bg-gray-50'" class="px-3 py-1.5 rounded-full border text-[11px] font-bold whitespace-nowrap transition flex items-center gap-1 tap-effect">
+                    <svg class="w-3.5 h-3.5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                    {{ $i }}
+                </button>
+                @endfor
+            </div>
+
+            {{-- Daftar Ulasan --}}
+            <div class="space-y-4">
+                @foreach($product->reviews as $review)
+                <div class="border-b border-gray-50 pb-4 last:border-0 last:pb-0" x-show="filter === 0 || filter === {{ $review->rating }}" x-transition.opacity.duration.300ms>
+                    <div class="flex justify-between items-start mb-1">
+                        <div class="flex items-center gap-2">
+                            <div class="w-7 h-7 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden shrink-0 border border-gray-200">
+                                @if($review->user->avatar)
+                                    <img src="{{ asset('storage/' . $review->user->avatar) }}" class="w-full h-full object-cover">
+                                @else
+                                    <span class="text-[10px] font-black text-gray-400">{{ substr($review->user->name, 0, 1) }}</span>
+                                @endif
+                            </div>
+                            <span class="text-[12px] font-bold text-gray-800">{{ $review->user->name }}</span>
+                        </div>
+                        <span class="text-[10px] text-gray-400 font-medium">{{ $review->created_at->diffForHumans() }}</span>
+                    </div>
+                    <div class="flex items-center gap-0.5 mb-2 ml-9">
+                        @for($i = 1; $i <= 5; $i++)
+                            <svg class="w-3.5 h-3.5 {{ $i <= $review->rating ? 'text-yellow-400 drop-shadow-sm' : 'text-gray-200' }}" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                        @endfor
+                    </div>
+                    @if($review->comment)
+                        <p class="text-[12px] text-gray-600 leading-relaxed ml-9 bg-gray-50 p-3 rounded-xl rounded-tl-none border border-gray-100 shadow-[inset_0_1px_3px_rgba(0,0,0,0.01)]">{{ $review->comment }}</p>
+                    @endif
+                </div>
+                @endforeach
+            </div>
+            @else
+            <div class="text-center py-8 bg-gray-50/50 rounded-2xl border border-gray-100">
+                <svg class="w-10 h-10 text-gray-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path></svg>
+                <p class="text-[12px] font-medium text-gray-400">Belum ada penilaian untuk produk ini.</p>
+            </div>
+            @endif
         </div>
 
         <div class="h-2 w-full bg-gray-50"></div>

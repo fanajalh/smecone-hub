@@ -10,16 +10,16 @@
     .active-scale:active { transform: scale(0.95); transition: transform 0.1s; }
 </style>
 
-<div class="min-h-screen pb-24 font-sans text-gray-900">
+<div class="min-h-screen pt-24 md:pt-32 pb-24 font-sans text-gray-900">
 
     {{-- TOP HEADER --}}
-    <div class="max-w-xl mx-auto px-4 md:px-0 pt-8 pb-6 flex items-center justify-between">
+    <div class="max-w-xl mx-auto px-4 md:px-0 pb-6 flex items-center justify-between">
         <a href="/dashboard" class="w-10 h-10 rounded-full bg-white border border-gray-100 flex items-center justify-center text-gray-500 hover:bg-red-50 hover:text-red-600 transition-colors active-scale shadow-sm">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+            <ion-icon name="arrow-back" class="text-xl"></ion-icon>
         </a>
         <h1 class="text-xl md:text-2xl font-black text-gray-900 tracking-tight">Kabar & Update</h1>
         <div class="w-10 h-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center shadow-sm">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path></svg>
+            <ion-icon name="newspaper" class="text-xl"></ion-icon>
         </div>
     </div>
 
@@ -102,16 +102,16 @@
                         <input type="hidden" name="type" value="{{ $modelClass }}">
                         <input type="hidden" name="id" value="{{ $feed->id }}">
                         <button type="submit" class="flex items-center transition active-scale outline-none {{ $isLiked ? 'text-red-500' : 'hover:text-gray-500' }}">
-                            <svg class="w-[28px] h-[28px] {{ $isLiked ? 'fill-current text-red-500' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+                            <ion-icon name="{{ $isLiked ? 'heart' : 'heart-outline' }}" class="text-[28px] {{ $isLiked ? 'text-red-500' : '' }}"></ion-icon>
                         </button>
                     </form>
                     
                     <button class="flex items-center transition active-scale hover:text-gray-500 outline-none" onclick="focusComment('comment-input-{{$feed->feed_type}}-{{$feed->id}}')">
-                        <svg class="w-[28px] h-[28px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                        <ion-icon name="chatbubble-outline" class="text-[26px]"></ion-icon>
                     </button>
 
                     <button class="flex items-center transition active-scale hover:text-gray-500 outline-none">
-                        <svg class="w-[28px] h-[28px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+                        <ion-icon name="paper-plane-outline" class="text-[26px]"></ion-icon>
                     </button>
                 </div>
                 
@@ -216,9 +216,12 @@
         @endif
         
         @empty
-        <div class="text-center py-20 bg-white rounded-[2rem] border border-dashed border-gray-200 mx-4">
-            <span class="text-5xl mb-4 block opacity-50">📭</span>
-            <h3 class="text-[15px] font-bold text-gray-600">Belum Ada Postingan</h3>
+        <div class="text-center py-20 bg-gradient-to-br from-white to-gray-50 rounded-[2.5rem] border border-gray-100 mx-4 shadow-sm">
+            <div class="w-24 h-24 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm border border-gray-100 text-gray-300">
+                <ion-icon name="newspaper-outline" class="text-5xl"></ion-icon>
+            </div>
+            <h3 class="text-[16px] font-bold text-gray-900">Belum Ada Postingan</h3>
+            <p class="text-[14px] text-gray-500 font-medium max-w-xs mx-auto mt-2">Belum ada berita atau event terbaru saat ini.</p>
         </div>
         @endforelse
     </div>

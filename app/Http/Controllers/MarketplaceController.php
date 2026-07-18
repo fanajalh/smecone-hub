@@ -88,7 +88,7 @@ class MarketplaceController extends Controller
             'whatsapp_number' => $request->whatsapp_number,
         ]);
 
-        return redirect('/marketplace/create')->with('success', 'Selamat! Lapak berhasil dibuka. Sekarang kamu bisa tambah produk.');
+        return redirect('/marketplace/lapak-saya')->with('success', 'Selamat! Lapak berhasil dibuka.');
     }
 
     public function myLapak()
@@ -166,12 +166,15 @@ class MarketplaceController extends Controller
             'format' => 'required|in:Fisik,Digital',
             'digital_link' => 'nullable|url',
             'variants_config' => 'nullable|string',
-            'image' => 'nullable|image|max:2048'
+            'image' => 'nullable|array|max:5',
+            'image.*' => 'image|max:2048'
         ]);
 
-        $path = null;
+        $imagePaths = [];
         if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('marketplaces', 'public');
+            foreach ($request->file('image') as $file) {
+                $imagePaths[] = $file->store('marketplaces', 'public');
+            }
         }
 
         // Parse variants string to JSON array (e.g., "Keju, Cokelat" -> ["Keju", "Cokelat"])
@@ -193,7 +196,7 @@ class MarketplaceController extends Controller
             'format' => $request->format,
             'digital_link' => $request->format === 'Digital' ? $request->digital_link : null,
             'variants_config' => $request->format === 'Fisik' ? $variants : null,
-            'image' => $path,
+            'image' => !empty($imagePaths) ? json_encode($imagePaths) : null,
             'is_sold' => false,
             'views_count' => 0,
             'is_promoted' => false,
@@ -231,15 +234,38 @@ class MarketplaceController extends Controller
             'format'      => 'required|in:Fisik,Digital',
             'digital_link'=> 'nullable|url',
             'variants_config' => 'nullable|string',
-            'image'       => 'nullable|image|max:2048',
+            'image'       => 'nullable|array|max:5',
+            'image.*'     => 'image|max:2048',
         ]);
 
-        if ($request->hasFile('image')) {
-            if ($product->image && Storage::disk('public')->exists($product->image)) {
-                Storage::disk('public')->delete($product->image);
-            }
-            $product->image = $request->file('image')->store('marketplaces', 'public');
+        $currentImages = [];
+        if ($product->image) {
+            $decoded = json_decode($product->image, true);
+            $currentImages = is_array($decoded) ? $decoded : [$product->image];
         }
+
+        if ($request->has('deleted_images')) {
+            $deletedImages = $request->input('deleted_images');
+            foreach ($deletedImages as $delImg) {
+                if (($key = array_search($delImg, $currentImages)) !== false) {
+                    unset($currentImages[$key]);
+                    if (Storage::disk('public')->exists($delImg)) {
+                        Storage::disk('public')->delete($delImg);
+                    }
+                }
+            }
+            $currentImages = array_values($currentImages);
+        }
+
+        if ($request->hasFile('image')) {
+            foreach ($request->file('image') as $file) {
+                if (count($currentImages) < 5) {
+                    $currentImages[] = $file->store('marketplaces', 'public');
+                }
+            }
+        }
+        
+        $product->image = !empty($currentImages) ? json_encode($currentImages) : null;
 
         $variants = null;
         if ($request->variants_config) {
@@ -264,9 +290,20 @@ class MarketplaceController extends Controller
         return redirect('/marketplace/lapak-saya')->with('success', 'Produk berhasil diperbarui!');
     }
 
+    public function broadcastPage($id)
+    {
+        $product = Marketplace::findOrFail($id);
+        
+        if ($product->user_id !== auth()->id() && !auth()->user()->is_admin) {
+            abort(403, 'Anda tidak berhak menyiarkan produk ini.');
+        }
+
+        return view('marketplace.broadcast', compact('product'));
+    }
+
     public function show($id)
     {
-        $product = Marketplace::with('user')->findOrFail($id);
+        $product = Marketplace::with(['user', 'reviews.user'])->findOrFail($id);
         
         if ($product->user_id !== auth()->id()) {
             $product->increment('views_count');
@@ -279,7 +316,57 @@ class MarketplaceController extends Controller
                             ->take(6)
                             ->get();
 
-        return view('marketplace.show', compact('product', 'recommendations'));
+        $canReview = false;
+        $unreviewedTransaction = null;
+        
+        if (auth()->check()) {
+            // Cek apakah user sudah beli (transaksi status bebas atau completed/paid tergantung sistem)
+            // Di sini kita asumsikan semua status transaksi di Smecone adalah valid (atau bisa filter status tertentu)
+            $unreviewedTransaction = \App\Models\Transaction::where('user_id', auth()->id())
+                                        ->where('marketplace_item_id', $product->id)
+                                        // ->where('status', 'PAID') // Jika ada status pembayaran
+                                        ->whereDoesntHave('review')
+                                        ->first();
+            
+            if ($unreviewedTransaction) {
+                $canReview = true;
+            }
+        }
+
+        // Kalkulasi rata-rata rating
+        $averageRating = $product->reviews->avg('rating') ?? 0;
+        $totalReviews = $product->reviews->count();
+
+        return view('marketplace.show', compact('product', 'recommendations', 'canReview', 'unreviewedTransaction', 'averageRating', 'totalReviews'));
+    }
+
+    public function storeReview(Request $request, $id)
+    {
+        $request->validate([
+            'rating' => 'required|integer|min:1|max:5',
+            'comment' => 'nullable|string|max:1000',
+        ]);
+
+        $product = Marketplace::findOrFail($id);
+
+        $unreviewedTransaction = \App\Models\Transaction::where('user_id', auth()->id())
+                                    ->where('marketplace_item_id', $product->id)
+                                    ->whereDoesntHave('review')
+                                    ->first();
+
+        if (!$unreviewedTransaction) {
+            return back()->with('error', 'Anda tidak berhak memberikan ulasan atau sudah memberikan ulasan.');
+        }
+
+        \App\Models\MarketplaceReview::create([
+            'user_id' => auth()->id(),
+            'marketplace_item_id' => $product->id,
+            'transaction_id' => $unreviewedTransaction->id,
+            'rating' => $request->rating,
+            'comment' => $request->comment,
+        ]);
+
+        return back()->with('success', 'Terima kasih! Ulasan Anda berhasil disimpan.');
     }
 
     public function toko($id)

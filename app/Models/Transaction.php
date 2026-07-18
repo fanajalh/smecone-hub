@@ -41,4 +41,9 @@ class Transaction extends Model
     {
         return $this->belongsTo(Marketplace::class, 'marketplace_item_id');
     }
+
+    public function review()
+    {
+        return $this->hasOne(MarketplaceReview::class);
+    }
 }

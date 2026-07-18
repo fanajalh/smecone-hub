@@ -38,7 +38,7 @@
     .view-grid .file-size { display: none; } /* Hide size in grid */
 </style>
 
-<div class="max-w-7xl mx-auto pt-6 px-4 sm:px-6 lg:px-8 pb-32 md:pb-16 font-sans">
+<div class="max-w-7xl mx-auto pt-24 md:pt-32 px-4 sm:px-6 lg:px-8 pb-32 md:pb-16 font-sans">
     
     {{-- ALERT MESSAGES --}}
     @if(session('success')) 

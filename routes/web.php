@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\RepositoryController;
 use App\Http\Controllers\MarketplaceController;
+use App\Http\Controllers\LostAndFoundController;
 use App\Http\Controllers\ForumController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AdminController;
@@ -12,6 +13,7 @@ use App\Http\Controllers\GitHttpController;
 use App\Http\Controllers\InteractionController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\NotificationController;
 
 Route::get('/404', function() { abort(404); });
 Route::get('/403', function() { abort(403); });
@@ -59,8 +61,31 @@ Route::middleware(['auth', 'App\Http\Middleware\IsStudent'])->group(function () 
         return view('event.index', compact('events'));
     });
 
+    Route::get('/kabar', function () {
+        $prestasis = \App\Models\Prestasi::with(['likes', 'comments.user'])->get()->map(function($item) {
+            $item->feed_type = 'prestasi';
+            return $item;
+        });
+        
+        $events = \App\Models\Event::with(['likes', 'comments.user'])->get()->map(function($item) {
+            $item->feed_type = 'event';
+            return $item;
+        });
+
+        $feeds = $prestasis->concat($events)->sortByDesc('created_at')->values();
+        
+        return view('kabar.index', compact('feeds'));
+    })->name('kabar.index');
+
     Route::post('/interaction/like', [InteractionController::class, 'toggleLike'])->name('like.toggle');
     Route::post('/interaction/comment', [InteractionController::class, 'storeComment'])->name('comment.store');
+
+    // NOTIFIKASI
+    Route::get('/notifikasi', [NotificationController::class, 'index'])->name('notifikasi.index');
+    Route::post('/notifikasi/mark-all-read', [NotificationController::class, 'markAllRead'])->name('notifikasi.markAllRead');
+    Route::delete('/notifikasi/clear-all', [NotificationController::class, 'clearAll'])->name('notifikasi.clearAll');
+    Route::delete('/notifikasi/{id}', [NotificationController::class, 'destroy'])->name('notifikasi.destroy');
+    Route::get('/notifikasi/unread-count', [NotificationController::class, 'unreadCount'])->name('notifikasi.unreadCount');
 
     // REPOSITORY
     Route::get('/repository', [RepositoryController::class, 'index']);
@@ -89,14 +114,7 @@ Route::middleware(['auth', 'App\Http\Middleware\IsStudent'])->group(function () 
     Route::get('/marketplace/rekap-penjualan/export', [App\Http\Controllers\PaymentController::class, 'exportSalesRecap'])->name('marketplace.recap.export');
     Route::post('/marketplace/register-store', [MarketplaceController::class, 'registerStore']);
     Route::post('/marketplace/store', [MarketplaceController::class, 'store']);
-    Route::post('/marketplace/{id}/broadcast', [MarketplaceController::class, 'broadcastKeWa']);          
     Route::get('/marketplace/toko/{id}', [MarketplaceController::class, 'toko']);
-    Route::get('/marketplace/{id}', [MarketplaceController::class, 'show'])->name('marketplace.show');
-    Route::get('/marketplace/{id}/edit', [MarketplaceController::class, 'edit'])->name('marketplace.edit');
-    Route::put('/marketplace/{id}/update', [MarketplaceController::class, 'update'])->name('marketplace.update');
-    Route::delete('/marketplace/{id}/delete', [MarketplaceController::class, 'destroy']);
-    Route::post('/marketplace/{id}/toggle-sold', [MarketplaceController::class, 'toggleSold']);
-    Route::get('/marketplace/payment/{id}', [PaymentController::class, 'paymentStatus'])->name('marketplace.payment.status');
     
     // Rute untuk Update Profil Toko (Banner & PP)
     Route::post('/marketplace/update-store-profile', [App\Http\Controllers\MarketplaceController::class, 'updateStoreProfile'])->name('marketplace.updateStoreProfile');
@@ -106,12 +124,23 @@ Route::middleware(['auth', 'App\Http\Middleware\IsStudent'])->group(function () 
 
     // PAYMENT SYSTEM
     Route::post('/marketplace/withdraw', [App\Http\Controllers\MarketplaceController::class, 'requestWithdrawal'])->name('marketplace.withdraw');
-    Route::get('/marketplace/{id}/checkout', [PaymentController::class, 'checkoutConfirm'])->name('marketplace.checkout.confirm');
-    Route::post('/marketplace/{id}/checkout/direct', [PaymentController::class, 'processDirectPayment'])->name('marketplace.checkout.direct');
     
     // TRANSACTION CRUD
     Route::put('/marketplace/transaction/{id}/status', [App\Http\Controllers\PaymentController::class, 'updateTransactionStatus'])->name('marketplace.transaction.status');
     Route::delete('/marketplace/transaction/{id}', [App\Http\Controllers\PaymentController::class, 'destroyTransaction'])->name('marketplace.transaction.destroy');
+
+    // DYNAMIC / ID BASED ROUTES (Must be placed after static routes)
+    Route::get('/marketplace/{id}/broadcast', [MarketplaceController::class, 'broadcastPage'])->name('marketplace.broadcast')->where('id', '[0-9]+');
+    Route::post('/marketplace/{id}/broadcast', [MarketplaceController::class, 'broadcastKeWa'])->where('id', '[0-9]+');          
+    Route::get('/marketplace/payment/{id}', [PaymentController::class, 'paymentStatus'])->name('marketplace.payment.status')->where('id', '[0-9]+');
+    Route::get('/marketplace/{id}/checkout', [PaymentController::class, 'checkoutConfirm'])->name('marketplace.checkout.confirm')->where('id', '[0-9]+');
+    Route::post('/marketplace/{id}/checkout/direct', [PaymentController::class, 'processDirectPayment'])->name('marketplace.checkout.direct')->where('id', '[0-9]+');
+    Route::get('/marketplace/{id}/edit', [MarketplaceController::class, 'edit'])->name('marketplace.edit')->where('id', '[0-9]+');
+    Route::put('/marketplace/{id}/update', [MarketplaceController::class, 'update'])->name('marketplace.update')->where('id', '[0-9]+');
+    Route::delete('/marketplace/{id}/delete', [MarketplaceController::class, 'destroy'])->where('id', '[0-9]+');
+    Route::post('/marketplace/{id}/toggle-sold', [MarketplaceController::class, 'toggleSold'])->where('id', '[0-9]+');
+    Route::post('/marketplace/{id}/review', [MarketplaceController::class, 'storeReview'])->where('id', '[0-9]+');
+    Route::get('/marketplace/{id}', [MarketplaceController::class, 'show'])->name('marketplace.show')->where('id', '[0-9]+');
 
     // CART
     Route::get('/keranjang', [CartController::class, 'page'])->name('cart.page');

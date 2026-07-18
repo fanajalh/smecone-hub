@@ -13,23 +13,23 @@
     [x-cloak] { display: none !important; }
 </style>
 
-<div class="bg-[#F6F8FA] min-h-screen pb-20 font-sans text-gray-800 selection:bg-red-100 selection:text-red-900 animate-page-in">
+<div class="bg-[#F6F8FA] min-h-screen pt-24 md:pt-32 pb-20 font-sans text-gray-800 selection:bg-red-100 selection:text-red-900 animate-page-in">
     
     {{-- Header Section --}}
-    <div class="bg-white px-5 pt-4 pb-4 rounded-b-[2rem] shadow-[0_2px_15px_rgba(0,0,0,0.02)] mb-5 md:max-w-4xl md:mx-auto md:rounded-[2rem] md:mt-6">
+    <div class="bg-white px-5 py-5 rounded-[2rem] shadow-[0_2px_15px_rgba(0,0,0,0.02)] mb-5 md:max-w-4xl md:mx-auto border border-gray-100 mx-4 md:mx-auto">
         <div class="flex justify-between items-center">
             <div class="flex items-center gap-3">
                 <a href="{{ route('marketplace.index') }}" class="w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center text-gray-600 hover:text-[#E21F26] hover:bg-red-50 transition tap-effect shrink-0">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path></svg>
+                    <ion-icon name="arrow-back" class="text-xl"></ion-icon>
                 </a>
                 <div>
                     <h2 class="text-[18px] md:text-[22px] font-extrabold text-gray-900 tracking-tight leading-tight">Riwayat Belanja</h2>
                     <p class="text-[11px] md:text-[13px] text-gray-500 font-medium">Pantau status jajan dan pesananmu</p>
                 </div>
             </div>
-            <a href="{{ route('marketplace.index') }}" class="bg-red-50 text-[#E21F26] font-bold px-3 py-2 rounded-xl text-[11px] md:text-[12px] hover:bg-red-100 transition flex items-center gap-1 tap-effect shadow-sm shrink-0">
+            <a href="{{ route('marketplace.index') }}" class="bg-red-50 text-[#E21F26] font-bold px-4 py-2.5 rounded-xl text-[11px] md:text-[12px] hover:bg-red-100 transition flex items-center gap-2 tap-effect shadow-sm shrink-0">
                 Smecone Mart
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path></svg>
+                <ion-icon name="chevron-forward" class="text-sm"></ion-icon>
             </a>
         </div>
     </div>
@@ -81,7 +81,7 @@
                         </div>
                     @else
                         <div class="w-14 h-14 rounded-xl bg-gray-50 shrink-0 flex items-center justify-center text-gray-300 border border-gray-100">
-                            <svg class="w-6 h-6 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                            <ion-icon name="image-outline" class="text-2xl"></ion-icon>
                         </div>
                     @endif
                     <div>
@@ -101,9 +101,8 @@
                         <span class="text-[12px] font-medium text-gray-600 truncate max-w-[100px]">{{ $purchase->marketplaceItem->user->store_name ?? explode(' ', trim($purchase->marketplaceItem->user->name ?? 'Penjual'))[0] }}</span>
                     </div>
                     
-                    {{-- TOMBOL TRIGGER MODAL --}}
                     <button @click="showModal = true" class="bg-gray-900 text-white hover:bg-[#E21F26] px-4 py-2 rounded-xl text-[12px] font-bold transition-colors tap-effect flex items-center gap-1.5 shadow-sm">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                        <ion-icon name="eye" class="text-sm"></ion-icon>
                         Lihat Detail
                     </button>
                 </div>
@@ -154,7 +153,7 @@
                                     {{-- Header --}}
                                     <div class="text-center mb-4 border-b-2 border-dashed border-gray-200 pb-4">
                                         <div class="inline-flex items-center justify-center w-10 h-10 bg-red-50 text-[#E21F26] rounded-full mb-2 border border-red-100">
-                                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"></path></svg>
+                                            <ion-icon name="receipt" class="text-xl"></ion-icon>
                                         </div>
                                         <h3 class="font-extrabold text-[15px] text-gray-900 tracking-wider uppercase">SMECONE MART</h3>
                                         <p class="text-[10px] font-mono text-gray-500 mt-0.5">BUKTI TRANSAKSI PEMBELIAN</p>
@@ -247,8 +246,8 @@
                                         $cleanWa = preg_replace('/^0/', '62', $sellerWa);
                                         $defaultMsg = urlencode("Halo kak, saya " . auth()->user()->name . " yang baru saja order *" . ($purchase->marketplaceItem->item_name ?? 'Barang') . "* (TRX-{$purchase->id}). Kapan barangnya bisa saya ambil?");
                                     @endphp
-                                    <a href="https://wa.me/{{ $cleanWa }}?text={{ $defaultMsg }}" target="_blank" class="w-full bg-emerald-500 text-white hover:bg-emerald-600 text-[13px] font-bold py-3.5 rounded-[1rem] flex justify-center items-center transition-all shadow-md tap-effect">
-                                        <svg class="w-5 h-5 mr-2 fill-current" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.181-2.592-5.771-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.277.042-.615.081-2.028-.452-1.714-.65-2.822-2.398-2.909-2.515-.087-.116-.694-.925-.694-1.765 0-.84.44-1.266.598-1.428.158-.162.347-.203.463-.203.115 0 .23.003.332.008.106.005.25-.043.391.297.144.347.491 1.2.535 1.288.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.274.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564c.174.087.289.13.332.202.043.073.043.42-.101.825z"/></svg>
+                                    <a href="https://wa.me/{{ $cleanWa }}?text={{ $defaultMsg }}" target="_blank" class="w-full bg-emerald-500 text-white hover:bg-emerald-600 text-[13px] font-bold py-3.5 rounded-[1rem] flex justify-center items-center gap-2 transition-all shadow-md tap-effect">
+                                        <ion-icon name="logo-whatsapp" class="text-lg"></ion-icon>
                                         Hubungi Penjual
                                     </a>
                                 @elseif($purchase->status != 'PENDING' && $purchase->status != 'DIBATALKAN')
@@ -273,11 +272,11 @@
                                     @if(in_array($purchase->status, ['DIBATALKAN', 'SELESAI', 'PENDING']))
                                         <form action="{{ route('marketplace.transaction.destroy', $purchase->id) }}" method="POST" class="{{ $purchase->status == 'PENDING' ? 'w-auto' : 'flex-1' }}" onsubmit="confirmSubmit(event, 'Buang Struk?', 'Yakin ingin menghapus riwayat pesanan ini secara permanen?', 'Ya, Buang')">
                                             @csrf @method('DELETE')
-                                            <button type="submit" class="w-full bg-white text-red-600 border border-red-200 hover:bg-[#E21F26] hover:text-white hover:border-[#E21F26] text-[12px] font-bold px-3 rounded-xl flex justify-center items-center transition-colors shadow-sm h-[44px] tap-effect group" title="Hapus Riwayat">
+                                            <button type="submit" class="w-full bg-white text-red-600 border border-red-200 hover:bg-[#E21F26] hover:text-white hover:border-[#E21F26] text-[12px] font-bold px-3 rounded-xl flex justify-center items-center gap-1.5 transition-colors shadow-sm h-[44px] tap-effect group" title="Hapus Riwayat">
                                                 @if($purchase->status == 'PENDING')
-                                                    <svg class="w-4 h-4 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                                    <ion-icon name="trash-outline" class="text-lg group-hover:text-white transition-colors"></ion-icon>
                                                 @else
-                                                    <svg class="w-4 h-4 mr-1.5 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                                    <ion-icon name="trash-outline" class="text-lg group-hover:text-white transition-colors"></ion-icon>
                                                     Buang Struk
                                                 @endif
                                             </button>
@@ -303,13 +302,16 @@
         </div>
         
         @empty
-        <div class="col-span-full bg-white py-20 px-6 text-center rounded-[2.5rem] border border-dashed border-gray-200 shadow-sm md:mt-10">
-            <div class="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
-                <svg class="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+        <div class="col-span-full bg-gradient-to-br from-white to-gray-50 py-20 px-6 text-center rounded-[2.5rem] border border-gray-100 shadow-sm ticket-gradient">
+            <div class="w-24 h-24 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm border border-gray-100 text-gray-300">
+                <ion-icon name="cart-outline" class="text-5xl"></ion-icon>
             </div>
             <h3 class="text-gray-900 font-extrabold text-xl mb-2">Belum ada pesanan</h3>
             <p class="text-[14px] text-gray-500 font-medium max-w-sm mx-auto">Yuk, mulai jajan dan dukung karya teman-temanmu di Smecone Mart!</p>
-            <a href="{{ route('marketplace.index') }}" class="inline-block mt-8 bg-[#E21F26] text-white font-bold text-[14px] px-8 py-3.5 rounded-2xl shadow-[0_8px_20px_rgba(226,31,38,0.25)] hover:bg-red-700 hover:-translate-y-0.5 transition-all tap-effect">Mulai Belanja</a>
+            <a href="{{ route('marketplace.index') }}" class="inline-flex items-center gap-2 mt-8 bg-[#E21F26] text-white font-bold text-[14px] px-8 py-3.5 rounded-2xl shadow-[0_8px_20px_rgba(226,31,38,0.25)] hover:bg-red-700 hover:-translate-y-0.5 transition-all tap-effect">
+                Mulai Belanja
+                <ion-icon name="arrow-forward"></ion-icon>
+            </a>
         </div>
         @endforelse
     </div>

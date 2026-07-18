@@ -61,4 +61,14 @@ class User extends Authenticatable
     {
         return $this->hasMany(Submission::class);
     }
+
+    public function appNotifications(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(AppNotification::class);
+    }
+
+    public function getUnreadNotificationsCountAttribute()
+    {
+        return $this->appNotifications()->unread()->count();
+    }
 }

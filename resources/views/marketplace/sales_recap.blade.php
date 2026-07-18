@@ -15,14 +15,14 @@
     .receipt-bg { background-image: radial-gradient(#e5e7eb 1px, transparent 1px); background-size: 12px 12px; }
 </style>
 
-<div class="bg-[#F8FAFC] min-h-screen pb-24 font-sans text-gray-800 selection:bg-emerald-100 selection:text-emerald-900">
+<div class="bg-[#F8FAFC] min-h-screen pt-24 md:pt-32 pb-24 font-sans text-gray-800 selection:bg-emerald-100 selection:text-emerald-900">
     
     {{-- HEADER --}}
-    <div class="bg-white px-5 pt-4 pb-5 rounded-b-[2rem] shadow-sm mb-8 md:max-w-5xl md:mx-auto md:rounded-[2rem] md:mt-6 animate-fade-in-up border border-gray-100">
+    <div class="bg-white px-5 py-5 rounded-[2rem] shadow-sm mb-8 md:max-w-5xl md:mx-auto animate-fade-in-up border border-gray-100 mx-4 md:mx-auto">
         <div class="flex justify-between items-center">
             <div class="flex items-center gap-3.5">
                 <a href="/marketplace/lapak-saya" class="w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center text-gray-500 hover:text-emerald-600 hover:bg-emerald-50 transition-colors tap-effect shrink-0 border border-gray-100">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path></svg>
+                    <ion-icon name="arrow-back" class="text-xl"></ion-icon>
                 </a>
                 <div>
                     <h2 class="text-[19px] md:text-[24px] font-black text-gray-900 tracking-tight leading-tight uppercase">Rekap Penjualan</h2>
@@ -30,7 +30,7 @@
                 </div>
             </div>
             <a href="{{ route('marketplace.recap.export') }}" class="bg-gray-900 hover:bg-black text-white font-bold px-4 py-2.5 rounded-xl text-[12px] md:text-[13px] transition-all flex items-center gap-2 tap-effect shadow-md shrink-0">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                <ion-icon name="download-outline" class="text-lg"></ion-icon>
                 <span class="hidden md:inline">Print CSV</span>
                 <span class="md:hidden">Print</span>
             </a>
@@ -40,22 +40,30 @@
     <div class="max-w-5xl mx-auto px-4 md:px-6">
 
         {{-- GRAND TOTAL CARDS (Kupon Style) --}}
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 mb-10 animate-fade-in-up" style="animation-delay: 0.1s;">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5 mb-10 animate-fade-in-up" style="animation-delay: 0.1s;">
             {{-- Pendapatan Kupon --}}
-            <div class="bg-white p-5 rounded-2xl border-2 border-emerald-50 shadow-sm relative overflow-hidden group">
-                <div class="absolute -right-4 -bottom-4 opacity-5 group-hover:scale-110 transition-transform"><svg class="w-32 h-32" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"></path></svg></div>
-                <div class="text-emerald-600 text-[10px] md:text-[11px] font-black mb-1 uppercase tracking-[0.15em]">Grand Total Rp</div>
-                <div class="text-2xl md:text-3xl font-black text-gray-900 tracking-tight">Rp {{ number_format($grandTotalRevenue, 0, ',', '.') }}</div>
+            <div class="bg-gradient-to-br from-emerald-500 to-green-600 p-6 rounded-[1.5rem] shadow-[0_8px_25px_rgba(16,185,129,0.3)] relative overflow-hidden group border border-emerald-400">
+                <div class="absolute -right-4 -bottom-4 opacity-20 group-hover:scale-110 transition-transform text-[100px]">
+                    <ion-icon name="wallet"></ion-icon>
+                </div>
+                <div class="text-green-100 text-[11px] md:text-[12px] font-black mb-1 uppercase tracking-[0.15em] relative z-10">Grand Total Rp</div>
+                <div class="text-2xl md:text-3xl font-black text-white tracking-tight relative z-10">Rp {{ number_format($grandTotalRevenue, 0, ',', '.') }}</div>
             </div>
             {{-- Unit Kupon --}}
-            <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
-                <div class="text-gray-400 text-[10px] md:text-[11px] font-black mb-1 uppercase tracking-[0.15em]">Total Item Keluar</div>
-                <div class="text-2xl md:text-3xl font-black text-gray-900 tracking-tight">{{ $grandTotalQty }} <span class="text-[14px] font-bold text-gray-400">PCS</span></div>
+            <div class="bg-white p-6 rounded-[1.5rem] border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)] flex flex-col justify-center relative overflow-hidden">
+                <div class="absolute -right-4 -bottom-4 opacity-5 text-[100px] text-gray-500">
+                    <ion-icon name="cube"></ion-icon>
+                </div>
+                <div class="text-gray-400 text-[11px] md:text-[12px] font-black mb-1 uppercase tracking-[0.15em] relative z-10">Total Item Keluar</div>
+                <div class="text-2xl md:text-3xl font-black text-gray-900 tracking-tight relative z-10">{{ $grandTotalQty }} <span class="text-[14px] font-bold text-gray-400">PCS</span></div>
             </div>
             {{-- Transaksi Kupon --}}
-            <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
-                <div class="text-gray-400 text-[10px] md:text-[11px] font-black mb-1 uppercase tracking-[0.15em]">Tiket Lunas</div>
-                <div class="text-2xl md:text-3xl font-black text-gray-900 tracking-tight">{{ $grandTotalTransactions }} <span class="text-[14px] font-bold text-gray-400">TRX</span></div>
+            <div class="bg-white p-6 rounded-[1.5rem] border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)] flex flex-col justify-center relative overflow-hidden">
+                <div class="absolute -right-4 -bottom-4 opacity-5 text-[100px] text-gray-500">
+                    <ion-icon name="receipt"></ion-icon>
+                </div>
+                <div class="text-gray-400 text-[11px] md:text-[12px] font-black mb-1 uppercase tracking-[0.15em] relative z-10">Tiket Lunas</div>
+                <div class="text-2xl md:text-3xl font-black text-gray-900 tracking-tight relative z-10">{{ $grandTotalTransactions }} <span class="text-[14px] font-bold text-gray-400">TRX</span></div>
             </div>
         </div>
 
@@ -81,7 +89,9 @@
                             @if($item['product']->image)
                                 <img src="{{ asset('storage/' . $item['product']->image) }}" class="w-full h-full object-cover">
                             @else
-                                <svg class="w-6 h-6 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                <div class="w-full h-full flex items-center justify-center text-gray-300">
+                                    <ion-icon name="image-outline" class="text-3xl"></ion-icon>
+                                </div>
                             @endif
                         </div>
 
@@ -230,11 +240,11 @@
                 </div>
             </div>
             @empty
-            <div class="text-center py-20 bg-white rounded-[2rem] border border-gray-100 shadow-sm ticket-gradient">
-                <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-dashed border-gray-300">
-                    <svg class="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path></svg>
+            <div class="text-center py-20 bg-white rounded-[2rem] border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)] ticket-gradient">
+                <div class="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-5 border border-dashed border-gray-300 text-gray-300 shadow-inner">
+                    <ion-icon name="ticket-outline" class="text-5xl"></ion-icon>
                 </div>
-                <h3 class="text-gray-900 font-black text-lg tracking-widest uppercase mb-1">Tiket Kosong</h3>
+                <h3 class="text-gray-900 font-black text-xl tracking-widest uppercase mb-1">Tiket Kosong</h3>
                 <p class="text-[13px] text-gray-500 font-mono">Belum ada data penjualan tercatat.</p>
             </div>
             @endforelse

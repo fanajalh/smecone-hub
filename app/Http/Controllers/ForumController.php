@@ -51,6 +51,15 @@ class ForumController extends Controller
                     'user_id' => auth()->id(),
                     'status' => 'pending'
                 ]);
+                
+                \App\Models\AppNotification::send(
+                    $channel->user_id,
+                    'forum',
+                    'Permintaan Gabung Baru',
+                    auth()->user()->name . ' meminta izin bergabung ke channel #' . $channel->title,
+                    ['url' => '/dashboard/channel/' . $channel->id]
+                );
+                
                 return redirect('/forum')->with('success', 'Permintaan gabung terkirim! Menunggu persetujuan pembuat channel.');
             }
             return redirect('/forum')->withErrors(['error' => 'Permintaan kamu sudah dalam antrean.']);
@@ -319,6 +328,14 @@ class ForumController extends Controller
             $channel->members()->attach($req->user_id);
         }
         
+        \App\Models\AppNotification::send(
+            $req->user_id,
+            'forum',
+            'Permintaan Diterima',
+            'Permintaan gabung ke channel #' . $channel->title . ' telah disetujui.',
+            ['url' => '/forum/' . $channel->id]
+        );
+        
         return back()->with('success', 'Persetujuan izin masuk berhasil!');
     }
 
@@ -328,6 +345,14 @@ class ForumController extends Controller
         $req = \App\Models\ChannelRequest::where('id', $requestId)->where('forum_thread_id', $channel->id)->firstOrFail();
         
         $req->update(['status' => 'rejected']);
+        
+        \App\Models\AppNotification::send(
+            $req->user_id,
+            'forum',
+            'Permintaan Ditolak',
+            'Permintaan gabung ke channel #' . $channel->title . ' telah ditolak.',
+            null
+        );
         
         return back()->with('success', 'Permintaan masuk telah ditolak.');
     }

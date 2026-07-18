@@ -36,7 +36,7 @@ class CartController extends Controller
                     'name'       => ($c->item->item_name ?? 'Produk Dihapus') . ($c->variant_selected ? ' ('.$c->variant_selected.')' : ''),
                     'price'      => (int) ($c->item->price ?? 0),
                     'image'      => $c->item && $c->item->image
-                                        ? asset('storage/' . $c->item->image)
+                                        ? asset('storage/' . (is_array(json_decode($c->item->image, true)) ? json_decode($c->item->image, true)[0] : $c->item->image))
                                         : null,
                     'qty'        => $c->qty,
                     'is_sold'    => (bool) ($c->item->is_sold ?? false),

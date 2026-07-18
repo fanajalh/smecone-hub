@@ -2,7 +2,7 @@
 @section('title', '| Siaran Promosi')
 
 @section('content')
-<div class="max-w-7xl mx-auto pt-6 md:pt-8 px-4 md:px-6 lg:px-8 pb-32 md:pb-12 animate-page-in font-sans text-gray-800 min-h-[85vh] flex flex-col">
+<div class="max-w-7xl mx-auto pt-24 md:pt-32 px-4 md:px-6 lg:px-8 pb-32 md:pb-12 animate-page-in font-sans text-gray-800 min-h-[85vh] flex flex-col">
     
     <div class="mb-6 shrink-0">
         <a href="{{ route('marketplace.lapak') }}" class="inline-flex items-center gap-2 text-sm font-semibold text-gray-500 hover:text-gray-900 transition mb-4">
@@ -38,8 +38,12 @@
                 <div class="flex flex-col md:flex-row gap-5 items-start">
                     <div class="shrink-0">
                         @if($product->image)
+                            @php 
+                                $decoded = json_decode($product->image, true);
+                                $firstImage = is_array($decoded) ? $decoded[0] : $product->image;
+                            @endphp
                             <div class="w-32 h-32 rounded-2xl border-2 border-gray-100 overflow-hidden relative group">
-                                <img src="{{ asset('storage/' . $product->image) }}" class="w-full h-full object-cover">
+                                <img src="{{ asset('storage/' . $firstImage) }}" class="w-full h-full object-cover">
                                 <div class="absolute inset-0 bg-black/60 text-white text-[11px] font-bold flex items-center justify-center text-center px-2 opacity-0 group-hover:opacity-100 transition backdrop-blur-sm">
                                     Gambar Bawaan
                                 </div>

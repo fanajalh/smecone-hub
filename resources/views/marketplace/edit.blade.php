@@ -2,7 +2,7 @@
 @section('title', '| Edit Produk')
 
 @section('content')
-<div class="max-w-2xl mx-auto pt-8 px-4 sm:px-6 lg:px-8 pb-32 md:pb-16 animate-page-in">
+<div class="max-w-5xl mx-auto pt-8 px-4 sm:px-6 lg:px-8 pb-32 md:pb-16 animate-page-in">
     
     <div class="mb-10 text-center relative">
         <div class="w-16 h-16 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm border border-amber-100">
@@ -18,33 +18,88 @@
         </div>
     @endif
 
-    <form x-data="{ format: '{{ old('format', $product->format ?? 'Fisik') }}' }" action="{{ route('marketplace.update', $product->id) }}" method="POST" enctype="multipart/form-data" class="bg-white p-6 md:p-10 rounded-[32px] border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] space-y-7 relative overflow-hidden">
+    <form x-data="editForm()" action="{{ route('marketplace.update', $product->id) }}" method="POST" enctype="multipart/form-data" class="bg-white p-6 md:p-10 rounded-[32px] border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] space-y-7 relative overflow-hidden">
         @csrf
         @method('PUT')
         
+        <div class="mb-8 relative z-20">
+            <a href="{{ route('marketplace.lapak') }}" class="inline-flex items-center gap-2 text-[13px] font-bold text-gray-400 hover:text-amber-600 transition-colors tap-effect">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                Kembali
+            </a>
+        </div>
+
         <div class="absolute -right-20 -top-20 w-40 h-40 bg-amber-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
 
         {{-- FOTO PRODUK --}}
         <div class="relative z-10">
-            <label class="block text-[11px] font-black uppercase tracking-widest text-gray-400 mb-2.5 ml-1">Foto Produk <span class="text-gray-300">(Kosongkan jika tidak ingin ganti)</span></label>
+            <label class="block text-[11px] font-black uppercase tracking-widest text-gray-400 mb-2.5 ml-1">Foto Produk <span class="text-gray-300">(Kosongkan jika tidak ingin ganti)</span> <span class="text-gray-400 font-medium normal-case">(Maksimal 5 Foto)</span></label>
             
-            @if($product->image)
-                <div class="mb-3 flex items-center gap-3">
-                    <img src="{{ asset('storage/' . $product->image) }}" class="w-20 h-20 rounded-xl object-cover border border-gray-200 shadow-sm">
-                    <span class="text-[12px] text-gray-500 font-medium">Foto saat ini</span>
+            @php 
+                $existingImages = [];
+                if($product->image) {
+                    $decoded = json_decode($product->image, true);
+                    $existingImages = is_array($decoded) ? $decoded : [$product->image];
+                }
+            @endphp
+            <div class="mb-5" x-show="existingImages.length > 0" style="display: none;">
+                <div class="flex items-center gap-3 mb-2">
+                    <span class="text-[12px] text-gray-500 font-medium">Foto saat ini:</span>
                 </div>
-            @endif
-
-            <div class="flex items-center justify-center w-full group tap-effect">
-                <label id="dropArea" class="flex flex-col items-center justify-center w-full h-36 border-2 border-dashed border-gray-300 rounded-[24px] cursor-pointer bg-gray-50 group-hover:bg-amber-50 group-hover:border-amber-300 transition-all duration-300 relative overflow-hidden text-center px-4">
-                    <div class="flex flex-col items-center justify-center py-4 transition-transform group-hover:-translate-y-1">
-                        <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm mb-2 text-gray-400 group-hover:text-amber-500 transition-colors">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                <div class="flex flex-wrap gap-4">
+                    <template x-for="(img, index) in existingImages" :key="index">
+                        <div class="relative group w-28 h-28 md:w-32 md:h-32 rounded-2xl overflow-hidden shadow-sm border border-gray-200">
+                            <img :src="'/storage/' + img" class="w-full h-full object-cover">
+                            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                <button type="button" @click.prevent="removeExistingImage(index)" class="bg-red-500 text-white p-2.5 rounded-full hover:bg-red-600 transition-colors shadow-md tap-effect">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                </button>
+                            </div>
                         </div>
-                        <p class="text-[12px] font-extrabold text-gray-600 group-hover:text-amber-600">Ganti Foto (Opsional)</p>
-                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">PNG, JPG, JPEG (Maks. 2MB)</p>
+                    </template>
+                </div>
+            </div>
+            
+            <template x-for="delImg in deletedImages" :key="delImg">
+                <input type="hidden" name="deleted_images[]" :value="delImg">
+            </template>
+
+            <div class="w-full">
+                <label id="dropArea" 
+                       @dragover.prevent="dragOver = true" 
+                       @dragleave.prevent="dragOver = false" 
+                       @drop.prevent="handleDrop($event)"
+                       :class="dragOver ? 'border-amber-400 bg-amber-50' : 'border-gray-300 bg-gray-50 hover:bg-amber-50 hover:border-amber-300'"
+                       class="flex flex-col items-center justify-center w-full min-h-[12rem] border-2 border-dashed rounded-[24px] cursor-pointer transition-all duration-300 relative overflow-hidden text-center px-4 py-6 group tap-effect">
+                    
+                    <div x-show="(existingImages.length + images.length) < 5" class="flex flex-col items-center justify-center pt-2 pb-2 transition-transform group-hover:-translate-y-1">
+                        <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm mb-3 text-gray-400 group-hover:text-amber-500 transition-colors">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        </div>
+                        <p class="text-[13px] font-extrabold text-gray-700 mb-1 group-hover:text-amber-600">Tambah Foto Baru (Opsional)</p>
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Tarik foto kesini (Maks. 2MB/foto)</p>
                     </div>
-                    <input type="file" name="image" id="fileInput" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+
+                    <!-- Previews -->
+                    <div x-show="images.length > 0" class="w-full grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4" style="display: none;">
+                        <template x-for="(image, index) in images" :key="index">
+                            <div class="relative group aspect-square rounded-2xl overflow-hidden shadow-sm border border-gray-200">
+                                <img :src="image.url" class="w-full h-full object-cover">
+                                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                    <button type="button" @click.stop="removeImage(index)" class="bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition-colors shadow-md">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </template>
+                        
+                        <div x-show="images.length < 5" class="aspect-square rounded-2xl border-2 border-dashed border-gray-300 flex flex-col items-center justify-center text-gray-400 hover:text-amber-500 hover:border-amber-300 hover:bg-amber-50 transition-colors">
+                            <svg class="w-8 h-8 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                            <span class="text-[10px] font-bold">Tambah</span>
+                        </div>
+                    </div>
+                    
+                    <input type="file" name="image[]" id="fileInput" accept="image/*" multiple @change="handleFiles($event.target.files)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
                 </label>
             </div>
         </div>
@@ -76,20 +131,15 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5 relative z-10">
             <div>
                 <label class="block text-[11px] font-black uppercase tracking-widest text-gray-400 mb-2.5 ml-1">Format Produk <span class="text-red-500">*</span></label>
-                <div class="flex bg-gray-50 p-1.5 rounded-[20px] border border-gray-200 relative">
-                    <label class="flex-1 text-center cursor-pointer relative z-10">
-                        <input type="radio" name="format" value="Fisik" x-model="format" class="peer sr-only">
-                        <div class="py-3.5 rounded-[16px] text-[13px] font-extrabold text-gray-400 transition-all peer-checked:bg-white peer-checked:text-blue-600 peer-checked:shadow-sm">
-                            📦 Fisik
-                        </div>
-                    </label>
-                    <label class="flex-1 text-center cursor-pointer relative z-10">
-                        <input type="radio" name="format" value="Digital" x-model="format" class="peer sr-only">
-                        <div class="py-3.5 rounded-[16px] text-[13px] font-extrabold text-gray-400 transition-all peer-checked:bg-white peer-checked:text-purple-600 peer-checked:shadow-sm">
-                            🌐 Digital
-                        </div>
-                    </label>
+                <div class="w-full bg-gray-50 border border-gray-200 rounded-[20px] py-3.5 px-5 text-[14px] font-extrabold text-gray-500 flex items-center gap-2">
+                    @if($product->format === 'Digital') 
+                        <span class="text-purple-600">🌐</span> Digital & Jasa 
+                    @else 
+                        <span class="text-blue-600">📦</span> Fisik 
+                    @endif
+                    <span class="text-[11px] font-normal italic ml-auto text-gray-400">(Tidak bisa diubah)</span>
                 </div>
+                <input type="hidden" name="format" value="{{ $product->format }}">
             </div>
 
             <div x-show="format === 'Digital'" style="display: none;">
@@ -198,15 +248,67 @@
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
 
 <script>
-    const fileInput = document.getElementById('fileInput');
-    const dropArea = document.getElementById('dropArea');
-
-    fileInput.addEventListener('change', function() {
-        if(this.files && this.files.length > 0) {
-            const textEl = dropArea.querySelector('.text-gray-600, .font-extrabold');
-            if(textEl) textEl.textContent = "Foto terpilih: " + this.files[0].name;
-            dropArea.classList.add('border-amber-400', 'bg-amber-50');
-        }
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('editForm', () => ({
+            format: '{{ old("format", $product->format ?? "Fisik") }}',
+            images: [],
+            existingImages: {!! json_encode($existingImages ?? []) !!},
+            deletedImages: [],
+            dragOver: false,
+            
+            removeExistingImage(index) {
+                this.deletedImages.push(this.existingImages[index]);
+                this.existingImages.splice(index, 1);
+            },
+            
+            handleFiles(files) {
+                if (files.length === 0) return;
+                
+                const newFiles = Array.from(files);
+                const remainingSlots = 5 - (this.existingImages.length + this.images.length);
+                if (newFiles.length > remainingSlots) {
+                    alert(`Total maksimal 5 foto produk (lama + baru). Anda hanya bisa menambah ${remainingSlots} foto lagi!`);
+                    newFiles.splice(remainingSlots > 0 ? remainingSlots : 0);
+                }
+                
+                newFiles.forEach(file => {
+                    if (file.size > 2 * 1024 * 1024) {
+                        alert(`File ${file.name} terlalu besar! Maksimal 2MB.`);
+                        return;
+                    }
+                    
+                    const url = URL.createObjectURL(file);
+                    this.images.push({
+                        file: file,
+                        url: url,
+                        name: file.name
+                    });
+                });
+                
+                this.updateFileInput();
+            },
+            
+            handleDrop(e) {
+                this.dragOver = false;
+                if (e.dataTransfer.files) {
+                    this.handleFiles(e.dataTransfer.files);
+                }
+            },
+            
+            removeImage(index) {
+                URL.revokeObjectURL(this.images[index].url);
+                this.images.splice(index, 1);
+                this.updateFileInput();
+            },
+            
+            updateFileInput() {
+                const dt = new DataTransfer();
+                this.images.forEach(img => {
+                    dt.items.add(img.file);
+                });
+                document.getElementById('fileInput').files = dt.files;
+            }
+        }));
     });
 </script>
 @endsection

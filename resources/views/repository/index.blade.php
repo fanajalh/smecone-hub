@@ -19,7 +19,7 @@
     .animate-card-in { opacity: 0; animation: fadeInUp 0.4s ease-out forwards; }
 </style>
 
-<div class="max-w-7xl mx-auto pt-6 px-4 sm:px-6 lg:px-8 pb-28 md:pb-16 animate-page-in font-sans">
+<div class="max-w-7xl mx-auto pt-24 md:pt-32 px-4 sm:px-6 lg:px-8 pb-28 md:pb-16 animate-page-in font-sans">
     
     {{-- HEADER HERO SECTION (Gojek Style Light Theme) --}}
     <div class="bg-white rounded-[2rem] p-6 md:p-10 shadow-[0_4px_20px_rgba(0,0,0,0.04)] border border-gray-100 mb-8 flex flex-col md:flex-row md:justify-between items-center gap-6 relative overflow-hidden">
@@ -36,7 +36,7 @@
         </div>
         
         <a href="/repository/create" class="w-full md:w-auto bg-[#EE2737] text-white px-7 py-3.5 rounded-full shadow-[0_4px_15px_rgba(238,39,55,0.25)] hover:bg-[#D41C29] hover:shadow-[0_6px_20px_rgba(238,39,55,0.35)] transition-all duration-300 flex items-center justify-center gap-2 font-bold text-sm relative z-10 tap-effect">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+            <ion-icon name="add-outline" class="text-xl"></ion-icon>
             <span>Buat Repo Baru</span>
         </a>
     </div>
@@ -44,8 +44,8 @@
     {{-- ALERT SUCCESS --}}
     @if(session('success'))
         <div class="mb-6 bg-green-50 border border-green-200 text-green-700 px-5 py-3.5 rounded-2xl text-[13px] font-semibold flex items-center gap-3 animate-page-in">
-            <div class="w-7 h-7 bg-green-500 rounded-full flex items-center justify-center shrink-0">
-                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+            <div class="w-7 h-7 bg-green-500 rounded-full flex items-center justify-center shrink-0 text-white">
+                <ion-icon name="checkmark-outline" class="text-lg"></ion-icon>
             </div>
             {{ session('success') }}
         </div>
@@ -59,7 +59,7 @@
                 <input type="hidden" name="major" value="{{ request('major') }}">
             @endif
             <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-                <svg class="w-5 h-5 text-gray-400 group-focus-within:text-[#EE2737] transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                <ion-icon name="search-outline" class="text-xl text-gray-400 group-focus-within:text-[#EE2737] transition-colors duration-300"></ion-icon>
             </div>
             <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari karya, tugas, atau nama siswa..." 
                    class="w-full pl-11 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-full focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#EE2737]/20 focus:border-[#EE2737] shadow-sm text-[13px] md:text-sm font-medium placeholder-gray-400 transition-all duration-300">
@@ -110,7 +110,7 @@
 
             {{-- Judul Repo --}}
             <h3 class="text-[16px] font-bold text-gray-900 leading-snug mb-2 line-clamp-2 flex items-start gap-2">
-                <svg class="w-5 h-5 text-gray-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>
+                <ion-icon name="folder-outline" class="text-xl text-gray-400 shrink-0 mt-0.5"></ion-icon>
                 <span>{{ $repo->name }}</span>
             </h3>
             
@@ -139,9 +139,9 @@
 
         @empty
         {{-- EMPTY STATE --}}
-        <div class="col-span-full py-16 bg-white rounded-3xl border border-gray-200 text-center flex flex-col items-center justify-center shadow-sm">
-            <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-4">
-                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
+        <div class="col-span-full py-16 bg-gradient-to-br from-white to-gray-50 rounded-3xl border border-gray-100 text-center flex flex-col items-center justify-center shadow-sm">
+            <div class="w-20 h-20 bg-white shadow-sm border border-gray-100 rounded-full flex items-center justify-center mb-4">
+                <ion-icon name="folder-open-outline" class="text-4xl text-gray-300"></ion-icon>
             </div>
             <h3 class="text-lg font-bold text-gray-900 mb-2">Pencarian Tidak Ditemukan</h3>
             <p class="text-[13px] text-gray-500 max-w-xs mx-auto mb-6">Belum ada karya di sini. Yuk, jadi yang pertama mengunggah tugasmu!</p>

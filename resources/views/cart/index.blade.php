@@ -16,7 +16,7 @@
 <div x-data="cartPage()" class="bg-gray-50 min-h-screen pb-40 md:pb-24 font-sans text-gray-800">
 
     {{-- ===== HEADER ===== --}}
-    <div class="bg-[#E21F26] w-full pt-8 pb-20 md:pb-24 rounded-b-[2.5rem] relative overflow-hidden shadow-lg">
+    <div class="bg-[#E21F26] w-full pt-8 lg:pt-40 pb-20 md:pb-24 rounded-b-[2.5rem] relative overflow-hidden shadow-lg">
         <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl pointer-events-none -translate-y-1/2 translate-x-1/4"></div>
         <div class="relative max-w-3xl mx-auto px-5 z-10">
             <a href="/marketplace" class="inline-flex items-center gap-2 text-white/90 hover:text-white text-sm font-semibold mb-4 transition-colors p-1 -ml-1 tap-effect">

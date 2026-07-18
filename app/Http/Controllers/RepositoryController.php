@@ -267,6 +267,18 @@ class RepositoryController extends Controller
     public function toggleStar($id) {
         $repository = Repository::findOrFail($id);
         $repository->stars()->toggle(auth()->id());
+        
+        $hasStarred = $repository->stars()->where('user_id', auth()->id())->exists();
+        if ($hasStarred && $repository->user_id !== auth()->id()) {
+            \App\Models\AppNotification::send(
+                $repository->user_id,
+                'repository',
+                'Repository Mendapat Star',
+                auth()->user()->name . ' memberikan star pada repositori ' . $repository->name,
+                ['url' => '/repository/' . $repository->id]
+            );
+        }
+
         return back();
     }
 

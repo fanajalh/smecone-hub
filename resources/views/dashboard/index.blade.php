@@ -6,18 +6,34 @@
     /* Menyembunyikan scrollbar tapi tetap bisa di-scroll */
     .hide-scrollbar::-webkit-scrollbar { display: none; }
     .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    
+    @keyframes waving-hand {
+        0% { transform: rotate(0.0deg) }
+        10% { transform: rotate(14.0deg) }
+        20% { transform: rotate(-8.0deg) }
+        30% { transform: rotate(14.0deg) }
+        40% { transform: rotate(-4.0deg) }
+        50% { transform: rotate(10.0deg) }
+        60% { transform: rotate(0.0deg) }
+        100% { transform: rotate(0.0deg) }
+    }
+    .animate-waving-hand {
+        animation: waving-hand 2.5s infinite;
+    }
 </style>
 
 {{-- Premium Header Background with Gradient and Decorative Elements --}}
-<div class="relative bg-gradient-to-br from-[#E21F26] via-[#D31920] to-[#B31217] w-full pt-10 pb-28 rounded-b-[2.5rem] md:rounded-b-[3.5rem] overflow-hidden shadow-lg shadow-red-900/20">
-    <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
-    <div class="absolute bottom-0 left-10 w-32 h-32 bg-black/10 rounded-full blur-2xl pointer-events-none"></div>
+<div class="relative bg-gradient-to-br from-[#E21F26] via-[#D31920] to-[#B31217] w-full pt-16 pb-28 lg:pt-44 lg:pb-36 rounded-b-[2.5rem] md:rounded-b-[3.5rem] overflow-hidden shadow-lg shadow-red-900/20">
+    <!-- Premium Background Pattern -->
+    <div class="absolute inset-0 opacity-[0.03]" style="background-image: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
+    <div class="absolute top-0 right-0 -mt-10 -mr-10 w-48 h-48 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute bottom-0 left-10 w-40 h-40 bg-black/15 rounded-full blur-3xl pointer-events-none"></div>
 
     <div class="relative max-w-6xl mx-auto px-5 lg:px-8 flex flex-col md:flex-row md:items-center justify-between gap-6 z-10">
         
         {{-- Profile Section --}}
-        <div class="flex items-center gap-4 text-white">
-            <div class="relative w-16 h-16 rounded-full border-[3px] border-white/40 shadow-xl overflow-hidden bg-white shrink-0 transition-transform hover:scale-105">
+        <div class="flex items-center gap-5 text-white">
+            <div class="relative w-20 h-20 md:w-24 md:h-24 rounded-[1.8rem] border-[3px] border-white/30 shadow-2xl overflow-hidden bg-white shrink-0 transition-all duration-500 hover:scale-105 hover:rotate-2 hover:border-white/60 hover:shadow-red-900/40">
                 @if($user && $user->avatar)
                     <img src="{{ asset('storage/' . $user->avatar) }}" alt="Avatar" class="w-full h-full object-cover">
                 @else
@@ -25,27 +41,27 @@
                 @endif
             </div>
             <div>
-                <p class="text-[13px] font-medium text-red-100 tracking-wide mb-0.5 opacity-90">Selamat Datang,</p>
-                <h1 class="text-2xl font-extrabold flex items-center gap-2 drop-shadow-sm">
-                    {{ explode(' ', $user->name ?? 'Warga')[0] }} 👋
+                <p class="text-[13px] md:text-sm font-semibold text-red-100 tracking-wider mb-1 opacity-90 uppercase">Selamat Datang,</p>
+                <h1 class="text-3xl md:text-4xl font-black flex items-center gap-3 drop-shadow-md">
+                    {{ explode(' ', $user->name ?? 'Warga')[0] }} <span class="animate-waving-hand inline-block origin-bottom-right">👋</span>
                 </h1>
             </div>
         </div>
 
         {{-- Points & Stats (Glassmorphism) --}}
         <div class="flex items-center gap-3 md:gap-4">
-            <div class="bg-white/10 backdrop-blur-md rounded-2xl px-5 py-3 text-white border border-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:bg-white/20 transition duration-300">
-                <p class="text-[10px] text-red-100 uppercase tracking-widest font-semibold mb-1">Peran Kamu</p>
-                <p class="text-sm font-black uppercase leading-tight mt-1 flex items-center gap-1">
-                    <svg class="w-4 h-4 text-yellow-300" fill="currentColor" viewBox="0 0 20 20"><path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"></path></svg>
+            <div class="bg-white/10 backdrop-blur-md rounded-2xl px-5 py-3 md:px-6 md:py-4 text-white border border-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.1)] hover:bg-white/15 transition duration-300">
+                <p class="text-[10px] md:text-xs text-red-100 uppercase tracking-widest font-bold mb-1 opacity-80">Peran Kamu</p>
+                <p class="text-sm md:text-base font-black uppercase leading-tight mt-1 flex items-center gap-1.5">
+                    <ion-icon name="shield-checkmark" class="text-yellow-400 text-lg drop-shadow-sm"></ion-icon>
                     @if(auth()->user()->is_admin) Admin @elseif(auth()->user()->is_teacher) Guru @else Siswa @endif
                 </p>
             </div>
-            <button onclick="document.getElementById('logout-form').submit();" class="bg-white/10 backdrop-blur-md rounded-2xl px-4 py-3 text-white border border-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:bg-red-800 transition duration-300 text-left outline-none cursor-pointer">
-                <p class="text-[10px] text-red-100 uppercase tracking-widest font-semibold mb-1">Aksi Sistem</p>
-                <p class="text-sm font-black uppercase leading-tight mt-1 flex items-center gap-1">
-                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-                    Keluar / Logout
+            <button onclick="window.playLogoutAnimation(() => { document.getElementById('logout-form').submit(); })" class="group bg-black/20 backdrop-blur-md rounded-2xl px-5 py-3 md:px-6 md:py-4 text-white border border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.1)] hover:bg-black/30 hover:border-red-400/50 transition-all duration-300 text-left outline-none cursor-pointer tap-effect">
+                <p class="text-[10px] md:text-xs text-red-100 uppercase tracking-widest font-bold mb-1 opacity-80 group-hover:text-red-200">Aksi Sistem</p>
+                <p class="text-sm md:text-base font-black uppercase leading-tight mt-1 flex items-center gap-1.5 group-hover:text-red-400 transition-colors">
+                    <ion-icon name="log-out" class="text-lg"></ion-icon>
+                    Keluar
                 </p>
             </button>
             <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">
@@ -63,34 +79,35 @@
         <div class="lg:col-span-8 flex flex-col gap-8">
             
             {{-- Navigation Menu (Modern Grid Cards) --}}
-            <div class="bg-white/80 backdrop-blur-xl rounded-3xl p-5 md:p-7 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white">
-                <div class="grid grid-cols-4 gap-3 md:gap-5">
-                    <a href="/marketplace" class="group flex flex-col items-center gap-3 p-3 rounded-2xl hover:bg-red-50 hover:scale-105 transition-all duration-300">
-                        <div class="w-14 h-14 rounded-[1.2rem] bg-gradient-to-br from-red-100 to-red-50 text-[#E21F26] flex items-center justify-center shadow-sm group-hover:shadow-md transition-all">
-                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+            <div class="bg-white/80 backdrop-blur-xl rounded-[2rem] p-5 md:p-7 shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-white relative overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-br from-white/60 to-transparent pointer-events-none"></div>
+                <div class="relative grid grid-cols-4 gap-3 md:gap-5 z-10">
+                    <a href="/marketplace" class="group flex flex-col items-center gap-3 p-3 rounded-[1.5rem] hover:bg-red-50/80 hover:scale-105 transition-all duration-300">
+                        <div class="w-14 h-14 md:w-16 md:h-16 rounded-[1.2rem] md:rounded-[1.4rem] bg-gradient-to-br from-red-100 to-red-50 text-[#E21F26] flex items-center justify-center shadow-inner group-hover:shadow-md transition-all">
+                            <ion-icon name="storefront" class="text-3xl md:text-4xl drop-shadow-sm"></ion-icon>
                         </div>
-                        <span class="text-[12px] md:text-sm font-bold text-gray-700 group-hover:text-[#E21F26] transition-colors">Jajan</span>
+                        <span class="text-[12px] md:text-sm font-extrabold text-gray-700 group-hover:text-[#E21F26] transition-colors">Jajan</span>
                     </a>
                     
-                    <a href="/forum" class="group flex flex-col items-center gap-3 p-3 rounded-2xl hover:bg-orange-50 hover:scale-105 transition-all duration-300">
-                        <div class="w-14 h-14 rounded-[1.2rem] bg-gradient-to-br from-orange-100 to-orange-50 text-orange-600 flex items-center justify-center shadow-sm group-hover:shadow-md transition-all">
-                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"></path></svg>
+                    <a href="/forum" class="group flex flex-col items-center gap-3 p-3 rounded-[1.5rem] hover:bg-orange-50/80 hover:scale-105 transition-all duration-300">
+                        <div class="w-14 h-14 md:w-16 md:h-16 rounded-[1.2rem] md:rounded-[1.4rem] bg-gradient-to-br from-orange-100 to-orange-50 text-orange-600 flex items-center justify-center shadow-inner group-hover:shadow-md transition-all">
+                            <ion-icon name="chatbubbles" class="text-3xl md:text-4xl drop-shadow-sm"></ion-icon>
                         </div>
-                        <span class="text-[12px] md:text-sm font-bold text-gray-700 group-hover:text-orange-600 transition-colors">Forum</span>
+                        <span class="text-[12px] md:text-sm font-extrabold text-gray-700 group-hover:text-orange-600 transition-colors">Forum</span>
                     </a>
                     
-                    <a href="/repository" class="group flex flex-col items-center gap-3 p-3 rounded-2xl hover:bg-indigo-50 hover:scale-105 transition-all duration-300">
-                        <div class="w-14 h-14 rounded-[1.2rem] bg-gradient-to-br from-indigo-100 to-indigo-50 text-indigo-600 flex items-center justify-center shadow-sm group-hover:shadow-md transition-all">
-                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                    <a href="/repository" class="group flex flex-col items-center gap-3 p-3 rounded-[1.5rem] hover:bg-indigo-50/80 hover:scale-105 transition-all duration-300">
+                        <div class="w-14 h-14 md:w-16 md:h-16 rounded-[1.2rem] md:rounded-[1.4rem] bg-gradient-to-br from-indigo-100 to-indigo-50 text-indigo-600 flex items-center justify-center shadow-inner group-hover:shadow-md transition-all">
+                            <ion-icon name="cloud-upload" class="text-3xl md:text-4xl drop-shadow-sm"></ion-icon>
                         </div>
-                        <span class="text-[12px] md:text-sm font-bold text-gray-700 group-hover:text-indigo-600 transition-colors">Repo</span>
+                        <span class="text-[12px] md:text-sm font-extrabold text-gray-700 group-hover:text-indigo-600 transition-colors">Repo</span>
                     </a>
                     
-                    <button onclick="showAllShortcuts()" class="group flex flex-col items-center gap-3 p-3 rounded-2xl hover:bg-gray-100 hover:scale-105 transition-all duration-300 outline-none">
-                        <div class="w-14 h-14 rounded-[1.2rem] bg-gradient-to-br from-gray-200 to-gray-100 text-gray-600 flex items-center justify-center shadow-sm group-hover:shadow-md transition-all">
-                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                    <button onclick="showAllShortcuts()" class="group flex flex-col items-center gap-3 p-3 rounded-[1.5rem] hover:bg-gray-100/80 hover:scale-105 transition-all duration-300 outline-none tap-effect">
+                        <div class="w-14 h-14 md:w-16 md:h-16 rounded-[1.2rem] md:rounded-[1.4rem] bg-gradient-to-br from-gray-200 to-gray-100 text-gray-600 flex items-center justify-center shadow-inner group-hover:shadow-md transition-all">
+                            <ion-icon name="grid" class="text-3xl md:text-4xl drop-shadow-sm"></ion-icon>
                         </div>
-                        <span class="text-[12px] md:text-sm font-bold text-gray-700 group-hover:text-gray-900 transition-colors">Lainnya</span>
+                        <span class="text-[12px] md:text-sm font-extrabold text-gray-700 group-hover:text-gray-900 transition-colors">Lainnya</span>
                     </button>
                 </div>
             </div>
@@ -135,44 +152,51 @@
                     <div>
                         <h2 class="text-xl font-extrabold text-gray-900 tracking-tight">Rekomendasi Jajan</h2>
                     </div>
-                    <a href="/marketplace" class="text-sm font-bold text-[#E21F26] hover:text-red-700 transition flex items-center gap-1">
+                    <a href="/marketplace" class="text-sm font-bold text-[#E21F26] hover:text-red-700 transition flex items-center gap-1 group">
                         Semua
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        <ion-icon name="arrow-forward" class="transition-transform group-hover:translate-x-1"></ion-icon>
                     </a>
                 </div>
                 <div class="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-5">
                     @forelse($recentMarketplace as $item)
-                    <a href="/marketplace/{{ $item->id }}" class="group bg-white rounded-3xl p-3 md:p-4 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-gray-100 hover:shadow-xl hover:border-red-100 transition-all duration-300 flex flex-col transform hover:-translate-y-1">
+                    <a href="/marketplace/{{ $item->id }}" class="group bg-white rounded-[1.5rem] p-3 md:p-4 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-gray-100 hover:shadow-2xl hover:border-red-100 transition-all duration-300 flex flex-col transform hover:-translate-y-1.5">
                         <div class="aspect-square bg-gray-50 rounded-2xl mb-4 overflow-hidden relative">
                             @if($item->image)
                                 <img src="{{ asset('storage/' . $item->image) }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
                             @else
                                 <div class="w-full h-full flex items-center justify-center text-gray-300 group-hover:bg-gray-100 transition-colors">
-                                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                    <ion-icon name="image-outline" class="text-4xl"></ion-icon>
                                 </div>
                             @endif
                             <div class="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                <span class="bg-white/90 backdrop-blur-sm text-gray-900 text-xs font-bold py-1.5 px-3 rounded-full shadow-lg">Lihat</span>
+                                <span class="bg-white/90 backdrop-blur-sm text-gray-900 text-xs font-bold py-1.5 px-3 rounded-full shadow-lg">Lihat Produk</span>
                             </div>
                         </div>
-                        <h3 class="text-[14px] md:text-base font-bold text-gray-800 line-clamp-1 group-hover:text-[#E21F26] transition-colors">{{ $item->item_name }}</h3>
-                        <div class="flex items-center justify-between mt-1.5 mb-2">
-                            <p class="text-[#E21F26] font-black text-sm md:text-base">Rp{{ number_format($item->price, 0, ',', '.') }}</p>
+                        <h3 class="text-[14px] md:text-base font-extrabold text-gray-800 line-clamp-1 group-hover:text-[#E21F26] transition-colors">{{ $item->item_name }}</h3>
+                        <div class="flex items-center justify-between mt-1 mb-3">
+                            <p class="text-[#E21F26] font-black text-sm md:text-base tracking-tight">Rp{{ number_format($item->price, 0, ',', '.') }}</p>
                         </div>
                         <div class="mt-auto pt-3 border-t border-gray-100 flex items-center gap-2">
-                            <div class="w-5 h-5 rounded-full bg-gray-200 flex items-center justify-center text-[10px] font-bold text-gray-600">
-                                {{ substr($item->user->name, 0, 1) }}
+                            <div class="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-[10px] font-extrabold text-gray-600 ring-2 ring-white shadow-sm overflow-hidden">
+                                @if($item->user->avatar)
+                                    <img src="{{ asset('storage/' . $item->user->avatar) }}" class="w-full h-full object-cover">
+                                @else
+                                    {{ substr($item->user->name, 0, 1) }}
+                                @endif
                             </div>
-                            <p class="text-[11px] md:text-xs text-gray-500 font-medium truncate">{{ explode(' ', $item->user->name)[0] }}</p>
+                            <p class="text-[11px] md:text-xs text-gray-500 font-bold truncate">{{ explode(' ', $item->user->name)[0] }}</p>
                         </div>
                     </a>
                     @empty
-                    <div class="col-span-full bg-white rounded-3xl p-10 text-center border border-dashed border-gray-200">
-                        <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-3 text-gray-400">
-                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                    <div class="col-span-full bg-gradient-to-b from-gray-50 to-white rounded-[2rem] p-12 text-center border border-dashed border-gray-200">
+                        <div class="w-20 h-20 bg-white shadow-sm border border-gray-100 rounded-[1.5rem] flex items-center justify-center mx-auto mb-4 text-gray-300 transform -rotate-6 transition-transform hover:rotate-0">
+                            <ion-icon name="basket-outline" class="text-4xl"></ion-icon>
                         </div>
-                        <p class="text-sm font-semibold text-gray-600">Belum ada jajan hari ini.</p>
-                        <p class="text-xs text-gray-400 mt-1">Coba cek lagi nanti ya!</p>
+                        <p class="text-base font-extrabold text-gray-700 tracking-tight">Belum ada jajan hari ini</p>
+                        <p class="text-[13px] text-gray-500 mt-1 font-medium">Coba cek lagi nanti atau jadilah yang pertama berjualan!</p>
+                        <a href="/marketplace/create" class="inline-flex items-center gap-2 bg-red-50 text-red-600 px-4 py-2 rounded-xl text-xs font-bold mt-4 hover:bg-red-100 transition tap-effect">
+                            <ion-icon name="add-circle"></ion-icon> Buka Lapak
+                        </a>
                     </div>
                     @endforelse
                 </div>
@@ -183,70 +207,77 @@
         <div class="lg:col-span-4 flex flex-col gap-6 lg:gap-8 mt-4 lg:mt-0">
             
             {{-- Channel Saya --}}
-            <div class="bg-white rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100">
+            <div class="bg-white rounded-[2rem] p-6 shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-gray-100">
                 <div class="flex justify-between items-center mb-5">
-                    <h2 class="text-lg font-extrabold text-gray-900">Channel Saya</h2>
-                    <a href="/dashboard/channel/create" class="bg-red-50 text-[#E21F26] px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-[#E21F26] hover:text-white transition-colors">+ Baru</a>
+                    <h2 class="text-lg font-extrabold text-gray-900 tracking-tight">Channel Saya</h2>
+                    <a href="/dashboard/channel/create" class="flex items-center gap-1 bg-red-50 text-[#E21F26] px-3 py-1.5 rounded-xl text-xs font-bold hover:bg-[#E21F26] hover:text-white transition-all shadow-sm">
+                        <ion-icon name="add"></ion-icon> Baru
+                    </a>
                 </div>
                 <div class="flex flex-col gap-2">
                     @forelse($myChannels as $channel)
-                    <div class="group flex items-center justify-between p-3 rounded-2xl hover:bg-gray-50 transition border border-transparent hover:border-gray-100">
+                    <div class="group flex items-center justify-between p-3 rounded-2xl hover:bg-gray-50 transition-all border border-transparent hover:border-gray-100 hover:shadow-sm">
                         <div class="flex items-center gap-3">
-                            <div class="w-12 h-12 rounded-[1rem] bg-red-50 text-[#E21F26] flex items-center justify-center font-black text-lg group-hover:bg-[#E21F26] group-hover:text-white transition-colors">
+                            <div class="w-12 h-12 rounded-[1rem] bg-red-50 text-[#E21F26] flex items-center justify-center font-black text-lg group-hover:bg-[#E21F26] group-hover:text-white transition-colors shadow-inner">
                                 {{ substr($channel->title, 0, 1) }}
                             </div>
                             <div>
-                                <h3 class="text-sm font-bold text-gray-800 line-clamp-1">{{ $channel->title }}</h3>
+                                <h3 class="text-sm font-bold text-gray-800 line-clamp-1 group-hover:text-[#E21F26] transition-colors">{{ $channel->title }}</h3>
                                 <p class="text-xs text-gray-500 mt-0.5 font-medium flex items-center gap-1">
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                                    <ion-icon name="chatbox-ellipses" class="text-gray-400"></ion-icon>
                                     {{ $channel->replies_count }} Pesan
                                 </p>
                             </div>
                         </div>
-                        <a href="/dashboard/channel/{{ $channel->id }}/manage" class="w-8 h-8 rounded-full bg-white border border-gray-100 flex items-center justify-center text-gray-400 group-hover:text-[#E21F26] group-hover:border-red-100 group-hover:shadow-sm transition-all">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
+                        <a href="/dashboard/channel/{{ $channel->id }}/manage" class="w-8 h-8 rounded-full bg-white border border-gray-100 flex items-center justify-center text-gray-400 group-hover:text-white group-hover:bg-[#E21F26] group-hover:border-[#E21F26] group-hover:shadow-md transition-all tap-effect">
+                            <ion-icon name="settings"></ion-icon>
                         </a>
                     </div>
                     @empty
-                    <div class="text-center py-6">
-                        <div class="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-2 text-gray-400">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"></path></svg>
+                    <div class="text-center py-8 bg-gray-50/50 rounded-2xl border border-dashed border-gray-200">
+                        <div class="w-12 h-12 bg-white shadow-sm rounded-full flex items-center justify-center mx-auto mb-3 text-gray-400">
+                            <ion-icon name="chatbubble-ellipses-outline" class="text-2xl"></ion-icon>
                         </div>
-                        <p class="text-sm font-semibold text-gray-500">Belum ada channel.</p>
+                        <p class="text-sm font-bold text-gray-600">Belum ada channel</p>
+                        <p class="text-xs text-gray-400 mt-0.5">Buat channel pertamamu sekarang.</p>
                     </div>
                     @endforelse
                 </div>
             </div>
 
             {{-- Repo Populer --}}
-            <div class="bg-white rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100">
+            <div class="bg-white rounded-[2rem] p-6 shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-gray-100">
                 <div class="flex justify-between items-center mb-5">
-                    <h2 class="text-lg font-extrabold text-gray-900">Repo Populer</h2>
+                    <h2 class="text-lg font-extrabold text-gray-900 tracking-tight">Repo Populer</h2>
                     <a href="/repository" class="text-sm font-bold text-[#E21F26] hover:text-red-700 hover:underline">Semua</a>
                 </div>
                 <div class="flex flex-col gap-3">
                     @forelse($popularRepos as $repo)
-                    <a href="/repository/{{ $repo->id }}" class="group block p-4 rounded-2xl border border-gray-100 hover:border-indigo-100 hover:bg-indigo-50/30 transition-all duration-300">
+                    <a href="/repository/{{ $repo->id }}" class="group block p-4 rounded-[1.5rem] bg-gray-50/50 border border-gray-100 hover:border-indigo-200 hover:bg-indigo-50/50 transition-all duration-300 hover:shadow-sm">
                         <div class="flex justify-between items-start mb-2">
-                            <h3 class="text-sm font-bold text-gray-800 line-clamp-1 group-hover:text-indigo-600 transition-colors flex items-center gap-2">
-                                <svg class="w-4 h-4 text-gray-400 group-hover:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>
+                            <h3 class="text-sm font-bold text-gray-800 line-clamp-1 group-hover:text-indigo-700 transition-colors flex items-center gap-2">
+                                <ion-icon name="folder-open" class="text-gray-400 group-hover:text-indigo-500 text-lg"></ion-icon>
                                 {{ $repo->name }}
                             </h3>
-                            <div class="flex items-center gap-1.5 bg-yellow-50 px-2 py-0.5 rounded-md text-amber-600 text-xs font-black">
-                                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                            <div class="flex items-center gap-1 bg-yellow-100/80 px-2 py-0.5 rounded-lg text-amber-600 text-xs font-black shadow-sm">
+                                <ion-icon name="star"></ion-icon>
                                 {{ $repo->stars_count }}
                             </div>
                         </div>
                         <div class="flex items-center gap-2 text-xs text-gray-500 font-medium">
-                            <div class="w-4 h-4 rounded-full bg-gray-200 overflow-hidden">
-                                <img src="https://ui-avatars.com/api/?name={{ urlencode($repo->user->name) }}&background=e2e8f0&color=475569" class="w-full h-full object-cover">
+                            <div class="w-5 h-5 rounded-full bg-gray-200 overflow-hidden ring-1 ring-gray-100">
+                                @if($repo->user->avatar)
+                                    <img src="{{ asset('storage/' . $repo->user->avatar) }}" class="w-full h-full object-cover">
+                                @else
+                                    <img src="https://ui-avatars.com/api/?name={{ urlencode($repo->user->name) }}&background=e2e8f0&color=475569" class="w-full h-full object-cover">
+                                @endif
                             </div>
-                            {{ $repo->user->name }}
+                            <span class="truncate">{{ $repo->user->name }}</span>
                         </div>
                     </a>
                     @empty
                     <div class="text-center py-6 border border-dashed border-gray-200 rounded-2xl">
-                        <p class="text-sm font-semibold text-gray-500">Belum ada repo.</p>
+                        <p class="text-sm font-semibold text-gray-500">Belum ada repo populer.</p>
                     </div>
                     @endforelse
                 </div>
@@ -269,48 +300,48 @@
                 <h3 class="text-left text-[11px] font-black tracking-widest text-[#E21F26] uppercase mb-3">Menu Utama</h3>
                 <div class="grid grid-cols-4 gap-2 mb-5">
                     <a href="/prestasi" class="group flex flex-col items-center gap-2 p-2 hover:bg-red-50 rounded-2xl transition-all">
-                        <div class="w-12 h-12 bg-gradient-to-br from-red-100 to-red-50 rounded-xl flex items-center justify-center text-[#E21F26] group-hover:scale-110 transition-transform shadow-sm">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg>
+                        <div class="w-12 h-12 bg-gradient-to-br from-red-100 to-red-50 rounded-[1rem] flex items-center justify-center text-[#E21F26] group-hover:scale-110 transition-transform shadow-sm">
+                            <ion-icon name="trophy" class="text-2xl"></ion-icon>
                         </div>
-                        <span class="text-[10px] md:text-[11px] font-bold text-gray-700 text-center leading-tight">Prestasi</span>
+                        <span class="text-[10px] md:text-[11px] font-bold text-gray-700 text-center leading-tight group-hover:text-[#E21F26]">Prestasi</span>
                     </a>
                     <a href="/event" class="group flex flex-col items-center gap-2 p-2 hover:bg-orange-50 rounded-2xl transition-all">
-                        <div class="w-12 h-12 bg-gradient-to-br from-orange-100 to-orange-50 rounded-xl flex items-center justify-center text-orange-600 group-hover:scale-110 transition-transform shadow-sm">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        <div class="w-12 h-12 bg-gradient-to-br from-orange-100 to-orange-50 rounded-[1rem] flex items-center justify-center text-orange-600 group-hover:scale-110 transition-transform shadow-sm">
+                            <ion-icon name="calendar" class="text-2xl"></ion-icon>
                         </div>
-                        <span class="text-[10px] md:text-[11px] font-bold text-gray-700 text-center leading-tight">Event</span>
+                        <span class="text-[10px] md:text-[11px] font-bold text-gray-700 text-center leading-tight group-hover:text-orange-600">Event</span>
                     </a>
                     <a href="/profile" class="group flex flex-col items-center gap-2 p-2 hover:bg-blue-50 rounded-2xl transition-all">
-                        <div class="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-50 rounded-xl flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform shadow-sm">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                        <div class="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-50 rounded-[1rem] flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform shadow-sm">
+                            <ion-icon name="person" class="text-2xl"></ion-icon>
                         </div>
-                        <span class="text-[10px] md:text-[11px] font-bold text-gray-700 text-center leading-tight">Profil</span>
+                        <span class="text-[10px] md:text-[11px] font-bold text-gray-700 text-center leading-tight group-hover:text-blue-600">Profil</span>
                     </a>
                     <a href="/keranjang" class="group flex flex-col items-center gap-2 p-2 hover:bg-emerald-50 rounded-2xl transition-all">
-                        <div class="w-12 h-12 bg-gradient-to-br from-emerald-100 to-emerald-50 rounded-xl flex items-center justify-center text-emerald-600 group-hover:scale-110 transition-transform shadow-sm">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                        <div class="w-12 h-12 bg-gradient-to-br from-emerald-100 to-emerald-50 rounded-[1rem] flex items-center justify-center text-emerald-600 group-hover:scale-110 transition-transform shadow-sm">
+                            <ion-icon name="cart" class="text-2xl"></ion-icon>
                         </div>
-                        <span class="text-[10px] md:text-[11px] font-bold text-gray-700 text-center leading-tight">Keranjang</span>
+                        <span class="text-[10px] md:text-[11px] font-bold text-gray-700 text-center leading-tight group-hover:text-emerald-600">Keranjang</span>
                     </a>
                 </div>
 
                 <h3 class="text-left text-[11px] font-black tracking-widest text-[#E21F26] uppercase mb-3">Aktivitas & Riwayat</h3>
                 <div class="grid grid-cols-4 gap-2">
                     <a href="/marketplace/purchases" class="group flex flex-col items-center gap-2 p-2 hover:bg-emerald-50 rounded-2xl transition-all text-center">
-                        <div class="w-12 h-12 bg-emerald-50 border border-emerald-100 rounded-xl flex items-center justify-center text-emerald-600 group-hover:scale-110 transition-transform">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <div class="w-12 h-12 bg-emerald-50 border border-emerald-100 rounded-[1rem] flex items-center justify-center text-emerald-600 group-hover:scale-110 transition-transform">
+                            <ion-icon name="bag-check-outline" class="text-2xl"></ion-icon>
                         </div>
                         <span class="text-[10px] md:text-[11px] font-bold text-gray-700 leading-tight group-hover:text-emerald-700">Terbeli</span>
                     </a>
                     <a href="/marketplace/penjualan" class="group flex flex-col items-center gap-2 p-2 hover:bg-red-50 rounded-2xl transition-all text-center">
-                        <div class="w-12 h-12 bg-red-50 border border-red-100 rounded-xl flex items-center justify-center text-red-600 group-hover:scale-110 transition-transform">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                        <div class="w-12 h-12 bg-red-50 border border-red-100 rounded-[1rem] flex items-center justify-center text-red-600 group-hover:scale-110 transition-transform">
+                            <ion-icon name="wallet-outline" class="text-2xl"></ion-icon>
                         </div>
                         <span class="text-[10px] md:text-[11px] font-bold text-gray-700 leading-tight group-hover:text-red-700">Terjual</span>
                     </a>
                     <a href="/marketplace/lapak-saya" class="group flex flex-col items-center gap-2 p-2 hover:bg-orange-50 rounded-2xl transition-all text-center">
-                        <div class="w-12 h-12 bg-orange-50 border border-orange-100 rounded-xl flex items-center justify-center text-orange-600 group-hover:scale-110 transition-transform">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                        <div class="w-12 h-12 bg-orange-50 border border-orange-100 rounded-[1rem] flex items-center justify-center text-orange-600 group-hover:scale-110 transition-transform">
+                            <ion-icon name="storefront-outline" class="text-2xl"></ion-icon>
                         </div>
                         <span class="text-[10px] md:text-[11px] font-bold text-gray-700 leading-tight group-hover:text-orange-700">Lapakku</span>
                     </a>
@@ -322,8 +353,7 @@
                 popup: 'rounded-[2rem] p-4 shadow-2xl border border-gray-100',
                 closeButton: 'focus:outline-none hover:text-red-500 transition text-gray-400 mt-2 mr-2'
             },
-            width: '90%',
-            maxWidth: '420px'
+            width: '420px'
         });
     }
 </script>

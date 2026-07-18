@@ -24,6 +24,20 @@ class InteractionController extends Controller
         } else {
             Like::create(['user_id' => $user_id, 'likeable_type' => $type, 'likeable_id' => $id]);
             $isLiked = true;
+
+            $modelClass = "App\\Models\\" . class_basename($type);
+            if (class_exists($modelClass)) {
+                $model = $modelClass::find($id);
+                if ($model && $model->user_id && $model->user_id !== $user_id) {
+                    \App\Models\AppNotification::send(
+                        $model->user_id,
+                        'kabar',
+                        'Seseorang menyukai postinganmu',
+                        auth()->user()->name . ' menyukai ' . strtolower(class_basename($type)) . ' milikmu.',
+                        ['url' => '/' . strtolower(class_basename($type)) . '/' . $id]
+                    );
+                }
+            }
         }
 
         $likeCount = Like::where('likeable_type', $type)->where('likeable_id', $id)->count();
@@ -51,6 +65,20 @@ class InteractionController extends Controller
             'commentable_id' => $request->id,
             'body' => $request->body
         ]);
+
+        $modelClass = "App\\Models\\" . class_basename($request->type);
+        if (class_exists($modelClass)) {
+            $model = $modelClass::find($request->id);
+            if ($model && $model->user_id && $model->user_id !== auth()->id()) {
+                \App\Models\AppNotification::send(
+                    $model->user_id,
+                    'kabar',
+                    'Komentar Baru',
+                    auth()->user()->name . ' mengomentari ' . strtolower(class_basename($request->type)) . ' milikmu.',
+                    ['url' => '/' . strtolower(class_basename($request->type)) . '/' . $request->id]
+                );
+            }
+        }
 
         // Cek apakah request datang dari JavaScript (AJAX)
         if ($request->ajax() || $request->wantsJson()) {

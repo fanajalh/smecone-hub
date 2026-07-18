@@ -2,7 +2,7 @@
 @section('title', '| Eksplorasi Channel')
 
 @section('content')
-<div class="max-w-4xl mx-auto pt-6 px-4 sm:px-6 lg:px-8 pb-32 md:pb-12 animate-page-in">
+<div class="max-w-4xl mx-auto pt-24 md:pt-32 px-4 sm:px-6 lg:px-8 pb-32 md:pb-12 animate-page-in">
     
     <div class="bg-white rounded-[32px] p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 mb-8 flex flex-col md:flex-row md:justify-between items-center gap-6 relative overflow-hidden">
         <div class="absolute -right-10 -top-10 w-40 h-40 bg-red-50 rounded-full blur-3xl opacity-60 pointer-events-none"></div>

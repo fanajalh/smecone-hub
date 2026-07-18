@@ -2,7 +2,7 @@
 @section('title', '| Toko ' . ($seller->store_name ?? $seller->name))
 
 @section('content')
-<div class="max-w-7xl mx-auto pt-4 md:pt-6 px-4 sm:px-6 lg:px-8 pb-32 md:pb-12 animate-page-in font-sans text-gray-800">
+<div class="max-w-7xl mx-auto pt-24 md:pt-32 px-4 sm:px-6 lg:px-8 pb-32 md:pb-12 animate-page-in font-sans text-gray-800">
     
     <a href="/marketplace" class="inline-flex items-center gap-1.5 text-gray-500 hover:text-red-600 font-medium text-[13px] md:text-sm mb-4 transition-colors tap-effect w-fit">
         <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
@@ -80,13 +80,13 @@
         </h2>
     </div>
     
-    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4">
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4">
         @forelse($products as $product)
         <div class="bg-white rounded-[16px] border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.02)] overflow-hidden hover:shadow-[0_4px_15px_rgba(220,38,38,0.05)] transition-all duration-300 flex flex-col relative group">
             
             <a href="/marketplace/{{ $product->id }}" class="flex flex-col h-full tap-effect {{ $product->is_sold ? 'opacity-75' : '' }}">
                 
-                <div class="aspect-square relative overflow-hidden bg-gray-50 border-b border-gray-50">
+                <div class="aspect-square w-full shrink-0 relative overflow-hidden bg-gray-50 border-b border-gray-50">
                     
                     @if($product->is_sold)
                     <div class="absolute inset-0 bg-white/50 backdrop-blur-[1px] z-20 flex items-center justify-center">
@@ -95,7 +95,11 @@
                     @endif
 
                     @if($product->image)
-                        <img src="{{ asset('storage/' . $product->image) }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-in-out">
+                        @php 
+                            $decoded = json_decode($product->image, true);
+                            $firstImage = is_array($decoded) ? $decoded[0] : $product->image;
+                        @endphp
+                        <img src="{{ asset('storage/' . $firstImage) }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-in-out">
                     @else
                         <div class="w-full h-full flex flex-col items-center justify-center text-gray-300">
                             <svg class="w-8 h-8 opacity-50 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
