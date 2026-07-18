@@ -29,40 +29,35 @@
     <div class="absolute top-0 right-0 -mt-10 -mr-10 w-48 h-48 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
     <div class="absolute bottom-0 left-10 w-40 h-40 bg-black/15 rounded-full blur-3xl pointer-events-none"></div>
 
-    <div class="relative max-w-6xl mx-auto px-5 lg:px-8 flex flex-col md:flex-row md:items-center justify-between gap-6 z-10">
+    <div class="relative max-w-6xl mx-auto px-5 lg:px-8 flex items-center justify-between z-10">
         
         {{-- Profile Section --}}
-        <div class="flex items-center gap-5 text-white">
-            <div class="relative w-20 h-20 md:w-24 md:h-24 rounded-[1.8rem] border-[3px] border-white/30 shadow-2xl overflow-hidden bg-white shrink-0 transition-all duration-500 hover:scale-105 hover:rotate-2 hover:border-white/60 hover:shadow-red-900/40">
+        <div class="flex items-center gap-4 text-white">
+            <div class="relative w-16 h-16 md:w-20 md:h-20 rounded-full border-[3px] border-white/30 shadow-xl overflow-hidden bg-white shrink-0 transition-all duration-500 hover:scale-105 hover:border-white/60">
                 @if($user && $user->avatar)
                     <img src="{{ $user->avatar_url }}" alt="Avatar" class="w-full h-full object-cover">
                 @else
                     <img src="https://ui-avatars.com/api/?name={{ urlencode($user->name ?? 'User') }}&background=fff&color=E21F26&bold=true" alt="Avatar" class="w-full h-full object-cover">
                 @endif
             </div>
-            <div>
-                <p class="text-[13px] md:text-sm font-semibold text-red-100 tracking-wider mb-1 opacity-90 uppercase">Selamat Datang,</p>
-                <h1 class="text-3xl md:text-4xl font-black flex items-center gap-3 drop-shadow-md">
-                    {{ explode(' ', $user->name ?? 'Warga')[0] }} <span class="animate-waving-hand inline-block origin-bottom-right">👋</span>
+            
+            <div class="flex flex-col items-start">
+                <h1 class="text-2xl md:text-3xl font-bold flex items-center gap-2 drop-shadow-sm capitalize">
+                    Halo, {{ strtolower(explode(' ', $user->name ?? 'Warga')[0]) }} <span class="animate-waving-hand inline-block origin-bottom-right text-xl">👋</span>
                 </h1>
+                
+                {{-- Role Badge --}}
+                <div class="mt-1 inline-flex items-center gap-1.5 bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-[10px] md:text-xs font-bold text-white shadow-sm border border-white/10 tracking-wide">
+                    <ion-icon name="shield-checkmark" class="text-yellow-300"></ion-icon>
+                    @if(auth()->user()->is_admin) Admin @elseif(auth()->user()->is_teacher) Guru @else Siswa @endif
+                </div>
             </div>
         </div>
 
-        {{-- Points & Stats (Glassmorphism) --}}
-        <div class="flex items-center gap-3 md:gap-4">
-            <div class="bg-white/10 backdrop-blur-md rounded-2xl px-5 py-3 md:px-6 md:py-4 text-white border border-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.1)] hover:bg-white/15 transition duration-300">
-                <p class="text-[10px] md:text-xs text-red-100 uppercase tracking-widest font-bold mb-1 opacity-80">Peran Kamu</p>
-                <p class="text-sm md:text-base font-black uppercase leading-tight mt-1 flex items-center gap-1.5">
-                    <ion-icon name="shield-checkmark" class="text-yellow-400 text-lg drop-shadow-sm"></ion-icon>
-                    @if(auth()->user()->is_admin) Admin @elseif(auth()->user()->is_teacher) Guru @else Siswa @endif
-                </p>
-            </div>
-            <button onclick="window.playLogoutAnimation(() => { document.getElementById('logout-form').submit(); })" class="group bg-black/20 backdrop-blur-md rounded-2xl px-5 py-3 md:px-6 md:py-4 text-white border border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.1)] hover:bg-black/30 hover:border-red-400/50 transition-all duration-300 text-left outline-none cursor-pointer tap-effect">
-                <p class="text-[10px] md:text-xs text-red-100 uppercase tracking-widest font-bold mb-1 opacity-80 group-hover:text-red-200">Aksi Sistem</p>
-                <p class="text-sm md:text-base font-black uppercase leading-tight mt-1 flex items-center gap-1.5 group-hover:text-red-400 transition-colors">
-                    <ion-icon name="log-out" class="text-lg"></ion-icon>
-                    Keluar
-                </p>
+        {{-- Logout Button --}}
+        <div>
+            <button onclick="window.playLogoutAnimation(() => { document.getElementById('logout-form').submit(); })" class="w-10 h-10 md:w-12 md:h-12 bg-black/10 hover:bg-black/30 backdrop-blur-md rounded-full flex items-center justify-center text-white border border-white/10 shadow-sm transition-all duration-300 tap-effect outline-none group" title="Keluar">
+                <ion-icon name="log-out-outline" class="text-xl md:text-2xl translate-x-0.5 group-hover:text-red-200 transition-colors"></ion-icon>
             </button>
             <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">
                  @csrf

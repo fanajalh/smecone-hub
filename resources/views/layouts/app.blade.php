@@ -127,47 +127,43 @@
     </main>
 
         @auth
-    {{-- ================= UNIQUE MOBILE BOTTOM DOCK ================= --}}
-    <div class="lg:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-2xl border-t border-gray-200/50 flex justify-around items-end px-2 pb-5 pt-3 shadow-[0_-5px_20px_rgba(0,0,0,0.05)] z-[90] transition-all">
+    {{-- ================= UNIQUE MOBILE BOTTOM DOCK (MODERN FLOATING PILL) ================= --}}
+    <div class="lg:hidden fixed bottom-5 left-4 right-4 bg-white/80 backdrop-blur-2xl border border-white/50 rounded-[2rem] flex justify-around items-center px-2 py-3 shadow-[0_10px_40px_rgba(0,0,0,0.08)] z-[90] transition-all">
         
-        <a href="/marketplace" class="flex flex-col items-center justify-center w-full group tap-effect">
-            <div class="relative p-1.5 rounded-2xl transition-all duration-300 {{ request()->is('marketplace*') ? 'text-[#E21F26]' : 'text-gray-400 hover:text-gray-900' }}">
-                <svg class="w-6 h-6 relative z-10" fill="{{ request()->is('marketplace*') ? 'currentColor' : 'none' }}" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+        <a href="/marketplace" class="flex flex-col items-center justify-center w-[20%] group tap-effect">
+            <div class="relative p-2 rounded-2xl transition-all duration-300 {{ request()->is('marketplace*') ? 'text-[#E21F26] bg-red-50' : 'text-gray-400 hover:text-gray-900 hover:bg-gray-50' }}">
+                <svg class="w-6 h-6 relative z-10 transition-transform group-hover:scale-110 {{ request()->is('marketplace*') ? 'drop-shadow-sm' : '' }}" fill="{{ request()->is('marketplace*') ? 'currentColor' : 'none' }}" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
             </div>
-            <span class="text-[10px] mt-0.5 font-bold {{ request()->is('marketplace*') ? 'text-[#E21F26]' : 'text-gray-500' }}">Jajan</span>
         </a>
 
-        <a href="/kabar" class="flex flex-col items-center justify-center w-full group tap-effect">
-            <div class="relative p-1.5 rounded-2xl transition-all duration-300 {{ request()->is('kabar*') ? 'text-[#E21F26]' : 'text-gray-400 hover:text-gray-900' }}">
-                <svg class="w-6 h-6 relative z-10" fill="{{ request()->is('kabar*') ? 'currentColor' : 'none' }}" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path></svg>
+        <a href="/kabar" class="flex flex-col items-center justify-center w-[20%] group tap-effect">
+            <div class="relative p-2 rounded-2xl transition-all duration-300 {{ request()->is('kabar*') ? 'text-[#E21F26] bg-red-50' : 'text-gray-400 hover:text-gray-900 hover:bg-gray-50' }}">
+                <svg class="w-6 h-6 relative z-10 transition-transform group-hover:scale-110 {{ request()->is('kabar*') ? 'drop-shadow-sm' : '' }}" fill="{{ request()->is('kabar*') ? 'currentColor' : 'none' }}" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path></svg>
             </div>
-            <span class="text-[10px] mt-0.5 font-bold {{ request()->is('kabar*') ? 'text-[#E21F26]' : 'text-gray-500' }}">Kabar</span>
         </a>
 
-        <a href="/dashboard" class="flex flex-col items-center justify-center w-full group tap-effect relative -top-1">
-            <div class="relative p-3 rounded-full transition-all duration-300 {{ request()->is('dashboard*') ? 'bg-[#E21F26] text-white shadow-md' : 'bg-gray-100 text-gray-500' }}">
+        <a href="/dashboard" class="flex flex-col items-center justify-center w-[20%] group tap-effect relative -mt-10">
+            <div class="relative p-3.5 rounded-full transition-all duration-500 {{ request()->is('dashboard*') ? 'bg-gradient-to-tr from-[#E21F26] to-[#ff4b51] text-white shadow-xl shadow-red-500/40 scale-110' : 'bg-white text-gray-400 shadow-lg hover:shadow-xl hover:text-[#E21F26] hover:scale-105' }} ring-4 ring-[#F8F9FA] z-20">
                 <svg class="w-6 h-6 relative z-10" fill="{{ request()->is('dashboard*') ? 'currentColor' : 'none' }}" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
             </div>
         </a>
 
-        <a href="/notifikasi" class="flex flex-col items-center justify-center w-full group tap-effect relative">
-            <div class="relative p-1.5 rounded-2xl transition-all duration-300 {{ request()->is('notifikasi*') ? 'text-[#E21F26]' : 'text-gray-400 hover:text-gray-900' }}">
-                <svg class="w-6 h-6 relative z-10" fill="{{ request()->is('notifikasi*') ? 'currentColor' : 'none' }}" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+        <a href="/notifikasi" class="flex flex-col items-center justify-center w-[20%] group tap-effect relative">
+            <div class="relative p-2 rounded-2xl transition-all duration-300 {{ request()->is('notifikasi*') ? 'text-[#E21F26] bg-red-50' : 'text-gray-400 hover:text-gray-900 hover:bg-gray-50' }}">
+                <svg class="w-6 h-6 relative z-10 transition-transform group-hover:scale-110 {{ request()->is('notifikasi*') ? 'drop-shadow-sm' : '' }}" fill="{{ request()->is('notifikasi*') ? 'currentColor' : 'none' }}" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
                 @if(auth()->user()->unread_notifications_count > 0)
-                <span class="absolute top-1 right-1 flex h-3 w-3 items-center justify-center z-20">
+                <span class="absolute top-1.5 right-1.5 flex h-3 w-3 items-center justify-center z-20">
                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
                     <span class="relative inline-flex rounded-full h-3 w-3 bg-[#E21F26] border-[2px] border-white"></span>
                 </span>
                 @endif
             </div>
-            <span class="text-[10px] mt-0.5 font-bold {{ request()->is('notifikasi*') ? 'text-[#E21F26]' : 'text-gray-500' }}">Notif</span>
         </a>
 
-        <a href="/profile" class="flex flex-col items-center justify-center w-full group tap-effect">
-            <div class="relative p-1.5 rounded-2xl transition-all duration-300 {{ request()->is('profile*') ? 'text-[#E21F26]' : 'text-gray-400 hover:text-gray-900' }}">
-                <svg class="w-6 h-6 relative z-10" fill="{{ request()->is('profile*') ? 'currentColor' : 'none' }}" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+        <a href="/profile" class="flex flex-col items-center justify-center w-[20%] group tap-effect">
+            <div class="relative p-2 rounded-2xl transition-all duration-300 {{ request()->is('profile*') ? 'text-[#E21F26] bg-red-50' : 'text-gray-400 hover:text-gray-900 hover:bg-gray-50' }}">
+                <svg class="w-6 h-6 relative z-10 transition-transform group-hover:scale-110 {{ request()->is('profile*') ? 'drop-shadow-sm' : '' }}" fill="{{ request()->is('profile*') ? 'currentColor' : 'none' }}" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
             </div>
-            <span class="text-[10px] mt-0.5 font-bold {{ request()->is('profile*') ? 'text-[#E21F26]' : 'text-gray-500' }}">Profil</span>
         </a>
 
     </div>
