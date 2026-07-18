@@ -6,7 +6,7 @@
             "use": "vercel-php@0.9.0"
         },
         {
-            "src": "/public/**",
+            "src": "public/**",
             "use": "@vercel/static"
         }
     ],
@@ -14,6 +14,18 @@
         {
             "src": "/build/(.*)",
             "dest": "/public/build/$1"
+        },
+        {
+            "src": "/favicon\\.(ico|png)",
+            "dest": "/public/favicon.$1"
+        },
+        {
+            "src": "/robots\\.txt",
+            "dest": "/public/robots.txt"
+        },
+        {
+            "src": "/(.*)\\.(?:css|js|map|ico|png|jpg|jpeg|gif|svg|webp|woff|woff2|ttf|eot)$",
+            "dest": "/public/$1.$2"
         },
         {
             "src": "/storage/(.*)",
