@@ -20,6 +20,24 @@ Route::get('/403', function() { abort(403); });
 Route::get('/419', function() { abort(419); });
 Route::get('/500', function() { abort(500); });
 
+Route::get('/debug-vercel', function () {
+    $path = public_path();
+    $files = [];
+    if (is_dir($path)) {
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($path, \RecursiveDirectoryIterator::SKIP_DOTS)
+        );
+        foreach ($iterator as $file) {
+            $files[] = str_replace($path, '', $file->getPathname());
+        }
+    }
+    return response()->json([
+        'public_path' => $path,
+        'public_exists' => is_dir($path),
+        'files' => $files,
+    ]);
+});
+
 Route::get('/', function () {
     if (auth()->check()) {
         if (auth()->user()->is_admin) {
