@@ -10,7 +10,17 @@ use Illuminate\Support\Str;
 
 class AssignmentController extends Controller
 {
-    // 1. store: Untuk Guru membuat Tugas Baru di dalam sebuah Channel.
+    // 1. create: Untuk Menampilkan Halaman Buat Tugas Baru
+    public function create(ForumThread $forumThread)
+    {
+        if (!auth()->user()->is_teacher) {
+            return redirect('/forum/'.$forumThread->id)->with('error', 'Hanya Guru yang bisa membuat tugas.');
+        }
+
+        return view('forum.create_assignment', compact('forumThread'));
+    }
+
+    // 2. store: Untuk Menyimpan Tugas Baru
     public function store(Request $request, ForumThread $forumThread)
     {
         // Pastikan hanya guru yang bisa membuat tugas
@@ -30,10 +40,71 @@ class AssignmentController extends Controller
             'deadline' => $request->deadline,
         ]);
 
-        return back()->with('success', 'Tugas berhasil dibuat!');
+        return redirect('/forum/'.$forumThread->id)->with('success', 'Tugas berhasil dibuat!');
     }
 
-    // 2. submit: Untuk Murid mengumpulkan link tugas
+    // 3. edit: Halaman Edit Tugas
+    public function edit(Assignment $assignment)
+    {
+        $forumThread = $assignment->forumThread;
+        if (!auth()->user()->is_teacher || $forumThread->user_id !== auth()->id()) {
+            return redirect('/forum/'.$forumThread->id)->with('error', 'Hanya pembuat tugas yang dapat mengubah tugas ini.');
+        }
+
+        return view('forum.edit_assignment', compact('assignment', 'forumThread'));
+    }
+
+    // 4. update: Menyimpan perubahan tugas
+    public function update(Request $request, Assignment $assignment)
+    {
+        $forumThread = $assignment->forumThread;
+        if (!auth()->user()->is_teacher || $forumThread->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'deadline' => 'required|date',
+        ]);
+
+        $assignment->update([
+            'title' => $request->title,
+            'description' => $request->description,
+            'deadline' => $request->deadline,
+        ]);
+
+        return redirect('/forum/'.$forumThread->id)->with('success', 'Tugas berhasil diperbarui!');
+    }
+
+    // 5. destroy: Menghapus tugas
+    public function destroy(Assignment $assignment)
+    {
+        $forumThread = $assignment->forumThread;
+        if (!auth()->user()->is_teacher || $forumThread->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $assignment->delete();
+
+        return redirect('/forum/'.$forumThread->id)->with('success', 'Tugas berhasil dihapus!');
+    }
+
+    // 6. submissions: Menampilkan halaman daftar pengumpulan (Fullscreen)
+    public function submissions(Assignment $assignment)
+    {
+        $forumThread = $assignment->forumThread;
+        if (!auth()->user()->is_teacher || $forumThread->user_id !== auth()->id()) {
+            return redirect('/forum/'.$forumThread->id)->with('error', 'Hanya pembuat tugas yang dapat melihat rekap pengumpulan.');
+        }
+
+        $students = $forumThread->members()->where('is_teacher', false)->get();
+        $submissions = \App\Models\Submission::where('assignment_id', $assignment->id)->get();
+
+        return view('forum.submissions', compact('assignment', 'forumThread', 'students', 'submissions'));
+    }
+
+    // 7. submit: Untuk Murid mengumpulkan link tugas
     public function submit(Request $request, Assignment $assignment)
     {
         $request->validate([

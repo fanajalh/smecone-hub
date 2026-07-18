@@ -11,6 +11,11 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     
+    <!-- Flatpickr for Date Inputs -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/airbnb.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
@@ -353,6 +358,16 @@
                 if (doorLeft) doorLeft.style.transform = 'translateX(-100%)';
                 if (doorRight) doorRight.style.transform = 'translateX(100%)';
             }
+        });
+
+        // Initialize Flatpickr on all date inputs
+        document.addEventListener('DOMContentLoaded', function() {
+            flatpickr('input[type="date"]', {
+                altInput: true,
+                altFormat: "d F Y",
+                dateFormat: "Y-m-d",
+                disableMobile: "true"
+            });
         });
     </script>
 </body>

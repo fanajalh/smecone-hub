@@ -97,9 +97,9 @@
         </div>
         
         @if(auth()->user()->is_teacher)
-        <button onclick="toggleAssignmentModal()" class="text-[#E21F26] bg-red-50 p-2.5 rounded-xl mr-2 hover:bg-red-100 transition-colors shadow-sm tap-effect" title="Buat Tugas">
+        <a href="{{ route('assignment.create', $channel->id) }}" class="text-[#E21F26] bg-red-50 p-2.5 rounded-xl mr-2 hover:bg-red-100 transition-colors shadow-sm tap-effect" title="Buat Tugas">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-        </button>
+        </a>
         @endif
 
         <button onclick="toggleSearchOverlay()" class="text-gray-400 hover:text-[#E21F26] p-2.5 rounded-xl hover:bg-gray-100 shrink-0 transition-colors tap-effect" title="Cari Pesan">
@@ -130,28 +130,45 @@
             @php 
                 $mySubmission = $assignment->submissions->where('user_id', auth()->id())->first();
             @endphp
-            <div class="min-w-[280px] max-w-[280px] bg-gradient-to-br from-white to-gray-50 rounded-2xl p-4 border border-gray-200 shadow-sm flex flex-col relative overflow-hidden group">
+            <div class="min-w-[320px] max-w-[320px] bg-gradient-to-br from-white to-gray-50 rounded-2xl p-4 border border-gray-200 shadow-sm flex flex-col relative overflow-hidden group">
                 <div class="absolute left-0 top-0 bottom-0 w-1 bg-[#E21F26]"></div>
                 
-                <div class="flex justify-between items-start mb-2 pl-2">
+                <div class="flex justify-between items-start mb-2">
                     <h3 class="font-extrabold text-[14px] text-gray-900 truncate pr-2 group-hover:text-[#E21F26] transition-colors">{{ $assignment->title }}</h3>
-                    <span class="text-[9px] bg-red-100 text-red-600 border border-red-200 px-2 py-0.5 rounded-md font-black uppercase tracking-widest shrink-0">Tugas</span>
+                    <div class="flex items-center gap-1 shrink-0">
+                        <span class="text-[9px] bg-red-100 text-red-600 border border-red-200 px-2 py-0.5 rounded-md font-black uppercase tracking-widest">Tugas</span>
+                        @if(auth()->user()->is_teacher)
+                        <div class="relative x-dropdown" data-dropdown="false">
+                            <button onclick="toggleDropdown(this)" class="p-0.5 text-gray-400 hover:text-gray-700 bg-white border border-gray-200 rounded-md shadow-sm transition">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"></path></svg>
+                            </button>
+                            <div class="hidden absolute right-0 mt-1 w-28 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-50">
+                                <a href="{{ route('assignment.edit', $assignment->id) }}" class="block px-3 py-1.5 text-[11px] font-bold text-gray-700 hover:bg-gray-50 hover:text-[#E21F26] transition">Edit</a>
+                                <form action="{{ route('assignment.destroy', $assignment->id) }}" method="POST" class="inline" onsubmit="confirmDelete(event, this)">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="w-full text-left px-3 py-1.5 text-[11px] font-bold text-red-600 hover:bg-red-50 transition">Hapus</button>
+                                </form>
+                            </div>
+                        </div>
+                        @endif
+                    </div>
                 </div>
-                <p class="text-[12px] text-gray-500 line-clamp-2 mb-3 pl-2 leading-relaxed">{{ $assignment->description }}</p>
+                <p class="text-[12px] text-gray-500 line-clamp-2 mb-3 leading-relaxed">{{ $assignment->description }}</p>
                 
-                <div class="flex items-center text-[10px] font-bold text-orange-600 mb-4 pl-2">
+                <div class="flex items-center text-[10px] font-bold text-orange-600 mb-4">
                     <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                     Tenggat: {{ $assignment->deadline->diffForHumans() }}
                 </div>
 
-                <div class="mt-auto pl-2">
+                <div class="mt-auto">
                     @if(auth()->user()->is_teacher)
-                        <div class="flex flex-col gap-2 w-full">
-                            <button onclick="toggleSubmissionsModal({{ $assignment->id }})" class="w-full bg-gray-900 text-white text-[11px] font-black py-2.5 rounded-xl hover:bg-black transition shadow-sm tap-effect">
+                        <div class="flex flex-col gap-1.5 w-full">
+                            <a href="{{ route('assignment.submissions', $assignment->id) }}" class="w-full bg-gray-900 text-white text-[10px] font-black py-2 rounded-xl hover:bg-black transition shadow-sm tap-effect text-center block">
                                 LIHAT PENGUMPULAN ({{ $assignment->submissions->count() }})
-                            </button>
-                            <a href="/assignment/{{ $assignment->id }}/export" class="w-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[11px] font-black py-2.5 rounded-xl text-center hover:bg-emerald-600 hover:text-white transition tap-effect flex items-center justify-center gap-1.5">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            </a>
+                            <a href="/assignment/{{ $assignment->id }}/export" class="w-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-black py-2 rounded-xl text-center hover:bg-emerald-600 hover:text-white transition tap-effect flex items-center justify-center gap-1">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                                 EXPORT CSV
                             </a>
                         </div>
@@ -441,33 +458,7 @@
         </div>
     </div>
 
-    <div id="assignmentModal" class="hidden fixed inset-0 bg-gray-900/60 z-[300] flex items-center justify-center p-4 backdrop-blur-sm animate-fadeIn">
-        <div class="bg-white rounded-[2rem] w-full max-w-sm p-6 md:p-8 shadow-2xl border border-gray-100">
-            <h2 class="text-xl font-black text-gray-900 mb-6 flex items-center gap-3">
-                <div class="w-12 h-12 rounded-xl bg-orange-50 text-orange-500 flex items-center justify-center"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"></path></svg></div>
-                Buat Tugas Baru
-            </h2>
-            <form action="{{ route('assignment.store', $channel->id) }}" method="POST" class="space-y-4">
-                @csrf
-                <div>
-                    <label class="block text-[12px] font-bold text-gray-500 mb-1.5 ml-1">Judul Tugas</label>
-                    <input type="text" name="title" required class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3.5 text-[14px] focus:ring-4 focus:ring-red-500/10 focus:border-red-400 font-bold outline-none transition-all" placeholder="Contoh: Modul 1 Web Dev">
-                </div>
-                <div>
-                    <label class="block text-[12px] font-bold text-gray-500 mb-1.5 ml-1">Instruksi / Deskripsi</label>
-                    <textarea name="description" rows="3" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3.5 text-[14px] focus:ring-4 focus:ring-red-500/10 focus:border-red-400 font-medium outline-none transition-all resize-none" placeholder="Tuliskan instruksi pengerjaan..."></textarea>
-                </div>
-                <div>
-                    <label class="block text-[12px] font-bold text-gray-500 mb-1.5 ml-1">Batas Waktu (Deadline)</label>
-                    <input type="datetime-local" name="deadline" required class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3.5 text-[14px] focus:ring-4 focus:ring-red-500/10 focus:border-red-400 font-bold outline-none transition-all">
-                </div>
-                <div class="flex gap-3 pt-4">
-                    <button type="button" onclick="toggleAssignmentModal()" class="flex-1 bg-gray-100 text-gray-600 font-extrabold py-3.5 rounded-xl hover:bg-gray-200 transition-colors tap-effect">Batal</button>
-                    <button type="submit" class="flex-1 bg-[#E21F26] hover:bg-red-700 text-white font-extrabold py-3.5 rounded-xl shadow-[0_4px_12px_rgba(226,31,38,0.25)] transition-colors tap-effect">Posting</button>
-                </div>
-            </form>
-        </div>
-    </div>
+
 
     <div id="submitModal" class="hidden fixed inset-0 bg-gray-900/60 z-[300] flex items-center justify-center p-4 backdrop-blur-sm animate-fadeIn">
         <div class="bg-white rounded-[2rem] w-full max-w-sm p-6 md:p-8 shadow-2xl border border-gray-100">
@@ -515,22 +506,7 @@
         </div>
     </div>
 
-    <div id="listSubmissionsModal" class="hidden fixed inset-0 bg-gray-900/60 z-[300] flex items-center justify-center p-4 backdrop-blur-sm animate-fadeIn">
-        <div class="bg-white rounded-[2rem] w-full max-w-md p-6 shadow-2xl border border-gray-100 max-h-[85vh] flex flex-col">
-            <div class="flex justify-between items-center mb-5 pb-4 border-b border-gray-100">
-                <h2 class="text-xl font-black text-gray-900 flex items-center gap-2">
-                    <span class="w-8 h-8 rounded-full bg-green-100 text-green-600 flex items-center justify-center"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg></span>
-                    Daftar Kumpul
-                </h2>
-                <button onclick="document.getElementById('listSubmissionsModal').classList.add('hidden')" class="w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center text-gray-400 hover:text-[#E21F26] hover:bg-red-50 transition-colors tap-effect">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                </button>
-            </div>
-            
-            <div class="flex-1 overflow-y-auto pr-1 space-y-4 hide-scrollbar" id="submissionsListContainer">
-                </div>
-        </div>
-    </div>
+
 
     {{-- LIGHTBOX MEDIA --}}
     <div id="lightbox" class="lightbox hidden" onclick="closeLightbox()">
@@ -554,7 +530,53 @@
     let selectedMediaFile = null;
     let searchDebounce = null;
 
-    function toggleAssignmentModal() { document.getElementById('assignmentModal').classList.toggle('hidden'); }
+    // Toggle dropdown function untuk Assignment cards
+    function toggleDropdown(btn) {
+        // Tutup dropdown lain yang sedang terbuka
+        document.querySelectorAll('.x-dropdown > div').forEach(el => {
+            if (el !== btn.nextElementSibling) el.classList.add('hidden');
+        });
+        const dropdown = btn.nextElementSibling;
+        dropdown.classList.toggle('hidden');
+    }
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(event) {
+        if (!event.target.closest('.x-dropdown')) {
+            document.querySelectorAll('.x-dropdown > div').forEach(el => el.classList.add('hidden'));
+        }
+    });
+
+    // SweetAlert2 Confirm Delete
+    function confirmDelete(event, form) {
+        event.preventDefault();
+        Swal.fire({
+            title: 'Hapus Tugas?',
+            text: "Tugas beserta pengumpulannya akan dihapus permanen!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#E21F26',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: 'Ya, Hapus!',
+            cancelButtonText: 'Batal',
+            customClass: {
+                popup: 'rounded-3xl',
+                confirmButton: 'font-bold rounded-xl px-5 py-2.5 shadow-sm',
+                cancelButton: 'font-bold rounded-xl px-5 py-2.5 shadow-sm'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.submit();
+            }
+        });
+    }
+
+    async function togglePrivacy(subId) {
+        await fetch(`/submission/${subId}/toggle-privacy`, {
+            method: "POST", headers: { "X-CSRF-TOKEN": csrfToken }
+        });
+        window.location.reload();
+    }
     
     function openSubmitModal(id, title) {
         const modal = document.getElementById('submitModal');
@@ -564,56 +586,8 @@
         modal.classList.remove('hidden');
     }
 
-    function toggleSubmissionsModal(assignmentId) {
-        const modal = document.getElementById('listSubmissionsModal');
-        const container = document.getElementById('submissionsListContainer');
-        const assignment = assignmentsData.find(a => a.id == assignmentId);
-        
-        container.innerHTML = '';
-        
-        if(assignment.submissions.length === 0) {
-            container.innerHTML = `
-                <div class="flex flex-col items-center justify-center py-10 text-gray-400">
-                    <svg class="w-12 h-12 mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                    <p class="font-bold text-sm">Belum ada yang mengumpulkan.</p>
-                </div>`;
-        } else {
-            assignment.submissions.forEach(sub => {
-                container.innerHTML += `
-                    <div class="bg-white rounded-2xl p-4 border border-gray-200 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 font-black border border-gray-200">${sub.user.name.charAt(0)}</div>
-                                <div>
-                                    <p class="font-extrabold text-gray-900 text-[14px] leading-tight">${sub.user.name}</p>
-                                    <p class="text-[10px] text-gray-500 font-bold mt-0.5">${new Date(sub.created_at).toLocaleString('id-ID', {day: 'numeric', month: 'short', hour:'2-digit', minute:'2-digit'})}</p>
-                                </div>
-                            </div>
-                            <div class="bg-${sub.grade ? 'green' : 'orange'}-50 px-3 py-1.5 rounded-lg border border-${sub.grade ? 'green' : 'orange'}-100 text-[12px] font-black text-${sub.grade ? 'green' : 'orange'}-600 shadow-sm">
-                                ${sub.grade ? sub.grade + '/100' : 'BELUM NILAI'}
-                            </div>
-                        </div>
-                        <a href="${sub.repo_link}" target="_blank" class="block bg-gray-50 text-blue-600 text-[13px] p-3.5 rounded-xl border border-gray-200 truncate mb-4 font-bold hover:bg-blue-50 hover:border-blue-200 hover:text-blue-700 transition-colors">
-                            🔗 Lihat Repositori
-                        </a>
-                        <form action="/submission/${sub.id}/grade" method="POST" class="flex gap-2">
-                            <input type="hidden" name="_token" value="${csrfToken}">
-                            <input type="number" name="grade" placeholder="Nilai 0-100" class="w-24 bg-white border border-gray-300 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-red-500 focus:ring-4 focus:ring-red-500/10 font-bold text-center">
-                            <button type="submit" class="flex-1 bg-gray-900 text-white text-[13px] font-extrabold rounded-xl hover:bg-black transition-colors shadow-sm tap-effect">BERI NILAI</button>
-                        </form>
-                    </div>
-                `;
-            });
-        }
-        modal.classList.remove('hidden');
-    }
 
-    async function togglePrivacy(subId) {
-        await fetch(`/submission/${subId}/toggle-privacy`, {
-            method: "POST", headers: { "X-CSRF-TOKEN": csrfToken }
-        });
-        window.location.reload();
-    }
+
 
     const chatContainer = document.getElementById('chatContainer');
     const tx = document.getElementById('chatInput');

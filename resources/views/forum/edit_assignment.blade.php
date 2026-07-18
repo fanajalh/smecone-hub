@@ -3,20 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smecone Hub | Edit Tugas - {{ $assignment->title }}</title>
+    <title>Smecone Hub | Edit Tugas - {{ $forumThread->title }}</title>
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     
-    <!-- Styles -->
+    <!-- Styles & Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    
+    <!-- Flatpickr CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <!-- Flatpickr Custom Theme to match Slate/Red -->
+    <style>
+        .flatpickr-calendar.arrowTop:before, .flatpickr-calendar.arrowTop:after { border-bottom-color: #fff; }
+        .flatpickr-day.selected { background: #E21F26 !important; border-color: #E21F26 !important; }
+        .flatpickr-day:hover { background: #f1f5f9; }
+        /* Bikin kalender lebih besar */
+        .flatpickr-calendar {
+            transform: scale(1.2);
+            transform-origin: top left;
+            margin-top: 5px !important;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        @media (max-width: 768px) {
+            .flatpickr-calendar {
+                transform: scale(1.05); /* Agak lebih kecil di mobile */
+            }
+        }
+    </style>
     
     <style>
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
             background-color: #f8fafc;
+        }
+
+        /* Hide native calendar icon since we use flatpickr */
+        input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+            display: none;
+            -webkit-appearance: none;
         }
     </style>
 </head>
@@ -29,7 +56,7 @@
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path></svg>
             </a>
             <div>
-                <h1 class="text-base font-extrabold text-slate-900 leading-tight">Ubah Detail Tugas</h1>
+                <h1 class="text-base font-extrabold text-slate-900 leading-tight">Edit Tugas</h1>
                 <p class="text-xs font-semibold text-slate-500 flex items-center gap-1.5 mt-1">
                     <span class="w-2 h-2 rounded-full bg-red-600"></span> Forum: {{ $forumThread->title }}
                 </p>
@@ -39,14 +66,14 @@
 
     <!-- Main Content Container -->
     <main class="flex-1 p-6 md:p-12 flex items-start justify-center">
-        <div class="bg-white rounded-3xl p-8 md:p-10 shadow-[0_4px_30px_rgba(0,0,0,0.03)] w-full max-w-xl flex flex-col gap-6">
-            <div class="flex items-center gap-4 border-b border-slate-100 pb-5">
-                <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-500 flex items-center justify-center shrink-0">
-                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"></path></svg>
+        <div class="bg-white rounded-[2rem] p-8 md:p-12 shadow-[0_4px_40px_rgba(0,0,0,0.04)] w-full max-w-3xl flex flex-col gap-8">
+            <div class="flex items-center gap-5 border-b border-slate-100 pb-6">
+                <div class="w-12 h-12 rounded-2xl bg-orange-50 text-orange-500 flex items-center justify-center shrink-0">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"></path></svg>
                 </div>
                 <div>
-                    <h2 class="text-lg font-black text-slate-900 leading-tight">Edit Detail Tugas</h2>
-                    <p class="text-xs font-semibold text-slate-400 mt-1">Sesuaikan kembali judul, deskripsi, atau batas waktu tugas ini.</p>
+                    <h2 class="text-lg font-black text-slate-900 leading-tight">Edit Penugasan</h2>
+                    <p class="text-xs font-semibold text-slate-400 mt-1">Ubah rincian tugas yang sudah Anda buat.</p>
                 </div>
             </div>
 
@@ -54,20 +81,20 @@
             <form action="{{ route('assignment.update', $assignment->id) }}" method="POST" class="flex flex-col gap-5">
                 @csrf
                 @method('PUT')
-                
                 <div class="flex flex-col gap-1.5">
                     <label class="text-xs font-bold text-slate-400 pl-1">JUDUL TUGAS</label>
-                    <input type="text" name="title" value="{{ $assignment->title }}" required class="w-full bg-slate-50 border border-slate-200/80 rounded-xl px-4 py-3.5 text-sm focus:bg-white focus:border-red-500 focus:ring-4 focus:ring-red-500/10 font-bold outline-none transition-all placeholder:text-slate-400" placeholder="Judul Tugas">
+                    <input type="text" name="title" value="{{ $assignment->title }}" required class="w-full bg-slate-50 border border-slate-200/80 rounded-xl px-4 py-3.5 text-sm focus:bg-white focus:border-red-500 focus:ring-4 focus:ring-red-500/10 font-bold outline-none transition-all placeholder:text-slate-400" placeholder="Contoh: Modul 1 Web Dev - CRUD Laravel">
                 </div>
 
                 <div class="flex flex-col gap-1.5">
                     <label class="text-xs font-bold text-slate-400 pl-1">INSTRUKSI / DESKRIPSI TUGAS</label>
-                    <textarea name="description" rows="5" class="w-full bg-slate-50 border border-slate-200/80 rounded-xl px-4 py-3.5 text-sm focus:bg-white focus:border-red-500 focus:ring-4 focus:ring-red-500/10 font-semibold outline-none transition-all resize-none placeholder:text-slate-400" placeholder="Tuliskan instruksi pengerjaan tugas...">{{ $assignment->description }}</textarea>
+                    <textarea name="description" rows="5" class="w-full bg-slate-50 border border-slate-200/80 rounded-xl px-4 py-3.5 text-sm focus:bg-white focus:border-red-500 focus:ring-4 focus:ring-red-500/10 font-semibold outline-none transition-all resize-none placeholder:text-slate-400" placeholder="Tuliskan instruksi pengerjaan tugas secara rinci di sini...">{{ $assignment->description }}</textarea>
                 </div>
 
-                <div class="flex flex-col gap-1.5">
+                <div class="flex flex-col gap-1.5 relative">
                     <label class="text-xs font-bold text-slate-400 pl-1">BATAS WAKTU PENGUMPULAN (DEADLINE)</label>
-                    <input type="datetime-local" name="deadline" value="{{ $assignment->deadline->format('Y-m-d\TH:i') }}" required class="w-full bg-slate-50 border border-slate-200/80 rounded-xl px-4 py-3.5 text-sm focus:bg-white focus:border-red-500 focus:ring-4 focus:ring-red-500/10 font-bold outline-none transition-all text-slate-700">
+                    <input type="text" id="deadline" name="deadline" value="{{ \Carbon\Carbon::parse($assignment->deadline)->format('Y-m-d\TH:i') }}" required class="w-full bg-slate-50 border border-slate-200/80 rounded-xl px-4 py-4 text-[15px] focus:bg-white focus:border-red-500 focus:ring-4 focus:ring-red-500/10 font-bold outline-none transition-all text-slate-800 placeholder:text-slate-400" placeholder="Pilih tanggal dan waktu deadline...">
+                    <svg class="w-5 h-5 text-slate-400 absolute right-4 top-[38px] pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                 </div>
 
                 <div class="flex gap-3 border-t border-slate-100 pt-6 mt-2">
@@ -83,5 +110,15 @@
         </div>
     </main>
 
+    <!-- Flatpickr JS -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script>
+        flatpickr("#deadline", {
+            enableTime: true,
+            dateFormat: "Y-m-d H:i",
+            time_24hr: true,
+            minDate: "today",
+        });
+    </script>
 </body>
 </html>

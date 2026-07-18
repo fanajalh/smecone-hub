@@ -201,4 +201,42 @@ class AdminController extends Controller
         $event->delete();
         return back()->with('success', 'Event berhasil dihapus.');
     }
+
+    // ==========================================
+    // 💰 MANAJEMEN PENARIKAN DANA (WITHDRAWAL)
+    // ==========================================
+    public function withdrawals()
+    {
+        $withdrawals = \App\Models\Withdrawal::with('user')->latest()->get();
+        return view('admin.withdrawals.index', compact('withdrawals'));
+    }
+
+    public function approveWithdrawal($id)
+    {
+        $withdrawal = \App\Models\Withdrawal::findOrFail($id);
+        
+        if ($withdrawal->status !== 'pending') {
+            return back()->with('error', 'Hanya penarikan pending yang bisa di-approve.');
+        }
+
+        $withdrawal->update(['status' => 'approved']);
+        return back()->with('success', 'Penarikan dana berhasil disetujui.');
+    }
+
+    public function rejectWithdrawal($id)
+    {
+        $withdrawal = \App\Models\Withdrawal::findOrFail($id);
+        
+        if ($withdrawal->status !== 'pending') {
+            return back()->with('error', 'Hanya penarikan pending yang bisa di-reject.');
+        }
+
+        // Kembalikan saldo ke user
+        if ($withdrawal->user) {
+            $withdrawal->user->increment('store_balance', $withdrawal->amount);
+        }
+
+        $withdrawal->update(['status' => 'rejected']);
+        return back()->with('success', 'Penarikan dana ditolak dan saldo dikembalikan.');
+    }
 }

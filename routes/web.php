@@ -72,7 +72,7 @@ Route::middleware(['auth', 'App\Http\Middleware\IsStudent'])->group(function () 
             return $item;
         });
 
-        $feeds = $prestasis->concat($events)->sortByDesc('created_at')->values();
+        $feeds = $prestasis->concat($events)->shuffle();
         
         return view('kabar.index', compact('feeds'));
     })->name('kabar.index');
@@ -165,7 +165,12 @@ Route::middleware(['auth', 'App\Http\Middleware\IsStudent'])->group(function () 
     Route::post('/forum/message/{id}/vote', [ForumController::class, 'votePoll']);
 
     // ASSIGNMENTS
+    Route::get('/forum/{forumThread}/assignment/create', [\App\Http\Controllers\AssignmentController::class, 'create'])->name('assignment.create');
     Route::post('/forum/{forumThread}/assignment', [\App\Http\Controllers\AssignmentController::class, 'store'])->name('assignment.store');
+    Route::get('/assignment/{assignment}/edit', [\App\Http\Controllers\AssignmentController::class, 'edit'])->name('assignment.edit');
+    Route::put('/assignment/{assignment}', [\App\Http\Controllers\AssignmentController::class, 'update'])->name('assignment.update');
+    Route::delete('/assignment/{assignment}', [\App\Http\Controllers\AssignmentController::class, 'destroy'])->name('assignment.destroy');
+    Route::get('/assignment/{assignment}/submissions', [\App\Http\Controllers\AssignmentController::class, 'submissions'])->name('assignment.submissions');
     Route::post('/assignment/{assignment}/submit', [\App\Http\Controllers\AssignmentController::class, 'submit'])->name('assignment.submit');
     Route::get('/assignment/{assignment}/export', [\App\Http\Controllers\AssignmentController::class, 'exportAssignmentGrades'])->name('assignment.export');
     Route::post('/submission/{submission}/grade', [\App\Http\Controllers\AssignmentController::class, 'grade'])->name('submission.grade');
@@ -206,6 +211,11 @@ Route::middleware(['auth', 'App\Http\Middleware\IsAdmin'])->group(function () {
     Route::get('/admin/event/{id}/edit', [AdminController::class, 'editEvent']);
     Route::put('/admin/event/{id}', [AdminController::class, 'updateEvent']);
     Route::delete('/admin/event/{id}/delete', [AdminController::class, 'destroyEvent']);
+    
+    // WITHDRAWAL
+    Route::get('/admin/withdrawals', [AdminController::class, 'withdrawals'])->name('admin.withdrawals');
+    Route::post('/admin/withdrawals/{id}/approve', [AdminController::class, 'approveWithdrawal'])->name('admin.withdrawals.approve');
+    Route::post('/admin/withdrawals/{id}/reject', [AdminController::class, 'rejectWithdrawal'])->name('admin.withdrawals.reject');
 });
 
 // API & WEBHOOK

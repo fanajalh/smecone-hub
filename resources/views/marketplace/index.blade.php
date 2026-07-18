@@ -261,7 +261,7 @@
                                 </div>
                                 <div class="flex items-center gap-1 text-[11px] font-black text-yellow-600 bg-yellow-50 px-2 py-1 rounded-lg border border-yellow-200/50">
                                     <ion-icon name="star"></ion-icon>
-                                    <span>4.{{ rand(5,9) }}</span>
+                                    <span>{{ $product->reviews_count > 0 ? $product->average_rating : 'Baru' }}</span>
                                 </div>
                             </div>
                         </div>

@@ -110,7 +110,7 @@
                         <ion-icon name="chatbubble-outline" class="text-[26px]"></ion-icon>
                     </button>
 
-                    <button class="flex items-center transition active-scale hover:text-gray-500 outline-none">
+                    <button type="button" class="flex items-center transition active-scale hover:text-gray-500 outline-none" onclick="sharePost('{{ addslashes($feed->judul) }}', '{{ addslashes(\Illuminate\Support\Str::limit($feed->deskripsi, 50)) }}')">
                         <ion-icon name="paper-plane-outline" class="text-[26px]"></ion-icon>
                     </button>
                 </div>
@@ -235,11 +235,25 @@
         document.getElementById(id).focus();
     }
 
+    function sharePost(title, text) {
+        if (navigator.share) {
+            navigator.share({
+                title: title,
+                text: text + '... Lihat selengkapnya di Smecone Hub!',
+                url: window.location.href
+            }).catch((error) => console.log('Error sharing', error));
+        } else {
+            navigator.clipboard.writeText(title + '\n' + text + '... Lihat selengkapnya di: ' + window.location.href).then(() => {
+                alert('Tautan dan info kabar telah disalin ke clipboard!');
+            });
+        }
+    }
+
     async function toggleLike(event, form) {
         event.preventDefault();
         const formData = new FormData(form);
         const button = form.querySelector('button');
-        const icon = button.querySelector('svg');
+        const icon = button.querySelector('ion-icon');
         const countSpan = form.closest('.px-2').querySelector('.like-count');
 
         try {
@@ -255,7 +269,8 @@
                 if (data.isLiked) {
                     button.classList.add('text-red-500');
                     button.classList.remove('hover:text-gray-500');
-                    icon.classList.add('fill-current', 'text-red-500');
+                    icon.setAttribute('name', 'heart');
+                    icon.classList.add('text-red-500');
                     
                     // Pop animation
                     icon.style.transform = 'scale(1.2)';
@@ -263,7 +278,8 @@
                 } else {
                     button.classList.remove('text-red-500');
                     button.classList.add('hover:text-gray-500');
-                    icon.classList.remove('fill-current', 'text-red-500');
+                    icon.setAttribute('name', 'heart-outline');
+                    icon.classList.remove('text-red-500');
                 }
             }
         } catch (error) { console.error("Error:", error); }

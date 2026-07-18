@@ -15,35 +15,40 @@
     </div>
 
     <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 md:p-8">
-        <form action="/dashboard/channel" method="POST" class="space-y-6">
+        <form action="/dashboard/channel" method="POST" class="flex flex-col gap-5">
             @csrf
             
-            <div>
-                <label class="block text-sm font-bold text-gray-700 mb-2">Nama Channel</label>
+            <div class="flex flex-col gap-1.5">
+                <label class="text-xs font-bold text-slate-400 pl-1">NAMA CHANNEL</label>
                 <div class="relative">
-                    <span class="absolute left-4 top-3.5 text-red-500 font-black text-lg">#</span>
+                    <span class="absolute left-4 top-3.5 text-red-500 font-black text-[15px]">#</span>
                     <input type="text" name="title" required placeholder="mabar-ml-smecone" 
-                           class="w-full pl-10 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:bg-white text-gray-800 font-bold lowercase transition">
+                           class="w-full pl-9 pr-4 py-3.5 bg-slate-50 border border-slate-200/80 rounded-xl focus:bg-white focus:border-red-500 focus:ring-4 focus:ring-red-500/10 text-slate-800 font-bold lowercase outline-none transition-all placeholder:text-slate-400 text-sm">
                 </div>
-                <p class="text-xs text-gray-400 mt-2 font-medium">Gunakan huruf kecil, pisahkan dengan strip (-), tanpa spasi.</p>
+                <p class="text-xs text-slate-400 mt-1 font-semibold ml-1">Gunakan huruf kecil, pisahkan dengan strip (-), tanpa spasi.</p>
             </div>
             
-            <div>
-                <label class="block text-sm font-bold text-gray-700 mb-2">Topik Obrolan / Deskripsi</label>
+            <div class="flex flex-col gap-1.5">
+                <label class="text-xs font-bold text-slate-400 pl-1">TOPIK OBROLAN / DESKRIPSI</label>
                 <textarea name="content" required placeholder="Deskripsikan aturan atau tujuan channel ini dibuat..." rows="4" 
-                          class="w-full px-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:bg-white text-gray-800 font-medium resize-none transition"></textarea>
+                          class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200/80 rounded-xl focus:bg-white focus:border-red-500 focus:ring-4 focus:ring-red-500/10 text-slate-800 font-semibold resize-none outline-none transition-all placeholder:text-slate-400 text-sm"></textarea>
             </div>
 
-            <div class="flex items-center gap-3 p-4 bg-orange-50 border border-orange-200 rounded-xl mb-6">
-                <input type="checkbox" name="is_private" id="is_private" class="w-5 h-5 text-red-600 border-gray-300 rounded focus:ring-red-500">
-                <label for="is_private" class="text-sm font-bold text-gray-800 cursor-pointer">
-                    Buat sebagai Channel Privat <span class="block text-xs font-medium text-gray-500 mt-0.5">Hanya orang yang diizinkan atau memiliki link undangan khusus yang dapat bergabung.</span>
-                </label>
+            <div class="flex items-start gap-3 p-4 bg-orange-50 border border-orange-200/60 rounded-xl mt-2 cursor-pointer transition-colors hover:bg-orange-100/50" onclick="document.getElementById('is_private').click()">
+                <div class="mt-0.5">
+                    <input type="checkbox" name="is_private" id="is_private" onclick="event.stopPropagation()" class="w-5 h-5 text-red-600 bg-white border-slate-300 rounded focus:ring-red-500 focus:ring-2 cursor-pointer transition-all">
+                </div>
+                <div>
+                    <label for="is_private" class="text-sm font-bold text-orange-900 cursor-pointer block leading-tight">Buat sebagai Channel Privat</label>
+                    <span class="block text-[11px] font-semibold text-orange-700/80 mt-1 leading-snug">Hanya orang yang diizinkan atau memiliki link undangan khusus yang dapat bergabung.</span>
+                </div>
             </div>
 
-            <button type="submit" class="w-full bg-red-600 text-white font-bold py-4 rounded-xl hover:bg-red-700 active:scale-95 transition shadow-lg shadow-red-600/30">
-                Bentuk Channel Sekarang
-            </button>
+            <div class="border-t border-slate-100 pt-6 mt-2">
+                <button type="submit" class="w-full bg-slate-900 text-white font-extrabold text-xs py-4 rounded-xl hover:bg-black transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg">
+                    BENTUK CHANNEL SEKARANG
+                </button>
+            </div>
         </form>
     </div>
 </div>

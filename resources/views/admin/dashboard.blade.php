@@ -143,17 +143,24 @@
 </div>
 
 <div class="fixed bottom-4 left-0 w-full z-50 flex justify-center px-4 pointer-events-none">
-    <div class="bg-gray-900/80 backdrop-blur-xl border border-gray-700/50 p-2 rounded-[2rem] shadow-2xl flex items-center gap-1.5 md:gap-2 pointer-events-auto">
-        <a href="/admin/dashboard" class="flex items-center justify-center gap-2 px-4 py-2.5 bg-white/10 text-white rounded-[1.5rem] transition tap-effect hover:bg-white/20">
+    <div class="bg-gray-900/90 backdrop-blur-xl border border-gray-700/50 p-2 rounded-[2rem] shadow-2xl flex items-center gap-1 md:gap-2 pointer-events-auto overflow-x-auto hide-scrollbar max-w-[95vw]">
+        <a href="/admin/dashboard" class="flex items-center justify-center gap-2 px-4 py-2.5 bg-white/15 text-white rounded-[1.5rem] transition tap-effect hover:bg-white/25 shrink-0">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
-            <span class="text-xs font-bold hidden md:block">Home</span>
+            <span class="text-xs font-bold md:block">Home</span>
         </a>
-        <div class="w-px h-6 bg-gray-700 mx-1"></div>
-        <a href="/admin/prestasi/create" class="flex items-center justify-center gap-2 px-4 py-2.5 text-gray-300 hover:bg-yellow-500/20 hover:text-yellow-400 rounded-[1.5rem] transition tap-effect">
-            <span class="text-xs font-bold whitespace-nowrap">+ Prestasi</span>
+        <div class="w-px h-6 bg-gray-700 mx-1 shrink-0"></div>
+        <a href="/admin/prestasi/create" class="flex items-center justify-center gap-2 px-4 py-2.5 text-gray-300 hover:bg-yellow-500/20 hover:text-yellow-400 rounded-[1.5rem] transition tap-effect shrink-0 group">
+            <svg class="w-5 h-5 text-gray-400 group-hover:text-yellow-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
+            <span class="text-xs font-bold whitespace-nowrap">Prestasi</span>
         </a>
-        <a href="/admin/event/create" class="flex items-center justify-center gap-2 px-4 py-2.5 text-gray-300 hover:bg-pink-500/20 hover:text-pink-400 rounded-[1.5rem] transition tap-effect">
-            <span class="text-xs font-bold whitespace-nowrap">+ Event</span>
+        <a href="/admin/event/create" class="flex items-center justify-center gap-2 px-4 py-2.5 text-gray-300 hover:bg-pink-500/20 hover:text-pink-400 rounded-[1.5rem] transition tap-effect shrink-0 group">
+            <svg class="w-5 h-5 text-gray-400 group-hover:text-pink-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+            <span class="text-xs font-bold whitespace-nowrap">Event</span>
+        </a>
+        <div class="w-px h-6 bg-gray-700 mx-1 shrink-0"></div>
+        <a href="/admin/withdrawals" class="flex items-center justify-center gap-2 px-4 py-2.5 text-gray-300 hover:bg-green-500/20 hover:text-green-400 rounded-[1.5rem] transition tap-effect shrink-0 group">
+            <svg class="w-5 h-5 text-gray-400 group-hover:text-green-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <span class="text-xs font-bold whitespace-nowrap">Acc Dana</span>
         </a>
     </div>
 </div>

@@ -20,4 +20,13 @@ class Marketplace extends Model
     public function reviews() {
         return $this->hasMany(MarketplaceReview::class, 'marketplace_item_id');
     }
+
+    public function getAverageRatingAttribute() {
+        $avg = $this->reviews()->avg('rating');
+        return $avg ? number_format((float)$avg, 1, '.', '') : '0.0';
+    }
+
+    public function getReviewsCountAttribute() {
+        return $this->reviews()->count();
+    }
 }
