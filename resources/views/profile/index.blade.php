@@ -14,8 +14,7 @@
         <div class="max-w-4xl mx-auto">
             {{-- Header Profil --}}
             <div class="mb-8 text-center lg:text-left text-white">
-                <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mb-2 drop-shadow-md">Pengaturan Profil ⚙️</h1>
-                <p class="text-red-100 font-medium text-lg drop-shadow-sm">Kelola informasi pribadi dan data toko Anda di Smecone Hub.</p>
+                <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mb-2 drop-shadow-md">Profil</h1>
             </div>
 
             @if(session('success'))
@@ -57,7 +56,7 @@
                         </div>
                         
                         <div class="text-center">
-                            <h3 class="text-xl font-bold text-gray-800">{{ auth()->user()->name }}</h3>
+                            <h3 class="text-xl font-bold text-gray-800 capitalize">{{ strtolower(auth()->user()->name) }}</h3>
                             <p class="text-gray-500 text-sm font-medium">{{ auth()->user()->email }}</p>
                             
                             <div class="mt-4 flex items-center justify-center gap-2">
@@ -71,16 +70,11 @@
                     </div>
                     
                     {{-- Kolom Kanan: Form Data --}}
-                    <div class="w-full lg:w-2/3 space-y-6">
+                    <div class="w-full lg:w-2/3 space-y-5">
                         
-                        <div>
-                            <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                                <svg class="w-5 h-5 text-[#E21F26]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-                                Data Diri
-                            </h3>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                <div class="space-y-1.5">
-                                    <label class="block text-sm font-semibold text-gray-700">Nama Lengkap</label>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div class="space-y-1.5">
+                                <label class="block text-sm font-semibold text-gray-700">Nama Lengkap</label>
                                     <div class="relative">
                                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                             <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -99,34 +93,24 @@
                                     </div>
                                 </div>
                                 
-                                <div class="space-y-1.5 md:col-span-2">
-                                    <label class="block text-sm font-semibold text-gray-700">Nomor WhatsApp (Aktif)</label>
-                                    <div class="relative">
-                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
-                                        </div>
-                                        <input type="text" name="whatsapp_number" value="{{ auth()->user()->whatsapp_number }}" placeholder="Contoh: 081234567890" class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#E21F26]/20 focus:border-[#E21F26] focus:bg-white transition-all shadow-sm">
+                            <div class="space-y-1.5 md:col-span-2">
+                                <label class="block text-sm font-semibold text-gray-700">Nomor WhatsApp</label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
                                     </div>
-                                    <p class="text-xs text-gray-500 mt-1 ml-1">Nomor WA digunakan jika ada pembeli yang menghubungi toko Anda.</p>
+                                    <input type="text" name="whatsapp_number" value="{{ auth()->user()->whatsapp_number }}" placeholder="08..." class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#E21F26]/20 focus:border-[#E21F26] focus:bg-white transition-all shadow-sm">
                                 </div>
                             </div>
                         </div>
 
-                        <div class="w-full h-px bg-gray-100 my-2"></div>
-
-                        <div>
-                            <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                                <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
-                                Pengaturan Toko
-                            </h3>
-                            <div class="space-y-1.5">
-                                <label class="block text-sm font-semibold text-gray-700">Nama Toko / Bisnis</label>
-                                <div class="relative">
-                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                                    </div>
-                                    <input type="text" name="store_name" value="{{ auth()->user()->store_name }}" placeholder="Biarkan kosong jika tidak ingin membuka toko" class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#E21F26]/20 focus:border-[#E21F26] focus:bg-white transition-all shadow-sm">
+                        <div class="space-y-1.5">
+                            <label class="block text-sm font-semibold text-gray-700">Nama Toko</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
                                 </div>
+                                <input type="text" name="store_name" value="{{ auth()->user()->store_name }}" placeholder="Opsional" class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#E21F26]/20 focus:border-[#E21F26] focus:bg-white transition-all shadow-sm">
                             </div>
                         </div>
                         
