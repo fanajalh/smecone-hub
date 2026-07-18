@@ -71,4 +71,20 @@ class User extends Authenticatable
     {
         return $this->appNotifications()->unread()->count();
     }
+
+    /**
+     * Fix avatar URL dynamically so it handles both local storage and Google Avatars properly.
+     */
+    public function getAvatarUrlAttribute()
+    {
+        if (!$this->avatar) {
+            return null;
+        }
+        
+        if (\Illuminate\Support\Str::startsWith($this->avatar, 'http')) {
+            return $this->avatar;
+        }
+        
+        return asset('storage/' . $this->avatar);
+    }
 }

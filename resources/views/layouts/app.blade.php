@@ -104,7 +104,7 @@
             {{-- User Profil --}}
             <a href="/profile" class="w-11 h-11 rounded-full border-2 border-white shadow-sm overflow-hidden tap-effect ring-1 ring-gray-200 hover:ring-[#E21F26] hover:ring-2 transition-all group">
                 @if(auth()->user()->avatar)
-                    <img src="{{ asset('storage/' . auth()->user()->avatar) }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform">
+                    <img src="{{ auth()->user()->avatar_url }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform">
                 @else
                     <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&background=E21F26&color=fff&bold=true" class="w-full h-full object-cover group-hover:scale-110 transition-transform">
                 @endif

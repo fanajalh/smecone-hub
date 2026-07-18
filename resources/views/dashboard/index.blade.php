@@ -35,7 +35,7 @@
         <div class="flex items-center gap-5 text-white">
             <div class="relative w-20 h-20 md:w-24 md:h-24 rounded-[1.8rem] border-[3px] border-white/30 shadow-2xl overflow-hidden bg-white shrink-0 transition-all duration-500 hover:scale-105 hover:rotate-2 hover:border-white/60 hover:shadow-red-900/40">
                 @if($user && $user->avatar)
-                    <img src="{{ asset('storage/' . $user->avatar) }}" alt="Avatar" class="w-full h-full object-cover">
+                    <img src="{{ $user->avatar_url }}" alt="Avatar" class="w-full h-full object-cover">
                 @else
                     <img src="https://ui-avatars.com/api/?name={{ urlencode($user->name ?? 'User') }}&background=fff&color=E21F26&bold=true" alt="Avatar" class="w-full h-full object-cover">
                 @endif
@@ -179,7 +179,7 @@
                         <div class="mt-auto pt-3 border-t border-gray-100 flex items-center gap-2">
                             <div class="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-[10px] font-extrabold text-gray-600 ring-2 ring-white shadow-sm overflow-hidden">
                                 @if($item->user->avatar)
-                                    <img src="{{ asset('storage/' . $item->user->avatar) }}" class="w-full h-full object-cover">
+                                    <img src="{{ $item->user->avatar_url }}" class="w-full h-full object-cover">
                                 @else
                                     {{ substr($item->user->name, 0, 1) }}
                                 @endif
@@ -267,7 +267,7 @@
                         <div class="flex items-center gap-2 text-xs text-gray-500 font-medium">
                             <div class="w-5 h-5 rounded-full bg-gray-200 overflow-hidden ring-1 ring-gray-100">
                                 @if($repo->user->avatar)
-                                    <img src="{{ asset('storage/' . $repo->user->avatar) }}" class="w-full h-full object-cover">
+                                    <img src="{{ $repo->user->avatar_url }}" class="w-full h-full object-cover">
                                 @else
                                     <img src="https://ui-avatars.com/api/?name={{ urlencode($repo->user->name) }}&background=e2e8f0&color=475569" class="w-full h-full object-cover">
                                 @endif
