@@ -1,26 +1,13 @@
 {
-    "version": 2,
-    "builds": [
-        {
-            "src": "api/index.php",
-            "use": "vercel-php@0.9.0"
+    "framework": null,
+    "functions": {
+        "api/index.php": {
+            "runtime": "vercel-php@0.9.0"
         }
-    ],
+    },
     "routes": [
         {
             "handle": "filesystem"
-        },
-        {
-            "src": "/build/(.*)",
-            "dest": "/public/build/$1"
-        },
-        {
-            "src": "/storage/(.*)",
-            "dest": "/public/storage/$1"
-        },
-        {
-            "src": "/favicon.ico",
-            "dest": "/public/favicon.ico"
         },
         {
             "src": "/(.*)",
