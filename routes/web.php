@@ -20,6 +20,25 @@ Route::get('/403', function() { abort(403); });
 Route::get('/419', function() { abort(419); });
 Route::get('/500', function() { abort(500); });
 
+// ==========================================
+// VERCEL STATIC FILE FALLBACK
+// Serve Vite assets manually if Vercel static routing fails
+// ==========================================
+Route::get('/build/{path}', function ($path) {
+    $filePath = public_path('build/' . $path);
+    if (file_exists($filePath)) {
+        $mime = mime_content_type($filePath);
+        if (str_ends_with($filePath, '.css')) $mime = 'text/css';
+        if (str_ends_with($filePath, '.js')) $mime = 'application/javascript';
+        if (str_ends_with($filePath, '.svg')) $mime = 'image/svg+xml';
+        return response()->file($filePath, [
+            'Content-Type' => $mime,
+            'Cache-Control' => 'public, max-age=31536000'
+        ]);
+    }
+    abort(404);
+})->where('path', '.*');
+
 Route::get('/debug-vercel', function () {
     $path = public_path();
     $files = [];
