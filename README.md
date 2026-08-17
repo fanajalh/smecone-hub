@@ -1,59 +1,36 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Smecone Hub
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Smecone Hub adalah platform Student Portal terintegrasi yang menyediakan berbagai fitur unggulan untuk ekosistem sekolah, termasuk Marketplace (Jajan), Forum (Diskusi & Channel), dan Repository (Bahan Ajar & Tugas).
 
-## About Laravel
+## 🔐 Akun Default (Testing)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Untuk keperluan testing, Anda dapat login menggunakan kredensial berikut:
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### 👑 Akun Admin
+- **Email:** `admin@smecone.id`
+- **Kata Sandi:** `password` (atau `12345678`)
+- **Fungsi:** Memiliki akses penuh, termasuk mengelola channel, menghapus data, dan menyetujui request.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### 👨‍🏫 Akun Guru
+- **Email:** `budi.guru@smecone.id`
+- **Kata Sandi:** `password` (atau `12345678`)
+- **Fungsi:** Memiliki akses ekstra (contoh: melihat repository private murid jika disubmit untuk tugas).
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+## 💳 Testing Sistem Pembayaran (Xendit Webhook)
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Jika Anda ingin melakukan testing pembayaran (E-Wallet/QRIS) secara lokal (di web) tanpa perlu menunggu respon asli dari Payment Gateway atau melakukan pembayaran sungguhan, Anda bisa langsung memanggil *route* berikut:
 
-## Laravel Sponsors
+**URL Simulasi Pembayaran:**  
+👉 `http://smecone-hub.test/tes-bayar/{id_transaksi}`
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+**Langkah-langkah:**
+1. Lakukan pemesanan barang seperti biasa hingga masuk ke halaman "Menunggu Pembayaran".
+2. Catat ID Transaksi Anda (bisa dilihat di URL halaman pembayaran).
+3. Buka tab baru di browser Anda dan kunjungi `/tes-bayar/{id}` (Ganti `{id}` dengan ID transaksi Anda).
+4. Transaksi akan langsung otomatis dianggap LUNAS (PAID) dan notifikasi akan terpicu!
 
-### Premium Partners
+---
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+*Dokumentasi ini di-generate secara otomatis untuk mempermudah pengembangan (Development).*

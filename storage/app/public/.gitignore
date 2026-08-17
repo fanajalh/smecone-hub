@@ -1,2 +1,2 @@
-*
+# Allow image assets to be tracked so Vercel can serve them
 !.gitignore

@@ -14,6 +14,7 @@ use App\Http\Controllers\InteractionController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\AssignmentController;
 
 Route::get('/404', function() { abort(404); });
 Route::get('/403', function() { abort(403); });
@@ -36,6 +37,38 @@ Route::get('/build/{path}', function ($path) {
             'Cache-Control' => 'public, max-age=31536000'
         ]);
     }
+    abort(404);
+})->where('path', '.*');
+
+// ==========================================
+// VERCEL STORAGE FILE FALLBACK
+// Serve storage assets (marketplaces, avatars, etc.) directly on Vercel
+// ==========================================
+Route::get('/storage/{path}', function ($path) {
+    // 1. Cek di public/storage
+    $filePath = public_path('storage/' . $path);
+    if (file_exists($filePath) && is_file($filePath)) {
+        return response()->file($filePath, [
+            'Cache-Control' => 'public, max-age=86400'
+        ]);
+    }
+    
+    // 2. Cek di storage/app/public via base_path (karena di Vercel, storage_path dialihkan ke /tmp/storage)
+    $baseStoragePath = base_path('storage/app/public/' . $path);
+    if (file_exists($baseStoragePath) && is_file($baseStoragePath)) {
+        return response()->file($baseStoragePath, [
+            'Cache-Control' => 'public, max-age=86400'
+        ]);
+    }
+
+    // 3. Cek di storage_path runtime (/tmp/storage/app/public jika ada file baru saat runtime)
+    $runtimeStoragePath = storage_path('app/public/' . $path);
+    if (file_exists($runtimeStoragePath) && is_file($runtimeStoragePath)) {
+        return response()->file($runtimeStoragePath, [
+            'Cache-Control' => 'public, max-age=86400'
+        ]);
+    }
+
     abort(404);
 })->where('path', '.*');
 
