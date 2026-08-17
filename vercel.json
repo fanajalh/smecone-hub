@@ -8,9 +8,17 @@
         {
             "src": "public/**",
             "use": "@vercel/static"
+        },
+        {
+            "src": "storage/app/public/**",
+            "use": "@vercel/static"
         }
     ],
     "routes": [
+        {
+            "src": "/storage/(.*)",
+            "dest": "/storage/app/public/$1"
+        },
         {
             "handle": "filesystem"
         },
