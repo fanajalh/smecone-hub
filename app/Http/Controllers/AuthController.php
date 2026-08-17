@@ -143,7 +143,8 @@ class AuthController extends Controller
         // Bonus: Kirim juga via WhatsApp Bot (kalau user punya nomor WA & bot aktif)
         if ($user->whatsapp_number) {
             try {
-                Http::timeout(5)->post('http://localhost:3000/send-message', [
+                $botUrl = rtrim(env('WA_SERVER_URL', 'http://13.212.247.120/smecone-wa'), '/') . '/send-message';
+                Http::timeout(5)->post($botUrl, [
                     'number' => $user->whatsapp_number,
                     'message' => "🔐 *RESET PASSWORD - SMEconE Hub*\n\nHalo kak *{$user->name}*!\n\nKami menerima permintaan reset password untuk akun Anda.\n\nKlik link berikut untuk membuat password baru:\n{$resetLink}\n\n⏰ Link ini berlaku selama *60 menit*.\n\n⚠️ Jika Anda tidak merasa meminta reset password, abaikan pesan ini.\n\n_SMEconE Hub_"
                 ]);
@@ -238,7 +239,8 @@ class AuthController extends Controller
         // Kirim notifikasi via WA bahwa password berhasil diubah
         if ($user->whatsapp_number) {
             try {
-                Http::timeout(5)->post('http://localhost:3000/send-message', [
+                $botUrl = rtrim(env('WA_SERVER_URL', 'http://13.212.247.120/smecone-wa'), '/') . '/send-message';
+                Http::timeout(5)->post($botUrl, [
                     'number' => $user->whatsapp_number,
                     'message' => "✅ *PASSWORD BERHASIL DIRESET*\n\nHalo kak *{$user->name}*!\n\nPassword akun Anda di SMEconE Hub berhasil diubah pada " . now()->format('d M Y, H:i') . " WIB.\n\n⚠️ Jika Anda tidak merasa mengubah password, segera hubungi admin.\n\n_SMEconE Hub_"
                 ]);

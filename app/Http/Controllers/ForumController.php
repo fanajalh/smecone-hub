@@ -136,9 +136,21 @@ class ForumController extends Controller
             'media_type' => $mediaType,
         ]);
 
+        $chat->load(['user', 'repliedMessage.user']);
+        
+        if ($request->reply_to_id && $chat->repliedMessage && $chat->repliedMessage->user_id !== auth()->id()) {
+            \App\Models\AppNotification::send(
+                $chat->repliedMessage->user_id,
+                'forum',
+                'Balasan Pesan',
+                auth()->user()->name . ' membalas pesan Anda di forum.',
+                ['url' => '/forum/' . $id . '#msg-' . $chat->id]
+            );
+        }
+
         return response()->json([
             'success' => true, 
-            'chat' => $chat->load(['user', 'repliedMessage.user'])
+            'chat' => $chat
         ]);
     }
 
@@ -381,6 +393,14 @@ class ForumController extends Controller
         $channel = ForumThread::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
         if (!$channel->members->contains($request->user_id)) {
             $channel->members()->attach($request->user_id);
+            
+            \App\Models\AppNotification::send(
+                $request->user_id,
+                'forum',
+                'Ditambahkan ke Channel',
+                'Anda telah ditambahkan ke channel #' . $channel->title . ' oleh Admin.',
+                ['url' => '/forum/' . $channel->id]
+            );
         }
         
         return back()->with('success', 'Anggota berhasil ditambahkan!');

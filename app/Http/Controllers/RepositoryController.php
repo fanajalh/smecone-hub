@@ -306,6 +306,15 @@ class RepositoryController extends Controller
         }
 
         $repository->collaborators()->attach($user->id);
+        
+        \App\Models\AppNotification::send(
+            $user->id,
+            'repository',
+            'Ditambahkan sebagai Kolaborator',
+            'Anda ditambahkan sebagai tim kolaborator di repositori ' . $repository->name,
+            ['url' => '/repository/' . $repository->id]
+        );
+        
         return back()->with('success', $user->name . ' berhasil ditambahkan ke tim!');
     }
 

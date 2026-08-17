@@ -188,7 +188,7 @@ class PaymentController extends Controller
             // ==========================================
             // TRIGGER WHATSAPP BOT (KE PEMBELI & PENJUAL)
             // ==========================================
-            $botUrl = 'http://localhost:3000/send-message'; 
+            $botUrl = rtrim(env('WA_SERVER_URL', 'http://13.212.247.120/smecone-wa'), '/') . '/send-message'; 
             
             // 1. Notif ke Pembeli
             try {
@@ -212,6 +212,14 @@ class PaymentController extends Controller
                         ]);
                     } catch (\Exception $e) {}
                 }
+                
+                // Trigger In-App Notification ke Penjual
+                \App\Models\AppNotification::send(
+                    $item->user_id, 
+                    'Pesanan Masuk', 
+                    'Pesanan COD Baru!', 
+                    "Ada pesanan COD baru untuk {$item->item_name} dari {$transaction->user->name}."
+                );
             }
 
             return redirect()->route('marketplace.purchases')->with('success', 'Pesanan COD berhasil dibuat! Penjual akan segera menghubungi Anda.');
@@ -415,7 +423,7 @@ class PaymentController extends Controller
             // TRIGGER EMAIL (PRODUK DIGITAL) / WHATSAPP BOT (PRODUK FISIK)
             // ==========================================
             
-            $botUrl = 'http://localhost:3000/send-message'; 
+            $botUrl = rtrim(env('WA_SERVER_URL', 'http://13.212.247.120/smecone-wa'), '/') . '/send-message'; 
             
             // Cek jika produk digital
             if ($transaction->marketplaceItem && $transaction->marketplaceItem->format === 'Digital') {
@@ -438,6 +446,14 @@ class PaymentController extends Controller
                     }
                 }
             }
+            
+            // Trigger In-App Notification ke Pembeli
+            \App\Models\AppNotification::send(
+                $transaction->user_id,
+                'Pembayaran Berhasil',
+                'Pembayaran Lunas!',
+                "Pembayaran untuk pesanan {$transaction->marketplaceItem->item_name} telah berhasil diterima."
+            );
 
             // 2. Notif ke Penjual
             if ($transaction->marketplaceItem && $transaction->marketplaceItem->user) {
@@ -455,6 +471,14 @@ class PaymentController extends Controller
                         // Abaikan error agar tidak mengganggu proses lunas Xendit
                     }
                 }
+                
+                // Trigger In-App Notification ke Penjual
+                \App\Models\AppNotification::send(
+                    $transaction->marketplaceItem->user_id,
+                    'Pesanan Masuk',
+                    'Pesanan Lunas!',
+                    "Barang jualanmu {$transaction->marketplaceItem->item_name} telah lunas dibayar oleh {$transaction->user->name}."
+                );
             }
         }
 
@@ -498,6 +522,15 @@ class PaymentController extends Controller
         if ($transaction->marketplaceItem->user_id === Auth::id()) {
             if (in_array($newStatus, ['DIPROSES', 'SELESAI']) && in_array($transaction->status, ['PAID', 'DIPROSES'])) {
                 $transaction->update(['status' => $newStatus]);
+                
+                // Trigger In-App Notification ke Pembeli
+                \App\Models\AppNotification::send(
+                    $transaction->user_id,
+                    'Status Pesanan',
+                    'Status Pesanan Diperbarui',
+                    "Status pesanan {$transaction->marketplaceItem->item_name} Anda telah diubah menjadi {$newStatus}."
+                );
+                
                 return back()->with('success', 'Status pesanan berhasil diperbarui menjadi ' . $newStatus);
             }
             return back()->with('error', 'Hanya pesanan PAID/DIPROSES yang dapat diubah statusnya.');

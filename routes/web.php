@@ -229,8 +229,9 @@ Route::middleware(['auth', 'App\Http\Middleware\IsStudent'])->group(function () 
     Route::delete('/dashboard/channel/{id}/members/{userId}', [ForumController::class, 'removeMember']);
 
     // PROFILE
-    Route::get('/profile', [ProfileController::class, 'index']);
-    Route::post('/profile/update', [ProfileController::class, 'update']);
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
+    Route::post('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
+    Route::post('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
 });
 
 // ZONA ADMIN

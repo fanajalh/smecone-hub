@@ -33,44 +33,69 @@ class MarketplaceController extends Controller
 
     public function broadcastKeWa(Request $request, $itemId)
     {
-        // 1. Validasi input dari modal
+        // 1. Validasi input dari form
         $request->validate([
             'pesan' => 'required|string',
-            'custom_image' => 'nullable|image|max:2048' // Maksimal 2MB
+            'custom_image' => 'nullable|image|max:2048',
+            'target_groups' => 'nullable|array',
         ]);
 
         $item = Marketplace::findOrFail($itemId);
-        $idGrupSmecone = '120363425273294200@g.us'; 
+        $sessionId = 'user_' . auth()->id();
+        $waBaseUrl = rtrim(env('WA_SERVER_URL', 'http://13.212.247.120/smecone-wa'), '/');
+
+        // Target groups (pilihan checkbox user)
+        $targetGroups = $request->input('target_groups');
+        if (empty($targetGroups)) {
+            $targetGroups = ['120363425273294200@g.us']; // Fallback grup SMEconE Hub
+        }
         
-        // 2. Gunakan pesan yang diketik/diedit user dari Modal
+        // 2. Pesan promosi
         $pesan = $request->pesan;
 
-        // 3. Cek apakah user mengunggah gambar custom
+        // 3. Cek gambar dan encode ke Base64 agar server AWS bisa menerima gambar dari localhost
         $imageUrl = null;
+        $imageBase64 = null;
+
         if ($request->hasFile('custom_image')) {
-            // Simpan gambar custom ke folder storage/app/public/broadcasts
             $path = $request->file('custom_image')->store('broadcasts', 'public');
             $imageUrl = asset('storage/' . $path);
-        } else {
-            // Jika tidak upload gambar custom, pakai gambar asli produk (jika ada)
-            $imageUrl = $item->image ? asset('storage/' . $item->image) : null;
+            $fullPath = storage_path('app/public/' . $path);
+            if (file_exists($fullPath)) {
+                $imageBase64 = base64_encode(file_get_contents($fullPath));
+            }
+        } elseif ($item->image) {
+            $rawImg = $item->image;
+            $decoded = json_decode($rawImg, true);
+            $imgName = is_array($decoded) ? ($decoded[0] ?? null) : $rawImg;
+
+            if ($imgName) {
+                $imageUrl = asset('storage/' . $imgName);
+                $fullPath = storage_path('app/public/' . $imgName);
+                if (file_exists($fullPath)) {
+                    $imageBase64 = base64_encode(file_get_contents($fullPath));
+                }
+            }
         }
 
         try {
-            // Tembak API Bot
-            $response = Http::post('http://localhost:3000/api/broadcast-iklan', [
-                'groupId' => $idGrupSmecone,
+            // Tembak Multi-Session Broadcast API di AWS
+            $response = Http::timeout(10)->post($waBaseUrl . '/session/' . $sessionId . '/broadcast', [
+                'targetGroups' => $targetGroups,
                 'pesan' => $pesan,
-                'imageUrl' => $imageUrl
+                'imageUrl' => $imageUrl,
+                'imageBase64' => $imageBase64
             ]);
 
             if ($response->successful()) {
-                return back()->with('success', 'Iklan custom berhasil dikirim ke grup WhatsApp!');
+                $count = count($targetGroups);
+                return redirect()->route('marketplace.lapak')->with('success', "Siaran promosi berhasil dikirimkan ke {$count} grup WhatsApp dari nomor Anda! 🚀");
             }
 
-            return back()->with('error', 'Gagal mengirim iklan.');
+            $errMsg = $response->json()['error'] ?? 'Gagal mengirim siaran.';
+            return back()->with('error', $errMsg);
         } catch (\Exception $e) {
-            return back()->with('error', 'Tidak bisa terhubung ke API Bot. Pastikan server Node.js menyala!');
+            return back()->with('error', 'Tidak bisa terhubung ke server WhatsApp AWS: ' . $e->getMessage());
         }
     }
 
@@ -298,7 +323,35 @@ class MarketplaceController extends Controller
             abort(403, 'Anda tidak berhak menyiarkan produk ini.');
         }
 
-        return view('marketplace.broadcast', compact('product'));
+        $sessionId = 'user_' . auth()->id();
+        $waBaseUrl = rtrim(env('WA_SERVER_URL', 'http://13.212.247.120/smecone-wa'), '/');
+        
+        $status = 'DISCONNECTED';
+        $phone = null;
+        $groups = [];
+        $qrUrl = $waBaseUrl . '/session/' . $sessionId . '/qr';
+
+        try {
+            // Check status of user's session
+            $statusRes = Http::timeout(3)->get($waBaseUrl . '/session/' . $sessionId . '/status');
+            if ($statusRes->successful()) {
+                $statusData = $statusRes->json();
+                $status = $statusData['status'] ?? 'DISCONNECTED';
+                $phone = $statusData['phone'] ?? null;
+
+                // If user is connected, automatically fetch their groups!
+                if ($status === 'CONNECTED') {
+                    $groupsRes = Http::timeout(6)->get($waBaseUrl . '/session/' . $sessionId . '/groups');
+                    if ($groupsRes->successful()) {
+                        $groups = $groupsRes->json()['groups'] ?? [];
+                    }
+                }
+            }
+        } catch (\Exception $e) {
+            // WA Server offline fallback
+        }
+
+        return view('marketplace.broadcast', compact('product', 'status', 'phone', 'groups', 'qrUrl', 'sessionId'));
     }
 
     public function show($id)
@@ -365,6 +418,15 @@ class MarketplaceController extends Controller
             'rating' => $request->rating,
             'comment' => $request->comment,
         ]);
+
+        if ($product->user_id) {
+            \App\Models\AppNotification::send(
+                $product->user_id,
+                'Review Baru',
+                'Ulasan Produk',
+                auth()->user()->name . " memberikan ulasan {$request->rating} bintang untuk produk {$product->item_name} Anda."
+            );
+        }
 
         return back()->with('success', 'Terima kasih! Ulasan Anda berhasil disimpan.');
     }

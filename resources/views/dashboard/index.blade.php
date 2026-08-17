@@ -157,7 +157,11 @@
                     <a href="/marketplace/{{ $item->id }}" class="group bg-white rounded-[1.5rem] p-3 md:p-4 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-gray-100 hover:shadow-2xl hover:border-red-100 transition-all duration-300 flex flex-col transform hover:-translate-y-1.5">
                         <div class="aspect-square bg-gray-50 rounded-2xl mb-4 overflow-hidden relative">
                             @if($item->image)
-                                <img src="{{ asset('storage/' . $item->image) }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                                @php 
+                                    $decoded = json_decode($item->image, true);
+                                    $firstImg = is_array($decoded) ? ($decoded[0] ?? $item->image) : $item->image;
+                                @endphp
+                                <img src="{{ asset('storage/' . $firstImg) }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
                             @else
                                 <div class="w-full h-full flex items-center justify-center text-gray-300 group-hover:bg-gray-100 transition-colors">
                                     <ion-icon name="image-outline" class="text-4xl"></ion-icon>

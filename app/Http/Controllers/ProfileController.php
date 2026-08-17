@@ -3,17 +3,16 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class ProfileController extends Controller
 {
-    // Tambahkan method ini!
     public function index()
     {
-        // Pastikan kamu punya file blade untuk profile (misal: resources/views/profile/index.blade.php)
         return view('profile.index'); 
     }
 
-    // Mungkin kamu sudah punya method update di bawahnya, biarkan saja.
     public function update(Request $request)
     {
         $user = auth()->user();
@@ -22,15 +21,15 @@ class ProfileController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
             'whatsapp_number' => 'nullable|string|max:20',
-            'store_name' => 'nullable|string|max:255',
-            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120', // Maks 5MB
+            'store_name' => 'nullable|string|max:255|unique:users,store_name,' . $user->id,
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
         ]);
 
-        $data = $request->except(['avatar']);
+        $data = $request->only(['name', 'email', 'whatsapp_number', 'store_name']);
 
         if ($request->hasFile('avatar')) {
-            if ($user->avatar && \Illuminate\Support\Facades\Storage::exists('public/' . $user->avatar)) {
-                \Illuminate\Support\Facades\Storage::delete('public/' . $user->avatar);
+            if ($user->avatar && Storage::exists('public/' . $user->avatar)) {
+                Storage::delete('public/' . $user->avatar);
             }
 
             $path = $request->file('avatar')->store('avatars', 'public');
@@ -40,5 +39,30 @@ class ProfileController extends Controller
         $user->update($data);
 
         return redirect()->back()->with('success', 'Profil berhasil diperbarui!');
+    }
+
+    public function updatePassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => 'required',
+            'password' => 'required|string|min:6|confirmed',
+        ], [
+            'current_password.required' => 'Kata sandi saat ini wajib diisi.',
+            'password.required' => 'Kata sandi baru wajib diisi.',
+            'password.min' => 'Kata sandi baru minimal 6 karakter.',
+            'password.confirmed' => 'Konfirmasi kata sandi baru tidak cocok.',
+        ]);
+
+        $user = auth()->user();
+
+        if (!Hash::check($request->current_password, $user->password)) {
+            return back()->withErrors(['current_password' => 'Kata sandi saat ini salah.'])->withInput();
+        }
+
+        $user->update([
+            'password' => Hash::make($request->password)
+        ]);
+
+        return redirect()->back()->with('success', 'Kata sandi berhasil diubah!');
     }
 }
