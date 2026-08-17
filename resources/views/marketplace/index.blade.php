@@ -333,7 +333,12 @@ document.addEventListener('alpine:init', () => {
                 const res = await fetch('/cart', { 
                     headers: { 'Accept': 'application/json' } 
                 });
-                this.cartCount = data.count;
+                if (res.ok) {
+                    const data = await res.json();
+                    this.cartCount = data.count || 0;
+                }
+            } catch(e) {
+                console.error("Gagal mengambil keranjang:", e);
             } finally {
                 this.cartLoading = false;
             }
